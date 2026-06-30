@@ -136,8 +136,8 @@ class UserRepository{
 /* 
 Testes da classe 
  */
-$usuario = new UserRepository();
-echo $usuario->ativarUsuario(2);
+// $usuario = new UserRepository();
+// echo $usuario->ativarUsuario(2);
 // $user = $usuario->encontrarPorCpf('222.222.222-22');
 // $user->setEmail('carlinhos13@empresa.com');
 // $user->setNome('Carlos Campos');
