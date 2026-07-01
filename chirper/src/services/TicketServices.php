@@ -85,3 +85,23 @@ class TicketServices {
         return $this->repository->update($ticket); 
     }
 }
+
+
+//Teste
+
+$service = new TicketServices();
+
+$teste = $service->criar(
+    titulo: "Erro no sistema",
+    descricao: "Sistema com defeito de dados",
+    prioridade: "Alta",
+    patrimonio: "pat-001",
+    status: "Em andamento",
+    id_categoria: 1,
+    id_usuario: 1
+
+);
+
+echo "<pre>";
+print_r($teste->getAll());
+echo "</pre>";

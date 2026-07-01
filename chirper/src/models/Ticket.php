@@ -6,7 +6,7 @@ use InvalidArgumentException;
 
 class Ticket {
     protected int $id;
-    protected int $uuid;
+    protected ?string $uuid;
     protected string $titulo;
     protected string $descricao;
     protected string $prioridade;
@@ -129,6 +129,9 @@ class Ticket {
         ];
     }
 
+    public function toJson(): string {
+        return json_encode($this->getAll());
+    }
 
     public function setTitulo(string $titulo): void {
         if (empty($titulo)) {
@@ -172,4 +175,22 @@ class Ticket {
     }
 }
  
+
+$teste = new Ticket(
+    id: 1,
+    titulo: "titulo",
+    descricao: "descricao descricao",
+    prioridade: "baixa",
+    patrimonio: "pat-01",
+    status: "ativo",
+    id_categoria: 1,
+    id_usuario: 1,
+    id_responsavel: 1,
+    uuid: "uuid-teste",
+    dataAbertura: new DateTime("2026-01-01"),
+    dataEncerramento: new DateTime("2026-01-01")
+);
+echo "<pre>";
+echo $teste->toJson();
+echo "</pre>";
 ?>

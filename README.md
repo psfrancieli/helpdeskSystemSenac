@@ -10,7 +10,7 @@
 
 5. Dentro do repositório: dê npm install e composer install
 
-6. npm run dev
+6. npm run dev:all
 
 ## Configurando o PHP para rodar com PostgreSQL no XAMPP
 

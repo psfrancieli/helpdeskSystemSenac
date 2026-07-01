@@ -137,12 +137,12 @@ class UserRepository{
 Testes da classe 
  */
 $usuario = new UserRepository();
-echo $usuario->ativarUsuario(2);
-// $user = $usuario->encontrarPorCpf('222.222.222-22');
-// $user->setEmail('carlinhos13@empresa.com');
+// echo $usuario->ativarUsuario(2);
+$user = $usuario->encontrarPorCpf('222.222.222-22');
+$user->setEmail('carlinhos13@empresa.com');
 // $user->setNome('Carlos Campos');
 // echo $usuario->atualizarUsuario($user);
-// echo $user->getNome() . "<br>" . $user->getEmail() . "<br>" . $user->getTelefone();
+echo $user->getNome() . "<br>" . $user->getEmail() . "<br>" . $user->getTelefone();
 
 // $user = new User('JoaozinhoGsss' , '111.222.444-21' , '(15)99222-8890' , 'joaozinho11112@email.com' , '123456');
 // echo $usuario->criarUsuario($user);
