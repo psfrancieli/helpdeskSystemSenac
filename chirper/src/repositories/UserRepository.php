@@ -4,7 +4,7 @@ require_once __DIR__ . "/../models/User.php";
 class UserRepository{
     public function EncontrarPorId(int $id): ?User{
         try{
-            $sql = 'SELECT * FROM "USUARIO" WHERE id = ?';
+            $sql = 'SELECT * FROM "USUARIO" WHERE id = ? AND ativo = TRUE';
             $stmt = Database::getConnection()->prepare($sql);
             $stmt->execute([$id]);
             $dados = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -55,7 +55,7 @@ class UserRepository{
     }
     public function deletarUsuario(int $id): bool{
         try {
-            $sql = 'UPDATE "USUARIO" SET ativo = FALSE WHERE id = ? AND ativo = 1';
+            $sql = 'UPDATE "USUARIO" SET ativo = FALSE WHERE id = ? AND ativo = TRUE';
             $stmt = Database::getConnection()->prepare($sql);
             return $stmt->execute([$id]);
         } catch (PDOException $e){
@@ -65,7 +65,7 @@ class UserRepository{
 
     public function encontrarPorEmail(string $email): ?User{
         try {
-            $sql = 'SELECT * FROM "USUARIO" WHERE email = ? AND ativo = 1';
+            $sql = 'SELECT * FROM "USUARIO" WHERE email = ? AND ativo = TRUE';
             $stmt = Database::getConnection()->prepare($sql);
             $stmt->execute([$email]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -78,7 +78,7 @@ class UserRepository{
     }
     public function encontrarPorCpf(string $cpf): ?User{
         try {
-            $sql = 'SELECT * FROM "USUARIO" WHERE "CPF" = ?';
+            $sql = 'SELECT * FROM "USUARIO" WHERE "CPF" = ? AND ativo = TRUE';
             $stmt = Database::getConnection()->prepare($sql);
             $stmt->execute([$cpf]);
             $user  = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -90,7 +90,7 @@ class UserRepository{
     }
     public function atualizarUsuario(User $user): bool{
         try {
-            $sql = 'UPDATE "USUARIO" SET  nome = ? , telefone = ? , email = ? , senha = ? WHERE id = ? AND ativo = 1';
+            $sql = 'UPDATE "USUARIO" SET  nome = ? , telefone = ? , email = ? , senha = ? WHERE id = ? AND ativo = TRUE';
             $stmt = Database::getConnection()->prepare($sql);
             $stmt->execute([$user->getNome() , $user->getTelefone() , $user->getEmail() , $user->getSenha() , $user->getId()]);
             return $stmt->rowCount() > 0;
