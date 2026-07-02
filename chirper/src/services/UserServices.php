@@ -46,7 +46,7 @@ class UserServices{
             throw new Exception("Acesso negado.");
         }
         if(!$userRepository->encontrarPorId($id)){
-            throw new Exception("Não é possivel deletar o usuario! ");
+            throw new Exception("Erro ao deletar usuario!");
         }
         return $userRepository->deletarUsuario($id);
 
