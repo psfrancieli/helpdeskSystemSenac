@@ -88,11 +88,22 @@ class UserRepository{
               throw new RuntimeException("Erro ao buscar usuario " , 0 , $e);
         }
     }
-    public function atualizarUsuario(User $user): bool{
+    public function atualizarSenha(string $senha): bool{
         try {
-            $sql = 'UPDATE "USUARIO" SET  nome = ? , telefone = ? , email = ? , senha = ? WHERE id = ? AND ativo = TRUE';
+            $sql = 'UPDATE "USUARIO" SET senha = ? WHERE id = ? AND ativo = TRUE';
             $stmt = Database::getConnection()->prepare($sql);
-            $stmt->execute([$user->getNome() , $user->getTelefone() , $user->getEmail() , $user->getSenha() , $user->getId()]);
+            $stmt->execute([$senha]);
+            return $stmt->rowCount() > 0;
+
+        } catch (PDOException $e) {
+            throw new RuntimeException("Não foi possivel atualizar os dados do usuario " , 0 , $e);
+        }
+    }
+    public function atualizarTelefone(string $telefone):bool{
+        try {
+            $sql = 'UPDATE "USUARIO" SET telefone = ? WHERE id = ? AND ativo = TRUE';
+            $stmt = Database::getConnection()->prepare($sql);
+            $stmt->execute([$telefone]);
             return $stmt->rowCount() > 0;
 
         } catch (PDOException $e) {
