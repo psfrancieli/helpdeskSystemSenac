@@ -1,11 +1,14 @@
 <?php
+namespace src\services;
 
 //Importações
-use src\repositories\TicketRepository; 
-use src\models\Ticket;
-
 require_once __DIR__ . "/../models/Ticket.php";
 require_once __DIR__ . "/../repositories/TicketRepository.php";
+
+use src\repositories\TicketRepository; 
+use src\models\Ticket;
+use DateTime;
+
 
 //Codificação dos metodos
 class TicketServices {
@@ -17,7 +20,7 @@ class TicketServices {
         $this->repository = new TicketRepository();
     }
 
-    public function criar(
+    public function criarTicket(
         string $titulo,
         string $descricao,
         string $prioridade,
@@ -29,60 +32,62 @@ class TicketServices {
     {
         $ticket = new Ticket (
             0,
+            null,
             $titulo,
             $descricao,
             $prioridade,
             $patrimonio,
             $status,
             $id_categoria,
-            $id_usuario
+            $id_usuario,
+            null,
+            new DateTime(),
+            null
+            
         );
 
-        return $this->repository->save($ticket);
+        $this->repository->CriarTicket($ticket);
+
+        return $ticket;
     }
 
-    public function atualizar(int $id, array $dadosAtualizados): Ticket {
-        $ticket = $this->repository->findById($id);
+    public function atualizarPrioridade(int $id, array $dadosAtualizados): Ticket {
+        $ticket = $this->repository->EncontrarTicketPorId($id);
 
         if (!$ticket) {
             throw new \Exception("Ticket não encontrado!");
         }
 
-        if (isset($dadosAtualizados['titulo'])) {
-            $ticket->setTitulo($dadosAtualizados['titulo']);
+        if (isset($dadosAtualizados['prioridade'])) {
+           $novaPrioridade = $dadosAtualizados['prioridade'];
+
+            $this->repository->atualizarPrioridadeTicket($id, $novaPrioridade);   
         }
 
-        if (isset($dadosAtualizados['descricao'])) {
-            $ticket->setDescricao($dadosAtualizados['descricao']);
-        }
-
-        return $this->repository->update($ticket);
+        return $ticket;
     }
 
     public function encerrar(int $id): Ticket {
 
-        $ticket = $this->repository->findById($id);
+        $ticket = $this->repository->EncontrarTicketPorId($id);
 
         if (!$ticket) {
             throw new \Exception("Ticket não encontrado!");
         }
 
-        $ticket->setStatus('encerrado');
+        $this->repository->encerrarTicket($id, 'encerrado');
 
-        return $this->repository->update($ticket);
+        return $ticket;
     }
 
-    public function atribuirTecnico(int $ticketId, int $tecnicoId): Ticket {
-        $ticket = $this->repository->findById($ticketId);
+    public function atribuirTecnico(int $ticketId): Ticket {
+        $ticket = $this->repository->EncontrarTicketPorId($ticketId);
 
         if (!$ticket) {
             throw new \Exception("Ticket não encontrado!");
         }
 
-        $ticket->setIdResponsavel($tecnicoId);
-        $ticket->setStatus("Em andamento");
-
-        return $this->repository->update($ticket); 
+        return $ticket;
     }
 }
 
@@ -91,7 +96,7 @@ class TicketServices {
 
 $service = new TicketServices();
 
-$teste = $service->criar(
+$teste = $service->criarTicket(
     titulo: "Erro no sistema",
     descricao: "Sistema com defeito de dados",
     prioridade: "Alta",

@@ -1,6 +1,16 @@
 <?php
+
+namespace src\repositories;
+
 require_once __DIR__ . "/../configs/Database.php";
 require_once __DIR__ . "/../models/Ticket.php";
+
+use src\models\Ticket;
+
+use Database; 
+use DateTime;
+use PDOException;
+use RuntimeException;
 
 class TicketRepository{
     public function EncontrarTicketPorId(int $id):Ticket{
