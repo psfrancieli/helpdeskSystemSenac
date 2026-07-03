@@ -57,17 +57,19 @@ class CategoryRepository{
         }
        
     }
-    public function deletarCategoria(int $id): bool{
+
+    public function atualizarCategoria(Category $categoria): bool{
         try {
-            $sql = 'UPDATE "USUARIO" *****';
+            $sql = 'UPDATE "CATEGORIA" SET  nome = ?  WHERE id = ?';
             $stmt = Database::getConnection()->prepare($sql);
-            return $stmt->execute([$id]);
-        } catch (PDOException $e){
-            throw new RuntimeException("Erro ao tentar deletar categoria " , 0 , $e);
+            $stmt->execute([$categoria->getNome() , $categoria->getId()]);
+            return $stmt->rowCount() > 0;
+
+        } catch (PDOException $e) {
+            throw new RuntimeException("Não foi possivel atualizar a categoria " , 0 , $e);
         }
     }
-
-
+    
 }
 /* 
 Testes da classe 
@@ -116,4 +118,17 @@ if ($categoria) {
 } else {
     echo "Categoria não encontrada.";
 */
+
+/*$categoriaRepo = new CategoryRepository();
+$categoria = new Category(4);
+$categoria->setNome('Softwarezinho');
+$sucesso = $categoriaRepo->atualizarCategoria($categoria);
+
+if ($sucesso) {
+    echo "Categoria atualizada com sucesso!<br>";
+    echo "ID: " . $categoria->getId() . "<br>";
+    echo "Novo nome: " . $categoria->getNome() . "<br>";
+} else {
+    echo "Nenhuma categoria foi atualizada (id não encontrado ou nome igual).";
+}*/
 ?>
