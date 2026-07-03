@@ -1,6 +1,6 @@
 <?php
 
-require_once './chirper/src/controllers/HistoryController.php';
+require __DIR__ . '/src/controllers/HistoryController.php';
 
 $data = [
     'description' => 'Técnico atribuído alterado',
