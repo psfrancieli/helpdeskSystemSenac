@@ -8,6 +8,9 @@ class UserRepository{
             $stmt = Database::getConnection()->prepare($sql);
             $stmt->execute([$id]);
             $dados = $stmt->fetch(PDO::FETCH_ASSOC);
+            if(!$dados){
+                return null;
+            }
             return new User($dados['id'], $dados['uuid'] , $dados['nome']
              , $dados['CPF'] , $dados['telefone'] , $dados['email'],
              $dados['senha'], $dados['nivel'] , $dados['ativo']);
@@ -15,12 +18,15 @@ class UserRepository{
             throw new RuntimeException("Erro ao buscar usuário no banco",0 , $e);
         }
     }
-    public function EncontrarTodosUsuarios():array{
+    public function EncontrarTodosUsuarios(): ?array{
         try{
             $sql = 'SELECT * FROM "USUARIO" WHERE ativo = 1';
             $stmt = Database::getConnection()->prepare($sql);
             $stmt->execute();
             $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if(!$dados){
+                return null;
+            }
             $usuarios = [];
             foreach ($dados as $usuario) {
             $usuarios[] = new User(    
@@ -69,6 +75,9 @@ class UserRepository{
             $stmt = Database::getConnection()->prepare($sql);
             $stmt->execute([$email]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            if(!$user){
+                return null;
+            }
             return new User($user['id'] , $user['uuid'] , $user['nome'] , $user['CPF'] , 
             $user['telefone'] , $user['email'] , $user['senha'] , $user['nivel'] , $user['ativo']);
 
@@ -82,21 +91,13 @@ class UserRepository{
             $stmt = Database::getConnection()->prepare($sql);
             $stmt->execute([$cpf]);
             $user  = $stmt->fetch(PDO::FETCH_ASSOC);
+            if(!$user){
+                return null;
+            }
             return new User($user['id'] , $user['uuid'] , $user['nome'] , $user['CPF'] , 
             $user['telefone'] , $user['email'] , $user['senha'] , $user['nivel'] , $user['ativo']);
         } catch (PDOException $e) {
               throw new RuntimeException("Erro ao buscar usuario " , 0 , $e);
-        }
-    }
-    public function atualizarSenha(string $senha): bool{
-        try {
-            $sql = 'UPDATE "USUARIO" SET senha = ? WHERE id = ? AND ativo = TRUE';
-            $stmt = Database::getConnection()->prepare($sql);
-            $stmt->execute([$senha]);
-            return $stmt->rowCount() > 0;
-
-        } catch (PDOException $e) {
-            throw new RuntimeException("Não foi possivel atualizar os dados do usuario " , 0 , $e);
         }
     }
     public function atualizarTelefone(string $telefone):bool{
@@ -124,7 +125,7 @@ class UserRepository{
     public function alterarSenha(string $senha , int $id):bool{
         try {
             
-            $sql = 'UPDATE "USUARIO" SET senha = ? WHERE id = ?';
+            $sql = 'UPDATE "USUARIO" SET senha = ? WHERE id = ? AND ativo = TRUE';
             $stmt = Database::getConnection()->prepare($sql);
             $stmt->execute([$senha , $id]);
             return $stmt->rowCount() > 0;

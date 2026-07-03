@@ -39,18 +39,23 @@ class UserServices{
         if($usuarioLogado->getNivel() !== 'analista'){
             throw new Exception("Acesso negado.");
         }
+
         if($userRepository->encontrarPorEmail($dados['email'])){
             throw new Exception("Esse email ja existe!");
         }
+
         if(!EmailUtils::validar($dados['email'])){
             throw new InvalidArgumentException("Email inválido");
         }
+
         if(!CpfUtils::validar($dados['cpf'])){
             throw new InvalidArgumentException("CPF inválido");
         }
+
         if(!PasswordUtils::validar($dados['senha'])){
             throw new InvalidArgumentException("Senha inválida");
         }
+ 
         if(!PhoneUtils::validar($dados['telefone'])){
             throw new InvalidArgumentException("Telefone inválido");
         }
@@ -73,7 +78,7 @@ class UserServices{
         return $userRepository->deletarUsuario($id);
 
     }
-    public function alterarSenha(User $usuarioLogado , string $senha):bool{
+    public function alterarSenha(User $usuarioLogado , string $senha , int $id):bool{
         $userRepository = new UserRepository();
         if($usuarioLogado->getNivel() !== 'analista'){
             throw new Exception("Acesso negado.");
@@ -82,10 +87,10 @@ class UserServices{
             throw new InvalidArgumentException("Senha inválida");
         }
         $novaSenha = PasswordUtils::hash($senha);
-        return $userRepository->atualizarSenha($novaSenha);
+        return $userRepository->alterarSenha($novaSenha , $id);
 
     }
-    public function alterarTelefone(User $usuarioLogado , string $telefone):bool{
+    public function atualizarTelefone(User $usuarioLogado , string $telefone):bool{
         $userRepository = new UserRepository();
         if($usuarioLogado->getNivel() !== 'usuario'){
             throw new Exception("Acesso negado.");
@@ -98,20 +103,61 @@ class UserServices{
         
 
     }
-    public function ativarUsuario(User $usuarioLogado , int $id){
+    public function ativarUsuario(User $usuarioLogado , int $id):bool{
         $userRepository = new UserRepository();
         $user = $userRepository->encontrarPorId($id);
         if($usuarioLogado->getNivel() !== 'adm'){
             throw new Exception("Acesso negado.");
         }
-        if($user['ativo']){
+        if($user->getAtivo()){
             throw new Exception("O usuario ja esta ativo no sistema! ");
         }
         return $userRepository->ativarUsuario($id);
     }
-    
 
+    public function alterarNivel(User $usuarioLogado, int $id, string $nivel):bool
+    {
+    $userRepository = new UserRepository();
+    //Verficação padrão do nivel do usuario
+    if ($usuarioLogado->getNivel() !== 'adm' &&
+    $usuarioLogado->getNivel() !== 'analista') {
+        throw new Exception("Acesso negado.");
+    }
+
+    $usuario = $userRepository->encontrarPorId($id);
+    //Se não encontrar o id do usuario, ele não existe.
+    if (!$usuario) {
+        throw new Exception("Usuário não encontrado.");
+    }
+    //Array de niveis permitidos para passar como parametro
+    $niveisPermitidos = ['usuario','tecnico','analista', 'adm'];
+
+    //Verifica se o nivel existe dentro do array niveisPermitidos , caso nao exista e um nivel invalido
+    if (!in_array($nivel, $niveisPermitidos, true)) {
+        throw new DomainException("Nível inválido.");
+    }
+
+    //Verifica se o usuario possui esse nivel
+    if ($usuario->getNivel() === $nivel) {
+        throw new DomainException("O usuário já possui esse nível.");
+    }
+    //Somente ADM altera o nivel de um usuario para ADM
+    if ($nivel === 'adm' && $usuarioLogado->getNivel() !== 'adm') {
+        throw new DomainException("Permissão negada.");
+    }
+    
+    return $userRepository->alterarNivelUsuario($id , $nivel);
+}
 
 }
+
+$service = new UserServices();
+$userRepository = new UserRepository();
+$user = $userRepository->encontrarPorId(1);
+$usuario = $service->encontrarPorCpf($user , '321.112.533-22');
+echo $usuario->getNome() . "<br>" . $usuario->getEmail() . "<br>" . $usuario->getCpf();
+
+
+
 
 ?>
