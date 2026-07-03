@@ -1,8 +1,8 @@
 <?php
 
-
-require_once "./chirper/src/models/History.php";
-require_once "./chirper/src/repositories/HistoryRepository.php";
+date_default_timezone_set('America/Sao_Paulo');
+require_once __DIR__ . '/../models/History.php';
+require_once __DIR__ . '/../repositories/HistoryRepository.php';
 
 class HistoryController{
 
