@@ -50,7 +50,7 @@ class History{
     
     public function setDescricao(string $descricao): void {
         if (empty($descricao)) {
-        throw new InvalidArgumentException('Descrição inválida');
+            throw new InvalidArgumentException('Descrição não pode estar vazia');
         }
         $this->descricao = $descricao;
     }
