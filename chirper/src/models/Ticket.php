@@ -4,41 +4,43 @@ namespace src\models;
 use DateTime;
 use InvalidArgumentException;
 
+date_default_timezone_set('America/Sao_Paulo');
+
 class Ticket {
-    protected int $id;
+    protected ?int $id;
     protected ?string $uuid;
     protected string $titulo;
     protected string $descricao;
-    protected string $prioridade;
+    protected ?string $prioridade;
     protected string $patrimonio;
     protected string $status;
-    protected DateTime $dataAbertura;
-    protected DateTime $dataEncerramento;
-    protected int $id_categoria;
+    protected ?DateTime $dataAbertura;
+    protected ?DateTime $dataEncerramento;
+    protected ?int $id_categoria;
     protected int $id_usuario;
-    protected int $id_responsavel;
- 
+    protected ?int $id_responsavel;
+
     public function __construct(
-        int $id,
-        string $titulo,
-        string $descricao,
-        string $prioridade,
-        string $patrimonio,
-        string $status,
-        ?int $id_categoria = null,
-        int $id_usuario = 0,
-        ?int $id_responsavel = null,
-        ?string $uuid = null,
-        ?DateTime $dataAbertura = null,
-        ?DateTime $dataEncerramento = null
+        ?int $id = null,                 
+        ?string $uuid = null,             
+        string $titulo = '',             
+        string $descricao = '',          
+        ?string $prioridade = null,       
+        string $patrimonio = '',         
+        string $status = 'Aberto',       
+        ?int $id_categoria = null,        
+        int $id_usuario = 0,              
+        ?int $id_responsavel = null,      
+        ?DateTime $dataAbertura = null,   
+        ?DateTime $dataEncerramento = null 
     )
     {
         if (empty($titulo)) {
-        throw new InvalidArgumentException('Nome inválido');
+            throw new InvalidArgumentException('Título inválido');
         }
 
         if (empty($descricao)) {
-        throw new InvalidArgumentException('Telefone inválido');
+            throw new InvalidArgumentException('Descrição inválida');
         }
 
         $this->id = $id;
@@ -55,11 +57,11 @@ class Ticket {
         $this->id_responsavel = $id_responsavel;
     }
 
-    public function getId(): int {
+    public function getId(): ?int {
         return $this->id;
     }
 
-    public function getUuid(): string {
+    public function getUuid(): ?string {
         return $this->uuid;
     }
 
@@ -71,7 +73,7 @@ class Ticket {
         return $this->descricao;
     }
 
-    public function getPrioridade(): string {
+    public function getPrioridade(): ?string {
         return $this->prioridade;
     }
 
@@ -83,15 +85,16 @@ class Ticket {
         return $this->status;
     }
 
-    public function getDataAbertura(): DateTime {
+    // Adicionado '?' no retorno das datas
+    public function getDataAbertura(): ?DateTime {
         return $this->dataAbertura;
     }
 
-    public function getDataEncerramento(): DateTime {
+    public function getDataEncerramento(): ?DateTime {
         return $this->dataEncerramento;
     }
 
-    public function getIdCategoria(): int {
+    public function getIdCategoria(): ?int {
         return $this->id_categoria;
     }
 
@@ -121,8 +124,8 @@ class Ticket {
             'prioridade' => $this->prioridade,
             'patrimonio' => $this->patrimonio,
             'status' => $this->status,
-            'dataAbertura' => $this->dataAbertura,
-            'dataEncerramento' => $this->dataEncerramento,
+            'dataAbertura' => $this->dataAbertura ? $this->dataAbertura->format('Y-m-d H:i:s') : null,
+            'dataEncerramento' => $this->dataEncerramento ? $this->dataEncerramento->format('Y-m-d H:i:s') : null,
             'id_categoria' => $this->id_categoria,
             'id_usuario' => $this->id_usuario,
             'id_responsavel' => $this->id_responsavel,
@@ -142,7 +145,7 @@ class Ticket {
 
     public function setDescricao(string $descricao): void {
         if (empty($descricao)) {
-            throw new InvalidArgumentException('Descrição inválido');
+            throw new InvalidArgumentException('Descrição inválida');
         }
         $this->descricao = $descricao;
     }
@@ -174,6 +177,7 @@ class Ticket {
         $this->id_responsavel = $id_responsavel;
     }
 }
+
  
 
 $teste = new Ticket(
@@ -193,4 +197,8 @@ $teste = new Ticket(
 echo "<pre>";
 echo $teste->toJson();
 echo "</pre>";
+// $teste = new Ticket(1, "titulo", "descricao descricao", "baixa", "pat-01", "ativo", 1, 1, 1, null, new DateTime("2026-01-01"), new DateTime("2026-01-01"));
+// echo "<pre>";
+// echo $teste->toJson();
+// echo "</pre>";
 ?>

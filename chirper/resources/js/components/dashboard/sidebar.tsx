@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Activity, BookCheck, LayoutGrid, ListChecks, Ticket, Users, ClipboardPlus } from 'lucide-react';
+import { Activity, BookCheck, LayoutGrid, ListChecks, Ticket, Users, ClipboardPlus, UserRoundPlus } from 'lucide-react';
 import type React from 'react';
 import { NavLink } from 'react-router-dom';
 
@@ -12,7 +12,8 @@ const items: { key: DashboardSection; label: string; icon: React.ComponentType<{
     { key: 'categorias', label: 'Categoria', icon: BookCheck },
     { key: 'historico', label: 'Histórico', icon: ListChecks },
     { key: 'status', label: 'Status', icon: Activity },
-    { key: 'criarChamado', label: 'Criar Chamado', icon: ClipboardPlus }
+    { key: 'criarChamado', label: 'Criar Chamado', icon: ClipboardPlus },
+    { key: 'criarUsuario', label: 'Criar Usuário', icon: UserRoundPlus }
 ];
 
 export function Sidebar() {
