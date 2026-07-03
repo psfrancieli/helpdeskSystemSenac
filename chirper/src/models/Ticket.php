@@ -1,5 +1,7 @@
 <?php
 
+date_default_timezone_set('America/Sao_Paulo');
+
 class Ticket {
     protected ?int $id;
     protected ?string $uuid;
@@ -174,8 +176,8 @@ class Ticket {
 
  
 
-$teste = new Ticket(1, "titulo", "descricao descricao", "baixa", "pat-01", "ativo", 1, 1, 1, null, new DateTime("2026-01-01"), new DateTime("2026-01-01"));
-echo "<prev>";
-echo $teste->toJson();
-echo "</prev>";
+// $teste = new Ticket(1, "titulo", "descricao descricao", "baixa", "pat-01", "ativo", 1, 1, 1, null, new DateTime("2026-01-01"), new DateTime("2026-01-01"));
+// echo "<pre>";
+// echo $teste->toJson();
+// echo "</pre>";
 ?>
