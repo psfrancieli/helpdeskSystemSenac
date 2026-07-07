@@ -4,17 +4,22 @@ class History{
     private int $id;
     private DateTime $data;
     private string $descricao;
+    private int $id_usuario_tecnico;
+    private int $id_chamado;
     
-    public function __construct(int $id , ?DateTime $data = null , string $descricao = '')
+    public function __construct(?DateTime $data = null , string $descricao = '', int $id_chamado, int $id_usuario_tecnico)
     {
-
-        $this->id = $id;
         $this->data = $data ?? new DateTime();
         $this->descricao = $descricao;
+        $this->id_chamado = $id_chamado;
+        $this->id_usuario_tecnico = $id_usuario_tecnico;
     }
 
-    public function getId():int{
-        return $this->id;
+    public function getChamado(): string{
+        return $this->id_chamado;
+    }
+    public function getTecnico(): string{
+        return $this->id_usuario_tecnico;
     }
     public function getData(): DateTime{
         return $this->data;
@@ -29,13 +34,27 @@ class History{
         }
         $this->data = $data;
     }
+
+    public function setChamado(int $id_chamado) {
+        if (empty($id_chamado)) {
+            throw new InvalidArgumentException('Chamado inexistente');
+        }
+        $this->id_chamado = $id_chamado;
+    }
+
+    public function setTecnico(int $id_usuario_tecnico) {
+        if (empty($id_usuario_tecnico)) {
+            throw new InvalidArgumentException('Tecnico inexistente');
+        }
+    }
     
     public function setDescricao(string $descricao): void {
         if (empty($descricao)) {
-        throw new InvalidArgumentException('Descrição inválida');
+            throw new InvalidArgumentException('Descrição não pode estar vazia');
         }
         $this->descricao = $descricao;
-    } 
+    }
+
 }
 
 ?>
