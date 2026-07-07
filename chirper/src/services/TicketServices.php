@@ -30,26 +30,30 @@ class TicketServices {
         int $id_usuario
     ): Ticket
     {
-        $ticket = new Ticket (
-            0,
-            null,
-            $titulo,
-            $descricao,
-            $prioridade,
-            $patrimonio,
-            $status,
-            $id_categoria,
-            $id_usuario,
-            null,
-            new DateTime(),
-            null
-            
-        );
-
-        $this->repository->CriarTicket($ticket);
-
-        return $ticket;
+    $prioridadesValidas = ['baixa', 'media', 'alta', 'muito alta'];
+    if (!in_array(strtolower($prioridade), $prioridadesValidas)) {
+        throw new \Exception("A prioridade informada é inválida.");
     }
+
+    $ticket = new Ticket(
+        0,
+        null,
+        $titulo, 
+        $descricao, 
+        $prioridade, 
+        $patrimonio,
+        $status, 
+        $id_categoria, 
+        $id_usuario, 
+        null, 
+        new DateTime(), 
+        null
+    );
+
+    $this->repository->CriarTicket($ticket);
+
+    return $ticket;
+}
 
     public function atualizarPrioridade(int $id, array $dadosAtualizados): Ticket {
         $ticket = $this->repository->EncontrarTicketPorId($id);
@@ -58,12 +62,23 @@ class TicketServices {
             throw new \Exception("Ticket não encontrado!");
         }
 
-        if (isset($dadosAtualizados['prioridade'])) {
-           $novaPrioridade = $dadosAtualizados['prioridade'];
+        if ($ticket->getStatus() === 'concluido') {
+            throw new \Exception("Não é possível alterar a prioridade de um ticket que ja tenha sido encerrado.");
+        }
 
+        if (isset($dadosAtualizados['prioridade'])) {
+           $novaPrioridade = strtolower($dadosAtualizados['prioridade']);
+
+        $prioridadesValidas = ['baixa', 'media', 'alta', 'muito alta'];
+        if (!in_array($novaPrioridade, $prioridadesValidas)) {
+            throw new \Exception("Prioridade inválida!");
+        }
+
+        if ($ticket->getPrioridade() !== $novaPrioridade) {
             $this->repository->atualizarPrioridadeTicket($id, $novaPrioridade);   
             $ticket->setPrioridade($novaPrioridade);
         }
+    }
 
         return $ticket;
     }
@@ -75,6 +90,11 @@ class TicketServices {
         if (!$ticket) {
             throw new \Exception("Ticket não encontrado!");
         }
+
+        if ($ticket->getStatus() === 'concluido') {
+            throw new \Exception("Não é possivel encerrar um ticket ja concluido.");
+        }
+
 
         $this->repository->encerrarTicket($id, 'concluido');
         $ticket->setStatus('concluido');
@@ -99,9 +119,9 @@ class TicketServices {
 
 //Teste
 
-$service = new TicketServices();
+// $service = new TicketServices();
 
-echo "<h3>Testando a conexão e criação...</h3>";
+// echo "<h3>Testando a conexão e criação...</h3>";
 
 // $novoTicket = $service->criarTicket(
 //     'Teste Simples',       
