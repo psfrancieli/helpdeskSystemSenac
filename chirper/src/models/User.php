@@ -1,7 +1,7 @@
 <?php 
 class User{
-    protected int $id;
-    protected string $uuid;
+    protected ?int $id;
+    protected ?string $uuid;
     protected string $nome;
     protected string $cpf;
     protected string $telefone;
