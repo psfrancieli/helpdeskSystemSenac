@@ -62,6 +62,7 @@ class TicketServices {
            $novaPrioridade = $dadosAtualizados['prioridade'];
 
             $this->repository->atualizarPrioridadeTicket($id, $novaPrioridade);   
+            $ticket->setPrioridade($novaPrioridade);
         }
 
         return $ticket;
@@ -76,19 +77,23 @@ class TicketServices {
         }
 
         $this->repository->encerrarTicket($id, 'encerrado');
+        $ticket->setStatus('encerrado');
 
         return $ticket;
     }
 
-    public function atribuirTecnico(int $ticketId): Ticket {
+    public function atribuirTecnico(int $ticketId, int $idResponsavel): Ticket {
         $ticket = $this->repository->EncontrarTicketPorId($ticketId);
 
         if (!$ticket) {
             throw new \Exception("Ticket não encontrado!");
         }
 
+        $this->repository->atribuirResponsavelTicket($ticketId, $idResponsavel);
+        $ticket->setIdResponsavel($idResponsavel);
+
         return $ticket;
-    }
+}
 }
 
 

@@ -119,6 +119,16 @@ class TicketRepository{
             throw new RuntimeException("Erro ao encerrar chamado no banco",0 , $e);
         }
     }
+
+    public function atribuirResponsavelTicket(int $ticketId, int $idResponsavel): void {
+        try {
+            $sql = 'UPDATE "CHAMADO" SET id_responsavel = ? WHERE id = ?';
+            $stmt = Database::getConnection()->prepare($sql);
+            $stmt->execute([$idResponsavel, $ticketId]);
+        } catch (PDOException $e) {
+            throw new RuntimeException("Erro ao atribuir responsável ao chamado no banco", 0, $e);
+        }
+}
 }
 
     // BUSCA DE UM CHAMADO POR ID
