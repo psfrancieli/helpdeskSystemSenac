@@ -10,10 +10,10 @@ class CategoryController
         $this->service = $service;
     }
 
-    public function index(): void
+    public function Index(): void
     {
         $categorias = $this->service->listarTodas();
-        require __DIR__ . '/../views/categorias/index.php';
+        require __DIR__ . '/../Views/categoria/index.php';
     }
 
     public function Search(int $id): void
@@ -26,7 +26,7 @@ class CategoryController
             return;
         }
 
-        require __DIR__ . '/../views/categorias/show.php';
+        require __DIR__ . '/../Views/categoria/search.php';
     }
 
 
@@ -36,7 +36,7 @@ class CategoryController
 
         try {
             $this->service->criar($nome);
-            header('Location: /categorias');
+            header('Location: /categoria');
         } catch (InvalidArgumentException $e) {
             http_response_code(400);
             echo $e->getMessage();
@@ -50,12 +50,9 @@ class CategoryController
 
         try {
             $this->service->atualizar($id, $nome);
-            header('Location: /categorias/' . $id);
+            header('Location: /categoria/' . $id);
         } catch (InvalidArgumentException $e) {
             http_response_code(400);
-            echo $e->getMessage();
-        } catch (RuntimeException $e) {
-            http_response_code(404);
             echo $e->getMessage();
         }
     }
