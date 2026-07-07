@@ -15,6 +15,18 @@ class UserRepository{
             throw new RuntimeException("Erro ao buscar usuário no banco",0 , $e);
         }
     }
+
+    public function criarUsuario(User $usuario):bool{
+        try{
+            $sql = 'INSERT INTO "USUARIO" (nome, "CPF" , telefone , email , senha , nivel , ativo) VALUES ( ? , ? , ?  , ? , ? , ? , ?)';
+            $stmt = Database::getConnection()->prepare($sql);
+            return $stmt->execute([$usuario->getNome() ,
+            $usuario->getCpf() , $usuario->getTelefone() , $usuario->getEmail() , $usuario->getSenha() , $usuario->getNivel() , $usuario->getAtivo()]);
+        }catch(PDOException $e){
+            throw new RuntimeException("Erro ao criar usuario ",0 , $e);
+        }
+       
+    }
 }
 
 $user = new UserRepository();

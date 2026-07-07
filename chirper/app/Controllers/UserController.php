@@ -15,4 +15,9 @@ class UserController
     {
         return $this->userRepository->listarUsuarioPorId($id);
     }
+
+    public function createUser(User $usuario): bool
+    {
+        return $this->userRepository->criarUsuario($usuario);
+    }
 }

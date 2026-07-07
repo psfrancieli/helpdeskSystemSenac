@@ -10,6 +10,7 @@ require_once __DIR__ . '/../app/configs/Database.php';
 require_once __DIR__ . '/../app/Models/Called.php';
 require_once __DIR__ . '/../app/repositories/ChamadoRepository.php';
 require_once __DIR__ . '/../app/Controllers/CalledController.php';
+require_once __DIR__ . '/../app/Controllers/UserController.php';
 
 use App\Core\Router;
 

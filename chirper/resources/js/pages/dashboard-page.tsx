@@ -24,7 +24,8 @@ import {
 } from "../data/mock";
 import { useChamados } from "../hooks/useChamados";
 import { createChamado } from "../services/chamadoService";
-import type { CreateHelpdeskTicket, DashboardSection, TicketPriority } from "../types/helpdesk";
+import { createUsuario, refreshUsuarios } from "../services/usuarioService";
+import type { CreateHelpdeskTicket, DashboardSection, CreateHelpdeskUser, TicketPriority, UserRole } from "../types/helpdesk";
 import AnimatedButton from "../components/dashboard/button-animated";
 
 interface DashboardPageProps {
@@ -39,12 +40,28 @@ interface TicketFormState {
   id_categoria: number;
 }
 
+interface UserFormState {
+  nome: string;
+  email: string;
+  senha: string;
+  nivel: UserRole;
+  ativo: boolean;
+}
+
 const initialTicketFormState: TicketFormState = {
   titulo: "",
   patrimonio: "",
   descricao: "",
   prioridade: "media",
   id_categoria: categories[0]?.id ?? 1,
+};
+
+const initialUserFormState: UserFormState = {
+  nome: "",
+  email: "",
+  senha: "",
+  nivel: "usuario",
+  ativo: true,
 };
 
 function normalizeSection(sectionParam?: string): DashboardSection {
@@ -75,6 +92,18 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
   const [ticketError, setTicketError] = useState<string | null>(null);
   const [ticketSuccess, setTicketSuccess] = useState<string | null>(null);
   const [isSubmittingTicket, setIsSubmittingTicket] = useState(false);
+  const [isSubmittingUser, setIsSubmittingUser] = useState(false);
+  const [userError, setUserError] = useState<string | null>(null);
+  const [userSuccess, setUserSuccess] = useState<string | null>(null);
+  // const for new users
+  const [userForm, setUserForm] = useState<UserFormState>({
+    nome: "",
+    email: "",
+    senha: "",
+    nivel: "usuario",
+    ativo: true,
+  });
+
 
   const {
     chamados,
@@ -164,6 +193,39 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
     } finally {
       setIsSubmittingTicket(false);
     }
+  }
+
+  async function handleCreateUser(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (isSubmittingUser) {
+      return;
+    }
+
+    setIsSubmittingUser(true);
+    setUserError(null);
+    setUserSuccess(null);
+
+    const payload: CreateHelpdeskUser = {
+      nome: userForm.nome.trim(),
+      email: userForm.email.trim(),
+      senha: userForm.senha.trim(),
+      nivel: userForm.nivel,
+      ativo: userForm.ativo,
+    };
+
+    try {
+      const response = await createUsuario(payload);
+      setUserForm(initialUserFormState);
+      setUserSuccess(response.message);
+      await refreshUsuarios();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Erro ao criar usuário";
+      setUserError(message);
+    } finally {
+      setIsSubmittingUser(false);
+    }
+
   }
 
   return (
@@ -333,8 +395,8 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                               </div>
                             </div>
                           </div>
-
-                          <div className="sm:col-span-3">
+                          {/* PRIORIDADE */}
+                          {/* <div className="sm:col-span-3">
                             <label htmlFor="prioridade" className="block text-sm/6 font-medium text-white">
                               Prioridade
                             </label>
@@ -350,9 +412,10 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                               <option value="alta" className="bg-stone-900">Alta</option>
                               <option value="muito alta" className="bg-stone-900">Muito alta</option>
                             </select>
-                          </div>
-
-                          <div className="sm:col-span-3">
+                          </div> */}
+                          
+                          {/* CATEGORIA */}
+                          {/* <div className="sm:col-span-3">
                             <label htmlFor="categoria" className="block text-sm/6 font-medium text-white">
                               Categoria
                             </label>
@@ -369,7 +432,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                                 </option>
                               ))}
                             </select>
-                          </div>
+                          </div> */}
 
                           <div className="col-span-full">
                             <label htmlFor="descricao" className="block text-sm/6 font-medium text-white">
@@ -425,13 +488,15 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                     Criar Usuário
                   </p>
 
-                  <form className="space-y-4">
+                  <form className="space-y-4" onSubmit={handleCreateUser}>
                     {/* Nome */}
                     <div className="flex flex-col space-y-1.5">
                       <label htmlFor="name" className="text-sm font-medium text-stone-300">Nome Completo</label>
                       <input 
                         type="text" 
-                        id="name" 
+                        id="name"
+                        value={userForm.nome}
+                        onChange={(event) => setUserForm((current) => ({ ...current, nome: event.target.value }))} 
                         placeholder="Ex: João Silva" 
                         className="w-full px-3 py-2 bg-stone-950 border border-stone-800 rounded-md text-sm text-stone-100 placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition"
                       />
@@ -442,7 +507,9 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                       <label htmlFor="email" className="text-sm font-medium text-stone-300">Email</label>
                       <input 
                         type="email" 
-                        id="email" 
+                        id="email"
+                        value={userForm.email}
+                        onChange={(event) => setUserForm((current) => ({ ...current, email: event.target.value }))} 
                         placeholder="joao@empresa.com" 
                         className="w-full px-3 py-2 bg-stone-950 border border-stone-800 rounded-md text-sm text-stone-100 placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition"
                       />
@@ -454,19 +521,21 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                       <div className="flex flex-col space-y-1.5">
                         <label htmlFor="level" className="text-sm font-medium text-stone-300">Nível de Acesso</label>
                         <select 
-                          id="level" 
+                          id="level"
+                          value={userForm.nivel}
+                          onChange={(event) => setUserForm((current) => ({ ...current, nivel: event.target.value as UserRole }))} 
                           className="w-full px-3 py-2 bg-stone-950 border border-stone-800 rounded-md text-sm text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition appearance-none"
                         >
                           <option value="user" className="bg-stone-900">Usuário</option>
                           <option value="manager" className="bg-stone-900">Gerente</option>
                           <option value="admin" className="bg-stone-900">Administrador</option>
                         </select>
-                      </div           >
+                      </div>
 
                       {/* Ativo */}
                       <div className="flex flex-col space-y-1.5 justify-end pb-2">
                         <label className="relative flex items-center cursor-pointer select-none">
-                          <input type="checkbox" id="active" defaultChecked className="sr-only peer" />
+                          <input type="checkbox" id="active" checked={userForm.ativo} onChange={(event) => setUserForm((current) => ({ ...current, ativo: event.target.checked }))} className="sr-only peer" />
                           <div className="w-9 h-5 bg-stone-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-stone-400 peer-checked:after:bg-stone-100 after:border-stone-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-600"></div>
                           <span className="ms-3 text-sm font-medium text-stone-300">Usuário Ativo</span>
                         </label>
@@ -479,14 +548,28 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                       <input 
                         type="password" 
                         id="password" 
+                        value={userForm.senha}
+                        onChange={(event) => setUserForm((current) => ({ ...current, senha: event.target.value }))}
                         placeholder="••••••••" 
                         className="w-full px-3 py-2 bg-stone-950 border border-stone-800 rounded-md text-sm text-stone-100 placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition"
                       />
                     </div           >
 
+                    {userError ? (
+                      <div className="rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">
+                        {userError}
+                      </div>
+                    ) : null}
+
+                    {userSuccess ? (
+                      <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
+                        {userSuccess}
+                      </div>
+                    ) : null}
+
                     {/* Botão de Ação */}
                     <div className="pt-2">
-                      <AnimatedButton />
+                      <AnimatedButton type="submit" disabled={isSubmittingUser} label={isSubmittingUser ? "Criando..." : "Criar usuário"} />
                     </div>
                   </form>
                 </CardContent>
@@ -526,3 +609,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
     </main>
   );
 }
+function setIsSubmittingUser(arg0: boolean) {
+  throw new Error("Function not implemented.");
+}
+
