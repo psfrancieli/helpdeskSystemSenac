@@ -76,8 +76,8 @@ class TicketServices {
             throw new \Exception("Ticket não encontrado!");
         }
 
-        $this->repository->encerrarTicket($id, 'encerrado');
-        $ticket->setStatus('encerrado');
+        $this->repository->encerrarTicket($id, 'concluido');
+        $ticket->setStatus('concluido');
 
         return $ticket;
     }
@@ -101,17 +101,18 @@ class TicketServices {
 
 $service = new TicketServices();
 
-$teste = $service->criarTicket(
-    titulo: "Erro no sistema",
-    descricao: "Sistema com defeito de dados",
-    prioridade: "Alta",
-    patrimonio: "pat-001",
-    status: "Em andamento",
-    id_categoria: 1,
-    id_usuario: 1
+echo "<h3>Testando a conexão e criação...</h3>";
 
-);
+// $novoTicket = $service->criarTicket(
+//     'Teste Simples',       
+//     'Descrição de teste.', 
+//     'alta',                
+//     'pat-001',            
+//     'pendente',           
+//     1,                     
+//     1                 
+// );
 
-echo "<pre>";
-print_r($teste->getAll());
-echo "</pre>";
+// echo "<pre>";
+// print_r($novoTicket);
+// echo "</pre>";
