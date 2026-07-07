@@ -13,6 +13,8 @@ export interface HelpdeskUser {
 
 export interface CreateHelpdeskUser {
     nome: string;
+    cpf: string;
+    telefone: string;
     email: string;
     senha: string;
     nivel: UserRole;

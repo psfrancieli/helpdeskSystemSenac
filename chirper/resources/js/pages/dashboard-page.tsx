@@ -22,9 +22,9 @@ import {
   tickets,
   users,
 } from "../data/mock";
-import { useChamados } from "../hooks/useChamados";
-import { createChamado } from "../services/chamadoService";
-import { createUsuario, refreshUsuarios } from "../services/usuarioService";
+import { useTickets } from "../hooks/useTickets";
+import { createTicket } from "../services/ticketService";
+import { createUsuario } from "../services/usuarioService";
 import type { CreateHelpdeskTicket, DashboardSection, CreateHelpdeskUser, TicketPriority, UserRole } from "../types/helpdesk";
 import AnimatedButton from "../components/dashboard/button-animated";
 
@@ -42,6 +42,8 @@ interface TicketFormState {
 
 interface UserFormState {
   nome: string;
+  cpf: string;
+  telefone: string;
   email: string;
   senha: string;
   nivel: UserRole;
@@ -58,6 +60,8 @@ const initialTicketFormState: TicketFormState = {
 
 const initialUserFormState: UserFormState = {
   nome: "",
+  cpf: "",
+  telefone: "",
   email: "",
   senha: "",
   nivel: "usuario",
@@ -98,6 +102,8 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
   // const for new users
   const [userForm, setUserForm] = useState<UserFormState>({
     nome: "",
+    cpf: "",
+    telefone: "",
     email: "",
     senha: "",
     nivel: "usuario",
@@ -106,11 +112,11 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
 
 
   const {
-    chamados,
+    tickets: chamados,
     isLoading: isChamadosLoading,
     error: chamadosError,
-    refreshChamados,
-  } = useChamados();
+    refreshTickets,
+  } = useTickets();
 
   useEffect(() => {
     const timeout = setTimeout(() => setLoading(false), 950);
@@ -183,10 +189,10 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
     };
 
     try {
-      const response = await createChamado(payload);
+      const response = await createTicket(payload);
       setTicketForm(initialTicketFormState);
       setTicketSuccess(response.message);
-      await refreshChamados();
+      await refreshTickets();
     } catch (error) {
       const message = error instanceof Error ? error.message : "Erro ao criar chamado";
       setTicketError(message);
@@ -206,8 +212,28 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
     setUserError(null);
     setUserSuccess(null);
 
+    if (userForm.nome.trim().length < 3) {
+      setUserError("Informe um nome válido.");
+      setIsSubmittingUser(false);
+      return;
+    }
+
+    if (userForm.cpf.trim() === "") {
+      setUserError("Informe o CPF.");
+      setIsSubmittingUser(false);
+      return;
+    }
+
+    if (userForm.telefone.trim() === "") {
+      setUserError("Informe o telefone.");
+      setIsSubmittingUser(false);
+      return;
+    }
+
     const payload: CreateHelpdeskUser = {
       nome: userForm.nome.trim(),
+      cpf: userForm.cpf.trim(),
+      telefone: userForm.telefone.trim(),
       email: userForm.email.trim(),
       senha: userForm.senha.trim(),
       nivel: userForm.nivel,
@@ -218,7 +244,6 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
       const response = await createUsuario(payload);
       setUserForm(initialUserFormState);
       setUserSuccess(response.message);
-      await refreshUsuarios();
     } catch (error) {
       const message = error instanceof Error ? error.message : "Erro ao criar usuário";
       setUserError(message);
@@ -504,6 +529,31 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
 
                     {/* Email */}
                     <div className="flex flex-col space-y-1.5">
+                      <label htmlFor="cpf" className="text-sm font-medium text-stone-300">CPF</label>
+                      <input
+                        type="text"
+                        id="cpf"
+                        value={userForm.cpf}
+                        onChange={(event) => setUserForm((current) => ({ ...current, cpf: event.target.value }))}
+                        placeholder="000.000.000-00"
+                        className="w-full px-3 py-2 bg-stone-950 border border-stone-800 rounded-md text-sm text-stone-100 placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition"
+                      />
+                    </div>
+
+                    <div className="flex flex-col space-y-1.5">
+                      <label htmlFor="telefone" className="text-sm font-medium text-stone-300">Telefone</label>
+                      <input
+                        type="text"
+                        id="telefone"
+                        value={userForm.telefone}
+                        onChange={(event) => setUserForm((current) => ({ ...current, telefone: event.target.value }))}
+                        placeholder="(11) 99999-9999"
+                        className="w-full px-3 py-2 bg-stone-950 border border-stone-800 rounded-md text-sm text-stone-100 placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition"
+                      />
+                    </div>
+
+                    {/* Email */}
+                    <div className="flex flex-col space-y-1.5">
                       <label htmlFor="email" className="text-sm font-medium text-stone-300">Email</label>
                       <input 
                         type="email" 
@@ -526,9 +576,10 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                           onChange={(event) => setUserForm((current) => ({ ...current, nivel: event.target.value as UserRole }))} 
                           className="w-full px-3 py-2 bg-stone-950 border border-stone-800 rounded-md text-sm text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition appearance-none"
                         >
-                          <option value="user" className="bg-stone-900">Usuário</option>
-                          <option value="manager" className="bg-stone-900">Gerente</option>
-                          <option value="admin" className="bg-stone-900">Administrador</option>
+                          <option value="usuario" className="bg-stone-900">Usuário</option>
+                          <option value="tecnico" className="bg-stone-900">Técnico</option>
+                          <option value="analista" className="bg-stone-900">Analista</option>
+                          <option value="adm" className="bg-stone-900">Administrador</option>
                         </select>
                       </div>
 
@@ -608,8 +659,5 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
       {loading ? <LoadingOctopus /> : null}
     </main>
   );
-}
-function setIsSubmittingUser(arg0: boolean) {
-  throw new Error("Function not implemented.");
 }
 

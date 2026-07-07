@@ -1,7 +1,7 @@
 <?php 
 class User{
-    protected int $id;
-    protected string $uuid;
+    protected ?int $id;
+    protected ?string $uuid;
     protected string $nome;
     protected string $cpf;
     protected string $telefone;
@@ -10,8 +10,9 @@ class User{
     protected string $nivel;
     protected bool $ativo;
 
-    public function __construct(int $id , string $uuid , string $nome ,string $cpf , string $telefone , 
-    string $email , string $senha, string $nivel = 'usuario', bool $ativo = true)
+    public function __construct( ?int $id = null,
+        ?string $uuid = null , string $nome = '' ,string $cpf = '' , string $telefone = '' , 
+    string $email = '' , string $senha = '', string $nivel = 'usuario', bool $ativo = true)
     {
         if (empty($nome)) {
         throw new InvalidArgumentException('Nome inválido');
@@ -37,10 +38,10 @@ class User{
 
     }
 
-    public function getId():int{
+    public function getId():?int{
         return $this->id;
     }
-    public function getUuid():string{
+    public function getUuid():?string{
         return $this->uuid;
     }
     public function getNome():string{
@@ -54,6 +55,9 @@ class User{
     }
     public function getEmail():string{
         return $this->email;
+    }
+    public function getSenha():string{
+        return $this->senha;
     }
     public function getNivel():string{
         return $this->nivel;
