@@ -4,7 +4,7 @@ require_once __DIR__ . "/../models/User.php";
 class UserRepository{
     public function EncontrarPorId(int $id): ?User{
         try{
-            $sql = 'SELECT * FROM "USUARIO" WHERE id = ? AND ativo = TRUE';
+            $sql = 'SELECT * FROM "USUARIO" WHERE id = ?';
             $stmt = Database::getConnection()->prepare($sql);
             $stmt->execute([$id]);
             $dados = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -20,7 +20,7 @@ class UserRepository{
     }
     public function EncontrarTodosUsuarios(): ?array{
         try{
-            $sql = 'SELECT * FROM "USUARIO" WHERE ativo = 1';
+            $sql = 'SELECT * FROM "USUARIO" WHERE ativo = TRUE';
             $stmt = Database::getConnection()->prepare($sql);
             $stmt->execute();
             $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -63,7 +63,8 @@ class UserRepository{
         try {
             $sql = 'UPDATE "USUARIO" SET ativo = FALSE WHERE id = ? AND ativo = TRUE';
             $stmt = Database::getConnection()->prepare($sql);
-            return $stmt->execute([$id]);
+            $stmt->execute([$id]);
+            return $stmt->rowCount() > 0;
         } catch (PDOException $e){
             throw new RuntimeException("Erro ao tentar deletar usuario " , 0 , $e);
         }
@@ -71,7 +72,7 @@ class UserRepository{
 
     public function encontrarPorEmail(string $email): ?User{
         try {
-            $sql = 'SELECT * FROM "USUARIO" WHERE email = ? AND ativo = TRUE';
+            $sql = 'SELECT * FROM "USUARIO" WHERE email = ?';
             $stmt = Database::getConnection()->prepare($sql);
             $stmt->execute([$email]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -87,7 +88,7 @@ class UserRepository{
     }
     public function encontrarPorCpf(string $cpf): ?User{
         try {
-            $sql = 'SELECT * FROM "USUARIO" WHERE "CPF" = ? AND ativo = TRUE';
+            $sql = 'SELECT * FROM "USUARIO" WHERE "CPF" = ?';
             $stmt = Database::getConnection()->prepare($sql);
             $stmt->execute([$cpf]);
             $user  = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -100,11 +101,11 @@ class UserRepository{
               throw new RuntimeException("Erro ao buscar usuario " , 0 , $e);
         }
     }
-    public function atualizarTelefone(string $telefone):bool{
+    public function atualizarTelefone(string $telefone , int $id):bool{
         try {
             $sql = 'UPDATE "USUARIO" SET telefone = ? WHERE id = ? AND ativo = TRUE';
             $stmt = Database::getConnection()->prepare($sql);
-            $stmt->execute([$telefone]);
+            $stmt->execute([$telefone , $id]);
             return $stmt->rowCount() > 0;
 
         } catch (PDOException $e) {
@@ -113,7 +114,7 @@ class UserRepository{
     }
     public function alterarNivelUsuario(int $id ,string $nivel = 'usuario'): bool{
         try {
-            $sql = 'UPDATE "USUARIO" SET nivel = ? WHERE id = ?';
+            $sql = 'UPDATE "USUARIO" SET nivel = ? WHERE id = ? AND ativo = TRUE';
             $stmt = Database::getConnection()->prepare($sql);
             $stmt->execute([$nivel , $id]);
             return $stmt->rowCount() > 0;
@@ -135,7 +136,7 @@ class UserRepository{
     }
     public function ativarUsuario(int $id): bool{
         try{
-            $sql = 'UPDATE "USUARIO" SET ativo = TRUE WHERE id = ?';
+            $sql = 'UPDATE "USUARIO" SET ativo = TRUE WHERE id = ? AND ativo = FALSE';
             $stmt = Database::getConnection()->prepare($sql);
             $stmt->execute([$id]);
             return $stmt->rowCount() > 0;

@@ -10,7 +10,11 @@ class UserServices{
             throw new Exception("Acesso negado.");
         }
         $user = new UserRepository();
-        return $user->encontrarPorId($id);
+        $usuario = $user->encontrarPorId($id);
+        if(!$usuario){
+            throw new Exception('Usuario não encontrador');
+        }
+        return $usuario;
     }
 
     public function encontrarTodosUsuarios(User $usuarioLogado): array{
@@ -30,7 +34,11 @@ class UserServices{
         }
         $cpfFormatado = CpfUtils::formatar($cpf);
         $user = new UserRepository();
-        return $user->encontrarPorCpf($cpfFormatado);
+        $usuario =  $user->encontrarPorCpf($cpfFormatado);
+        if(!$usuario){
+            throw new Exception('Usuario não encontrador');
+        }
+        return $usuario;
 
     }
 
@@ -69,45 +77,64 @@ class UserServices{
 
     public function deletarUsuario(User $usuarioLogado , int $id):bool{
         $userRepository = new UserRepository();
-        if($usuarioLogado !== 'adm'){
+        $usuario = $userRepository->encontrarPorId($id);
+        if($usuarioLogado->getNivel() !== 'adm'){
             throw new Exception("Acesso negado.");
         }
-        if(!$userRepository->encontrarPorId($id)){
-            throw new Exception("Erro ao deletar usuario!");
+        if(!$usuario){
+            throw new Exception("Usuario não encontrado!");
+        }
+        if($usuario->getNivel() === 'adm'){
+            throw new DomainException('Acesso negado!');
         }
         return $userRepository->deletarUsuario($id);
 
     }
-    public function alterarSenha(User $usuarioLogado , string $senha , int $id):bool{
-        $userRepository = new UserRepository();
-        if($usuarioLogado->getNivel() !== 'analista'){
-            throw new Exception("Acesso negado.");
-        }
-        if(!PasswordUtils::validar($senha)){
-            throw new InvalidArgumentException("Senha inválida");
-        }
-        $novaSenha = PasswordUtils::hash($senha);
-        return $userRepository->alterarSenha($novaSenha , $id);
-
+    public function resetarSenha(User $usuarioLogado, string $senha, int $id): bool
+    {
+    $userRepository = new UserRepository();
+    $usuario = $userRepository->encontrarPorId($id);
+    if($usuarioLogado->getId() === $id){
+        throw new Exception("Não pode alterar sua propria senha!");
     }
-    public function atualizarTelefone(User $usuarioLogado , string $telefone):bool{
-        $userRepository = new UserRepository();
-        if($usuarioLogado->getNivel() !== 'usuario'){
-            throw new Exception("Acesso negado.");
+    if (!$usuario) {
+        throw new Exception("Usuário não encontrado.");
+    }
+
+    if ($usuario->getNivel() === 'adm') {
+        if ($usuarioLogado->getNivel() !== 'adm') {
+            throw new DomainException("Permissão negada.");
         }
+    } elseif ($usuarioLogado->getNivel() !== 'analista') {
+        throw new DomainException("Acesso negado.");
+    }
+
+    if (!PasswordUtils::validar($senha)) {
+        throw new InvalidArgumentException("Senha inválida.");
+    }
+    $novaSenha = PasswordUtils::hash($senha);
+
+    return $userRepository->alterarSenha($novaSenha, $id);
+    }
+   
+    public function atualizarTelefone(string $telefone , int $id):bool{
+        $userRepository = new UserRepository();
         if(!PhoneUtils::validar($telefone)){
             throw new InvalidArgumentException("Telefone inválido");
         }
         $novoTelefone = PhoneUtils::formatar($telefone);
-        return $userRepository->atualizarTelefone($novoTelefone);
+        return $userRepository->atualizarTelefone($novoTelefone , $id);
         
 
     }
     public function ativarUsuario(User $usuarioLogado , int $id):bool{
         $userRepository = new UserRepository();
         $user = $userRepository->encontrarPorId($id);
+        if(!$user){
+            throw new Exception("Usuario não encontrado!");
+        }
         if($usuarioLogado->getNivel() !== 'adm'){
-            throw new Exception("Acesso negado.");
+            throw new Exception("Acesso negado.");  
         }
         if($user->getAtivo()){
             throw new Exception("O usuario ja esta ativo no sistema! ");
@@ -154,8 +181,32 @@ class UserServices{
 $service = new UserServices();
 $userRepository = new UserRepository();
 $user = $userRepository->encontrarPorId(1);
-$usuario = $service->encontrarPorCpf($user , '321.112.533-22');
-echo $usuario->getNome() . "<br>" . $usuario->getEmail() . "<br>" . $usuario->getCpf();
+//TESTES DA CLASSE USERSERVICE
+// $usuario = $service->encontrarPorCpf($user , '384.422.369-02');
+// $usuario = $service->alterarNivel($user , 8 , 'adm');
+// $senha = 'Caiqu@12300';
+// $usuario = $service->resetarSenha($user , $senha , 1);
+// $usuario = $service->ativarUsuario($user , 4);
+// $telefone = '15987212311';
+// $usuario = $service->atualizarTelefone( $telefone , 2);
+// $dados = [
+//     "id" => null,
+//     "uuid" => null,
+//     'nome' => "Joao",
+//     "cpf" => "25439862196",
+//     "telefone" => "15998713523",
+//     "email" => "sapinho@gmail.com",
+//     "senha" => "Sapo12345@"
+
+// ];
+// $usuario = $service->cadastrarUsuario($user , $dados);
+// $usuario = $service->deletarUsuario($user , 4);
+// $usuarioEncontrar = $service->encontrarPorId($user, 4);
+
+// echo $usuarioEncontrar->getNome() . "<br>" . $usuarioEncontrar->getEmail() . "<br>" . 
+// $usuarioEncontrar->getCpf() 
+// . "<br>" . $usuarioEncontrar->getNivel(). "<br>" . $usuarioEncontrar->getSenha() . "<br>" . $usuarioEncontrar->getAtivo() . "<br>" . $usuarioEncontrar->getTelefone();
+
 
 
 
