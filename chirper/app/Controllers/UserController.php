@@ -1,20 +1,21 @@
 <?php
 
 require_once __DIR__ . '/../Models/User.php';
+require_once __DIR__ . '/../services/UserServices.php';
 require_once __DIR__ . '/../repositories/UserRepository.php';
 
 class UserController
 {
-    private UserRepository $userRepository;
+    private $userService;
 
     public function __construct()
     {
-        $this->userRepository = new UserRepository();
+        $this->userService = new UserServices();
     }
 
     public function getById(int $id): User
     {
-        return $this->userRepository->listarUsuarioPorId($id);
+        return $this->userService->listarUsuarioPorId($id);
     }
 
     public function createUser(): void
@@ -58,19 +59,28 @@ class UserController
                 throw new InvalidArgumentException('Nivel de acesso invalido');
             }
 
-            $usuario = new User(
-                0,
-                null,
-                $nome,
-                $cpf,
-                $telefone,
-                $email,
-                password_hash($senha, PASSWORD_DEFAULT),
-                $nivel,
-                $ativo
-            );
+            $dados = [
+                'id'       => 0,
+                'uuid'     => null,
+                'nome'     => $nome,
+                'cpf'      => $cpf,
+                'telefone' => $telefone,
+                'email'    => $email,
+                'senha'    => $senha,
+                'nivel'    => $nivel,
+                'ativo'    => $ativo,
+            ];
 
-            $created = $this->userRepository->criarUsuario($usuario);
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            $userRepo = new UserRepository();
+            $currentUser = $userRepo->EncontrarPorId((int)($_SESSION['user_id'] ?? 0));
+            if ($currentUser === null) {
+                throw new RuntimeException('Usuario nao autenticado');
+            }
+
+            $created = $this->userService->cadastrarUsuario($currentUser, $dados);
 
             http_response_code(201);
             echo json_encode([
