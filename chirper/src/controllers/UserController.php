@@ -16,7 +16,7 @@ no react ele receberia mais ou menos assim
         "telefone": "(15)99999-9999"
     }
 }
-    o success vai servir justamente para verificações
+    o success vai servir justamente para verificações no react
 
 */
 class UserController extends Controller
@@ -31,15 +31,24 @@ class UserController extends Controller
     // ============================
     // Buscar usuário por ID
     // ============================
-    public function encontrarPorId(User $usuarioLogado, int $id): void
+    public function encontrarPorId(User $usuarioLogado, int $id):void
     {
         try {
 
             $usuario = $this->service->encontrarPorId($usuarioLogado, $id);
 
+            $user = [
+                "id" => $usuario->getId(),
+                "nome" => $usuario->getNome(),
+                "email" => $usuario->getEmail(),
+                "telefone" => $usuario->getTelefone(),
+                "cpf" => $usuario->getCpf()
+            ];
+
+
             $this->response([
                 "success" => true,
-                "data" => $usuario
+                "data" => $user
             ]);
 
         } catch (Throwable $e) {
@@ -60,10 +69,20 @@ class UserController extends Controller
         try {
 
             $usuarios = $this->service->encontrarTodosUsuarios($usuarioLogado);
+            $resultado = [];
+            foreach($usuarios as $usuario){
+               $resultado[] = [
+                "id" => $usuario->getId(),
+                "nome" => $usuario->getNome(),
+                "email" => $usuario->getEmail(),
+                "telefone" => $usuario->getTelefone(),
+                "cpf" => $usuario->getCpf()
+            ];
+            }
 
             $this->response([
                 "success" => true,
-                "data" => $usuarios
+                "data" => $resultado
             ]);
 
         } catch (Throwable $e) {
@@ -76,9 +95,7 @@ class UserController extends Controller
         }
     }
 
-    // ============================
-    // Buscar por CPF
-    // ============================
+
     public function encontrarPorCpf(User $usuarioLogado): void
     {
         try {
@@ -90,9 +107,18 @@ class UserController extends Controller
                 $dados['cpf']
             );
 
+            $user = [
+                "id" => $usuario->getId(),
+                "nome" => $usuario->getNome(),
+                "email" => $usuario->getEmail(),
+                "telefone" => $usuario->getTelefone(),
+                "cpf" => $usuario->getCpf()
+            ];
+
             $this->response([
                 "success" => true,
-                "data" => $usuario
+                "data" => $user
+        
             ]);
 
         } catch (Throwable $e) {
@@ -105,9 +131,7 @@ class UserController extends Controller
         }
     }
 
-    // ============================
-    // Cadastrar usuário
-    // ============================
+
     public function cadastrarUsuario(User $usuarioLogado): void
     {
         try {
@@ -131,9 +155,7 @@ class UserController extends Controller
         }
     }
 
-    // ============================
-    // Deletar usuário
-    // ============================
+
     public function deletarUsuario(User $usuarioLogado, int $id): void
     {
         try {
@@ -155,9 +177,7 @@ class UserController extends Controller
         }
     }
 
-    // ============================
-    // Resetar senha
-    // ============================
+  
     public function resetarSenha(User $usuarioLogado, int $id): void
     {
         try {
@@ -185,18 +205,16 @@ class UserController extends Controller
         }
     }
 
-    // ============================
-    // Atualizar telefone
-    // ============================
-    public function atualizarTelefone(int $id): void
+
+    public function atualizarTelefone(User $usuarioLogado): void
     {
         try {
 
             $dados = $this->getBody();
 
             $this->service->atualizarTelefone(
-                $dados['telefone'],
-                $id
+                $usuarioLogado,
+                $dados['telefone']
             );
 
             $this->response([
@@ -214,9 +232,7 @@ class UserController extends Controller
         }
     }
 
-    // ============================
-    // Ativar usuário
-    // ============================
+
     public function ativarUsuario(User $usuarioLogado, int $id): void
     {
         try {
@@ -241,9 +257,6 @@ class UserController extends Controller
         }
     }
 
-    // ============================
-    // Alterar nível
-    // ============================
     public function alterarNivel(User $usuarioLogado, int $id): void
     {
         try {
@@ -271,3 +284,106 @@ class UserController extends Controller
         }
     }
 }   
+
+$user = new UserRepository();
+$usuario = $user->encontrarPorId(3);
+
+// =====================================================
+// TESTES
+// =====================================================
+
+
+
+$userRepository = new UserRepository();
+
+
+$usuarioLogado = $userRepository->encontrarPorId(1);
+
+$controller = new UserController();
+
+
+// ======================================
+// Buscar por ID
+// ======================================
+// $controller->encontrarPorId($usuarioLogado, 3);
+
+
+// ======================================
+// Buscar todos
+// ======================================
+// $controller->encontrarTodos($usuarioLogado);
+
+
+// ======================================
+// Buscar por CPF
+// Corpo esperado:
+//
+// {
+//     "cpf":"12345678900"
+// }
+//
+// ======================================
+// $controller->encontrarPorCpf($usuarioLogado);
+
+
+// ======================================
+// Cadastrar usuário
+//
+// Corpo esperado:
+//
+// {
+//     "nome":"João",
+//     "cpf":"12345678900",
+//     "email":"joao@email.com",
+//     "telefone":"15999999999",
+//     "senha":"123456",
+//     "nivel":"USER"
+// }
+//
+// ======================================
+// $dados = [
+//     "id" => null,
+//     "uuid" => null,
+//     'nome' => "Caiquinho",
+//     "cpf" => "036.840.960-08",
+//     "telefone" => "12998713679",
+//     "email" => "caique@gmail.com",
+//     "senha" => "Sapo12345@"
+
+// ];
+// $controller->cadastrarUsuario($usuarioLogado);
+
+
+// ======================================
+// Deletar usuário
+// ======================================
+// $controller->deletarUsuario($usuarioLogado, 10);
+
+
+// ======================================
+// Resetar senha
+//
+//
+// ======================================
+    // $controller->resetarSenha($usuarioLogado, 1 , 'Caique@123456');
+
+
+// ======================================
+// Atualizar telefone
+//
+
+// ======================================
+// $controller->atualizarTelefone($usuarioLogado, '13998738777');
+
+
+// ======================================
+// Ativar usuário
+// // ======================================
+// $controller->ativarUsuario($usuarioLogado, 4);
+
+
+// ======================================
+// Alterar nível
+
+// ======================================
+// $controller->alterarNivel($usuarioLogado, 3 , 'tecnico');
