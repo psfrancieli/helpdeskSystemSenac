@@ -1,4 +1,4 @@
-    <?php 
+<?php
 class EmailUtils
 {
     public static function normalizar(string $email): string
@@ -13,4 +13,3 @@ class EmailUtils
         return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
     }
 }
-    ?>

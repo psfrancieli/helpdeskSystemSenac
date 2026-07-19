@@ -48,6 +48,15 @@ class UserServices{
             throw new Exception("Acesso negado.");
         }
 
+        if (!isset($dados['nivel'])) {
+            $dados['nivel'] = 'usuario';
+        }
+
+        $niveisPermitidos = ['usuario', 'tecnico', 'analista', 'adm'];
+        if (!in_array($dados['nivel'], $niveisPermitidos, true)) {
+            throw new InvalidArgumentException("Cargo inválido");
+        }
+
         if($userRepository->encontrarPorEmail($dados['email'])){
             throw new Exception("Esse email ja existe!");
         }
@@ -71,7 +80,7 @@ class UserServices{
         $dados['email'] = EmailUtils::normalizar($dados['email']);
         $dados['cpf'] = CpfUtils::formatar($dados['cpf']);
         $dados['senha'] = PasswordUtils::hash($dados['senha']);
-        $newUser = new User($dados['id'] , $dados['uuid'],$dados['nome'] , $dados['cpf'] , $dados['telefone'] , $dados['email'] , $dados['senha']);
+        $newUser = new User($dados['id'] , $dados['uuid'],$dados['nome'] , $dados['cpf'] , $dados['telefone'] , $dados['email'] , $dados['senha'], $dados['nivel'], true);
         return $userRepository->criarUsuario($newUser);
     }
 
@@ -177,38 +186,3 @@ class UserServices{
 }
 
 }
-
-$service = new UserServices();
-$userRepository = new UserRepository();
-$user = $userRepository->encontrarPorId(1);
-//TESTES DA CLASSE USERSERVICE
-// $usuario = $service->encontrarPorCpf($user , '384.422.369-02');
-// $usuario = $service->alterarNivel($user , 8 , 'adm');
-// $senha = 'Caiqu@12300';
-// $usuario = $service->resetarSenha($user , $senha , 1);
-// $usuario = $service->ativarUsuario($user , 4);
-// $telefone = '15987212311';
-// $usuario = $service->atualizarTelefone( $telefone , 2);
-// $dados = [
-//     "id" => null,
-//     "uuid" => null,
-//     'nome' => "Joao",
-//     "cpf" => "25439862196",
-//     "telefone" => "15998713523",
-//     "email" => "sapinho@gmail.com",
-//     "senha" => "Sapo12345@"
-
-// ];
-// $usuario = $service->cadastrarUsuario($user , $dados);
-// $usuario = $service->deletarUsuario($user , 4);
-// $usuarioEncontrar = $service->encontrarPorId($user, 4);
-
-// echo $usuarioEncontrar->getNome() . "<br>" . $usuarioEncontrar->getEmail() . "<br>" . 
-// $usuarioEncontrar->getCpf() 
-// . "<br>" . $usuarioEncontrar->getNivel(). "<br>" . $usuarioEncontrar->getSenha() . "<br>" . $usuarioEncontrar->getAtivo() . "<br>" . $usuarioEncontrar->getTelefone();
-
-
-
-
-
-?>

@@ -1,7 +1,4 @@
 <?php
-
-
-
 class PhoneUtils
 {
     /**
@@ -49,4 +46,3 @@ class PhoneUtils
         );
     }
 }
-?>

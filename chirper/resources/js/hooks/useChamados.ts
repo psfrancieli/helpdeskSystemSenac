@@ -7,12 +7,14 @@ interface UseChamadosResult {
     chamados: HelpdeskTicket[];
     isLoading: boolean;
     error: string | null;
+    reloadChamados: () => void;
 }
 
 export function useChamados(): UseChamadosResult {
     const [chamados, setChamados] = useState<HelpdeskTicket[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [refreshIndex, setRefreshIndex] = useState(0);
 
     useEffect(() => {
         let cancelled = false;
@@ -37,7 +39,7 @@ export function useChamados(): UseChamadosResult {
         return () => {
             cancelled = true;
         };
-    }, []);
+    }, [refreshIndex]);
 
-    return { chamados, isLoading, error };
+    return { chamados, isLoading, error, reloadChamados: () => setRefreshIndex((value) => value + 1) };
 }

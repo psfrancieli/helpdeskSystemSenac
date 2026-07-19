@@ -1,7 +1,7 @@
 export type UserRole = 'adm' | 'analista' | 'tecnico' | 'usuario';
 export type TicketPriority = 'baixa' | 'media' | 'alta' | 'muito alta';
 export type TicketStatus = 'pendente' | 'cancelado' | 'concluido';
-export type DashboardSection = 'overview' | 'usuarios' | 'chamados' | 'categorias' | 'historico' | 'status' | 'criarChamado' | 'criarUsuario';
+export type DashboardSection = 'overview' | 'usuarios' | 'chamados' | 'historico' | 'status' | 'criarChamado' | 'criarUsuario';
 
 export interface HelpdeskUser {
     id: number;
@@ -17,6 +17,15 @@ export interface CreateHelpdeskUser {
     senha: string;
     nivel: UserRole;
     ativo: boolean;
+}
+
+export interface CreateApiUserInput {
+    nome: string;
+    email: string;
+    senha: string;
+    cpf: string;
+    telefone: string;
+    nivel: UserRole;
 }
 
 export interface HelpdeskCategory {
@@ -38,7 +47,21 @@ export interface HelpdeskTicket {
     categoria: string;
     solicitante: string;
     responsavel?: string;
+    tecnicoId?: number | null;
     status: TicketStatus;
+}
+
+export interface CreateChamadoInput {
+    titulo: string;
+    descricao: string;
+    prioridade: TicketPriority;
+    patrimonio: string;
+    id_categoria: number;
+    id_usuario: number;
+    id_responsavel: number | null;
+    status: TicketStatus;
+    data_abertura?: string;
+    data_encerramento?: string | null;
 }
 
 export interface DashboardMetric {

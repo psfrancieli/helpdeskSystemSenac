@@ -283,40 +283,50 @@ class UserController extends Controller
 
         }
     }
-}   
+    public function store(): void
+    {
+        try {
+            $dados = $this->getBody();
 
-$user = new UserRepository();
-$usuario = $user->encontrarPorId(3);
+            foreach (['nome', 'cpf', 'telefone', 'email', 'senha'] as $campo) {
+                if (!array_key_exists($campo, $dados) || $dados[$campo] === '' || $dados[$campo] === null) {
+                    $this->response([
+                        'success' => false,
+                        'message' => sprintf('Campo obrigatório ausente: %s', $campo),
+                    ], 400);
+                }
+            }
 
-// =====================================================
-// TESTES
-// =====================================================
+            $dados['id'] = null;
+            $dados['uuid'] = null;
 
+            // Fluxo temporário sem autenticação completa no roteador.
+            $usuarioLogado = new User(
+                0,
+                null,
+                'Sistema',
+                '111.444.777-35',
+                '(11) 99999-9999',
+                'sistema@helpdesk.local',
+                'nao_utilizado',
+                'analista',
+                true
+            );
 
+            $this->service->cadastrarUsuario($usuarioLogado, $dados);
 
-$userRepository = new UserRepository();
-
-
-$usuarioLogado = $userRepository->encontrarPorId(1);
-
-$controller = new UserController();
-
-
-// ======================================
-// Buscar por ID
-// ======================================
-// $controller->encontrarPorId($usuarioLogado, 3);
-
-
-// ======================================
-// Buscar todos
-// ======================================
-// $controller->encontrarTodos($usuarioLogado);
-
-
-// ======================================
-// Buscar por CPF
-// Corpo esperado:
+            $this->response([
+                'success' => true,
+                'message' => 'Usuário cadastrado com sucesso.',
+            ], 201);
+        } catch (Throwable $e) {
+            $this->response([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+}
 //
 // {
 //     "cpf":"12345678900"

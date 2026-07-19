@@ -1,4 +1,4 @@
-<?php 
+<?php
 class PasswordUtils{
     public static function hash(string $senha){
         return password_hash($senha, PASSWORD_DEFAULT);
@@ -14,5 +14,3 @@ class PasswordUtils{
     ) === 1;
 }
 }
-
-?>

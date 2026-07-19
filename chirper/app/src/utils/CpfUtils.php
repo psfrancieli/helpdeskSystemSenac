@@ -1,4 +1,4 @@
-<?php 
+<?php
 class CpfUtils{
     public static function validar(string $cpf): bool
     {
@@ -47,6 +47,3 @@ class CpfUtils{
     }
 
 }
-
-
-?>
