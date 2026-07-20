@@ -117,13 +117,13 @@ class UserServices{
     return $userRepository->alterarSenha($novaSenha, $id);
     }
    
-    public function atualizarTelefone(string $telefone , int $id):bool{
+    public function atualizarTelefone(User $usuarioLogado, string $telefone):bool{
         $userRepository = new UserRepository();
         if(!PhoneUtils::validar($telefone)){
             throw new InvalidArgumentException("Telefone inválido");
         }
         $novoTelefone = PhoneUtils::formatar($telefone);
-        return $userRepository->atualizarTelefone($novoTelefone , $id);
+        return $userRepository->atualizarTelefone($novoTelefone , $usuarioLogado->getId());
         
 
     }
