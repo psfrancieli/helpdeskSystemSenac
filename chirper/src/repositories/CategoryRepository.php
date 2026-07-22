@@ -9,6 +9,9 @@ class CategoryRepository{
             $stmt = Database::getConnection()->prepare($sql);
             $stmt->execute([$id]);
             $dados = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$dados) {
+                return null;
+            }
             return new Category($dados['id'], $dados['nome']);
         }catch(PDOException $e){
             throw new RuntimeException("Erro ao buscar categoria no banco",0 , $e);
@@ -41,6 +44,9 @@ class CategoryRepository{
             $stmt = Database::getConnection()->prepare($sql);
             $stmt->execute([$nome]);
             $dados = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$dados) {
+                return null;
+            }
             return new Category($dados['id'], $dados['nome']);
         }catch(PDOException $e){ 
             throw new RuntimeException("Erro ao buscar categoria no banco",0 , $e);

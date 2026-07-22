@@ -113,7 +113,7 @@ $service = new CategoryServices();
 
 try {
 
-    $resultado = $service->criarCategoria("Hardware");
+    $resultado = $service->criarCategoria("Rede");
 
     if ($resultado) {
         echo "Categoria criada com sucesso!";
