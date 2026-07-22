@@ -20,7 +20,7 @@ class HistoryController{
         $history->setChamado($data['id_chamado']);
         $history->setTecnico($data['id_usuario_tecnico']);
 
-        HistoryRepository::create($history);
+        return HistoryService::getById($id);
     }
 
 
