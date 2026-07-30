@@ -11,7 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 
 interface LoginPageProps {
-    onLogin: (credentials: { email: string; password: string }) => Promise<void>;
+    onLogin: (credentials: { email: string; password: string; remember: boolean }) => Promise<void>;
 }
 
 export function LoginPage({ onLogin }: LoginPageProps) {
@@ -19,11 +19,20 @@ export function LoginPage({ onLogin }: LoginPageProps) {
     const [remember, setRemember] = useState(true);
     const [form, setForm] = useState({ email: '', password: '' });
     const [isLoading, setIsLoading] = useState(false);
+    const [authError, setAuthError] = useState<string | null>(null);
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         setIsLoading(true);
-        await onLogin(form);
+        setAuthError(null);
+
+        try {
+            await onLogin({ ...form, remember });
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Não foi possível autenticar.';
+            setAuthError(message);
+        }
+
         setIsLoading(false);
 
         if (!remember) {
@@ -60,6 +69,11 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                         </CardHeader>
                         <CardContent>
                             <form className="space-y-4" onSubmit={handleSubmit}>
+                                {authError ? (
+                                    <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+                                        {authError}
+                                    </div>
+                                ) : null}
                                 <label className="block space-y-2">
                                     <span className="text-sm text-stone-200">E-mail</span>
                                     <div className="relative">

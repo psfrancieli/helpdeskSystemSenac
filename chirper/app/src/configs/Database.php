@@ -21,7 +21,7 @@ class Database
             $user = $env['PGUSER'];
             $password = $env['PGPASSWORD'];
  
-            $dsn = "pgsql:host=$host;port=$port;dbname=$dbname;sslmode=require;options='endpoint=ep-green-night-acel3qx9'";
+            $dsn = "pgsql:host=$host;port=$port;dbname=$dbname;sslmode=require";
  
             self::$pdo = new PDO(
                 $dsn,
@@ -50,6 +50,4 @@ class Database
     }
  
 }
- 
-?>
  

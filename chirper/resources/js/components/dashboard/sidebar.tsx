@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Activity, BookCheck, LayoutGrid, ListChecks, Ticket, Users, ClipboardPlus, UserRoundPlus } from 'lucide-react';
+import { Activity, LayoutGrid, ListChecks, Ticket, Users, ClipboardPlus, UserRoundPlus } from 'lucide-react';
 import type React from 'react';
 import { NavLink } from 'react-router-dom';
 
@@ -9,18 +9,23 @@ const items: { key: DashboardSection; label: string; icon: React.ComponentType<{
     { key: 'overview', label: 'Dashboard', icon: LayoutGrid },
     { key: 'usuarios', label: 'Usuário', icon: Users },
     { key: 'chamados', label: 'Chamado', icon: Ticket },
-    { key: 'categorias', label: 'Categoria', icon: BookCheck },
     { key: 'historico', label: 'Histórico', icon: ListChecks },
     { key: 'status', label: 'Status', icon: Activity },
     { key: 'criarChamado', label: 'Criar Chamado', icon: ClipboardPlus },
     { key: 'criarUsuario', label: 'Criar Usuário', icon: UserRoundPlus }
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+    allowedItems?: DashboardSection[];
+}
+
+export function Sidebar({ allowedItems }: SidebarProps) {
+    const visibleItems = allowedItems ? items.filter((item) => allowedItems.includes(item.key)) : items;
+
     return (
         <aside className="glass-panel hidden w-20 rounded-3xl border-stone-500/30 p-3 lg:block">
             <nav className="flex h-full flex-col gap-2">
-                {items.map((item, index) => (
+                {visibleItems.map((item, index) => (
                     <motion.div
                         key={item.key}
                         initial={{ opacity: 0, x: -16 }}
