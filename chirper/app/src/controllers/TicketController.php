@@ -25,7 +25,9 @@ class TicketController {
             ];
 
         } catch (RuntimeException $e) {
-            http_response_code(500);
+            
+        http_response_code(500);
+
             return [
                 'status' => 'error',
                 'message' => 'Erro ao listar tickets: ' . $e->getMessage()
@@ -38,13 +40,16 @@ class TicketController {
             $ticket = $this->repository->EncontrarTicketPorId($id);
             
             http_response_code(200);
+
             return [
                 'status' => 'success',
                 'data' => $ticket->getAll()
             ];
             
         } catch (RuntimeException $e) {
+
             http_response_code(404);
+
             return [
                 'status' => 'error',
                 'message' => 'Ticket não encontrado.'
@@ -52,7 +57,7 @@ class TicketController {
         }
     }
 
-    public function salvar(array $dadosRequisicao): array {
+    public function criar(array $dadosRequisicao): array {
         try {
             $novoTicket = new Ticket(
                 id: null,
@@ -117,4 +122,5 @@ class TicketController {
         }
     }
 }
+
 ?>
