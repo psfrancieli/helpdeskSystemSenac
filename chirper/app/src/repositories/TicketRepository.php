@@ -1,6 +1,17 @@
 <?php
+
+namespace src\repositories;
+
 require_once __DIR__ . "/../configs/Database.php";
 require_once __DIR__ . "/../models/Ticket.php";
+
+use src\models\Ticket;
+
+use Database; 
+use DateTime;
+use PDOException;
+use RuntimeException;
+use PDO;
 
 class TicketRepository{
     public function EncontrarTicketPorId(int $id):Ticket{
@@ -110,6 +121,15 @@ class TicketRepository{
         }
     }
 
+    public function atribuirResponsavelTicket(int $ticketId, int $idResponsavel): void {
+        try {
+            $sql = 'UPDATE "CHAMADO" SET id_responsavel = ? WHERE id = ?';
+            $stmt = Database::getConnection()->prepare($sql);
+            $stmt->execute([$idResponsavel, $ticketId]);
+        } catch (PDOException $e) {
+            throw new RuntimeException("Erro ao atribuir responsável ao chamado no banco", 0, $e);
+        }
+}
     public function listarTodos(): array
     {
         try {
