@@ -3,6 +3,7 @@
 date_default_timezone_set('America/Sao_Paulo');
 require_once __DIR__ . '/../models/History.php';
 require_once __DIR__ . '/../repositories/HistoryRepository.php';
+require_once __DIR__ . '/../services/HistoryService.php';
 
 class HistoryController{
 
@@ -20,7 +21,7 @@ class HistoryController{
         $history->setChamado($data['id_chamado']);
         $history->setTecnico($data['id_usuario_tecnico']);
 
-        return HistoryService::getById($id);
+        return HistoryService::create($history);
     }
 
 

@@ -4,7 +4,7 @@ require_once __DIR__ . "/../models/History.php";
 
 class HistoryRepository {
 
-    public static function create(History $history)
+    public static function create(History $history): bool
     {
         try {
             $db = new Database();
@@ -15,17 +15,18 @@ class HistoryRepository {
 
             $stmt = $db->getConnection()->prepare($sql);
 
-            $stmt->execute([
-                $history->getDescricao(),
-                $history->getData()->format('Y-m-d H:i:s'),
-                $history->getChamado(),
-                $history->getTecnico()
+            return $stmt->execute([
+            $history->getDescricao(),
+            $history->getData()->format('Y-m-d H:i:s'),
+            $history->getChamado(),
+            $history->getTecnico()
             ]);
 
             echo "Inserido!";
 
         } catch (PDOException $e) {
             echo "Erro: " . $e->getMessage();
+            return false;
         }
     }
 

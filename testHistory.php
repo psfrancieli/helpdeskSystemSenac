@@ -1,9 +1,9 @@
 <?php
 
-require __DIR__ . '/src/controllers/HistoryController.php';
+require __DIR__ . '/chirper/src/controllers/HistoryController.php';
 
 $data = [
-    'description' => 'Teste Inserindoo',
+    'description' => 'Hoje e sexta feira',
     'data' => new DateTime(),
     'id_chamado' => 1,
     'id_usuario_tecnico' => 3
