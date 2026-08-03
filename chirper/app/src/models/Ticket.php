@@ -177,28 +177,3 @@ class Ticket {
         $this->id_responsavel = $id_responsavel;
     }
 }
-
- 
-
-$teste = new Ticket(
-    id: 1,
-    titulo: "titulo",
-    descricao: "descricao descricao",
-    prioridade: "baixa",
-    patrimonio: "pat-01",
-    status: "ativo",
-    id_categoria: 1,
-    id_usuario: 1,
-    id_responsavel: 1,
-    uuid: "uuid-teste",
-    dataAbertura: new DateTime("2026-01-01"),
-    dataEncerramento: new DateTime("2026-01-01")
-);
-echo "<pre>";
-echo $teste->toJson();
-echo "</pre>";
-// $teste = new Ticket(1, "titulo", "descricao descricao", "baixa", "pat-01", "ativo", 1, 1, 1, null, new DateTime("2026-01-01"), new DateTime("2026-01-01"));
-// echo "<pre>";
-// echo $teste->toJson();
-// echo "</pre>";
-?>
