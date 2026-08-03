@@ -11,6 +11,7 @@ use Database;
 use DateTime;
 use PDOException;
 use RuntimeException;
+use PDO;
 
 class TicketRepository{
     public function EncontrarTicketPorId(int $id):Ticket{
@@ -120,7 +121,6 @@ class TicketRepository{
         }
     }
 
-<<<<<<< HEAD:chirper/src/repositories/TicketRepository.php
     public function atribuirResponsavelTicket(int $ticketId, int $idResponsavel): void {
         try {
             $sql = 'UPDATE "CHAMADO" SET id_responsavel = ? WHERE id = ?';
@@ -130,7 +130,6 @@ class TicketRepository{
             throw new RuntimeException("Erro ao atribuir responsável ao chamado no banco", 0, $e);
         }
 }
-=======
     public function listarTodos(): array
     {
         try {
@@ -161,7 +160,6 @@ class TicketRepository{
             throw new RuntimeException('Erro ao listar chamados', 0, $e);
         }
     }
->>>>>>> beeba7d763f1b290833086d79f71e5ba6fc86122:chirper/app/src/repositories/TicketRepository.php
 }
 
     // BUSCA DE UM CHAMADO POR ID
