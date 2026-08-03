@@ -12,7 +12,7 @@ class Database
  
         try {
 
-            $env = parse_ini_file(__DIR__ . '/../../../.env');
+            $env = parse_ini_file(__DIR__ . '/../../../../.env');
 
             $host = "ep-green-night-acel3qx9-pooler.sa-east-1.aws.neon.tech";
             $dbname = "neondb";

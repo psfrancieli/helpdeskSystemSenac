@@ -10,8 +10,8 @@ class User{
     protected string $nivel;
     protected bool $ativo;
 
-    public function __construct( ?int $id = null,
-        ?string $uuid = null , string $nome ,string $cpf , string $telefone , 
+    public function __construct( ?int $id,
+        ?string $uuid, string $nome ,string $cpf , string $telefone , 
     string $email , string $senha, string $nivel = 'usuario', bool $ativo = true)
     {
         if (empty($nome)) {
