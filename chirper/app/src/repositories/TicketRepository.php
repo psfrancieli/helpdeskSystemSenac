@@ -120,6 +120,7 @@ class TicketRepository{
         }
     }
 
+<<<<<<< HEAD:chirper/src/repositories/TicketRepository.php
     public function atribuirResponsavelTicket(int $ticketId, int $idResponsavel): void {
         try {
             $sql = 'UPDATE "CHAMADO" SET id_responsavel = ? WHERE id = ?';
@@ -129,6 +130,38 @@ class TicketRepository{
             throw new RuntimeException("Erro ao atribuir responsável ao chamado no banco", 0, $e);
         }
 }
+=======
+    public function listarTodos(): array
+    {
+        try {
+            $sql = '
+                SELECT
+                    c.id,
+                    c.uuid,
+                    c.titulo,
+                    c.patrimonio,
+                    c.prioridade,
+                    c.data_abertura,
+                    c.data_encerramento,
+                    c.status,
+                    cat.nome  AS categoria,
+                    us.nome   AS solicitante,
+                    resp.nome AS responsavel
+                FROM "CHAMADO" c
+                LEFT JOIN "CATEGORIA" cat  ON c.id_categoria   = cat.id
+                LEFT JOIN "USUARIO"   us   ON c.id_usuario      = us.id
+                LEFT JOIN "USUARIO"   resp ON c.id_responsavel  = resp.id
+                ORDER BY c.data_abertura DESC
+            ';
+
+            $stmt = Database::getConnection()->query($sql);
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new RuntimeException('Erro ao listar chamados', 0, $e);
+        }
+    }
+>>>>>>> beeba7d763f1b290833086d79f71e5ba6fc86122:chirper/app/src/repositories/TicketRepository.php
 }
 
     // BUSCA DE UM CHAMADO POR ID

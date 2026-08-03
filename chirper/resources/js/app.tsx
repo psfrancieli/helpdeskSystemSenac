@@ -1,26 +1,33 @@
 import '../css/app.css';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { HashRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 
+import { AuthProvider, useAuth } from './context/auth-context';
 import { DashboardPage } from '@/pages/dashboard-page';
 import { LoginPage } from '@/pages/login-page';
 
 function AppShell() {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const { isAuthenticated, isInitializing, login, logout } = useAuth();
     const navigate = useNavigate();
 
-    async function handleLogin() {
-        await new Promise((resolve) => setTimeout(resolve, 900));
-        setIsAuthenticated(true);
+    async function handleLogin(credentials: { email: string; password: string; remember: boolean }) {
+        await login(credentials);
         navigate('/dashboard');
     }
 
-    function handleLogout() {
-        setIsAuthenticated(false);
+    async function handleLogout() {
+        await logout();
         navigate('/login');
+    }
+
+    if (isInitializing) {
+        return (
+            <main className="flex min-h-screen items-center justify-center bg-stone-950 text-stone-200">
+                Carregando sessão...
+            </main>
+        );
     }
 
     return (
@@ -33,7 +40,7 @@ function AppShell() {
                 transition={{ duration: 0.45, ease: 'easeOut' }}
             >
                 <Routes>
-                    <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
+                    <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage onLogin={handleLogin} />} />
                     <Route path="/dashboard/:section?" element={isAuthenticated ? <DashboardPage onLogout={handleLogout} /> : <Navigate to="/login" replace />} />
                     <Route path="*" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
                 </Routes>
@@ -45,7 +52,9 @@ function AppShell() {
 function App() {
     return (
         <HashRouter>
-            <AppShell />
+            <AuthProvider>
+                <AppShell />
+            </AuthProvider>
         </HashRouter>
     );
 }
