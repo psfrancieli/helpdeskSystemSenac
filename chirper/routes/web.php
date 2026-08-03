@@ -423,7 +423,8 @@ $router->post('/api/login', function (): void {
 	} catch (Throwable $e) {
 		apiJsonResponse([
 			'success' => false,
-			'message' => 'Erro ao autenticar usuário.',
+			// 'message' => 'Erro ao autenticar usuário.',
+			'message' => $e->getMessage(),
 		], 500);
 	}
 });
