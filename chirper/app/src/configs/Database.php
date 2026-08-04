@@ -12,7 +12,7 @@ class Database
 
         try {
 
-            $env = parse_ini_file(__DIR__ . '/../../../.env');
+            $env = parse_ini_file(__DIR__ . '/../../../../.env');
 
             $host = "ep-green-night-acel3qx9-pooler.sa-east-1.aws.neon.tech";
             $dbname = "neondb";
@@ -20,9 +20,9 @@ class Database
 
             $user = $env['PGUSER'];
             $password = $env['PGPASSWORD'];
-
-            $dsn = "pgsql:host=$host;port=$port;dbname=$dbname;sslmode=require;options='endpoint=ep-green-night-acel3qx9'";
-
+ 
+            $dsn = "pgsql:host=$host;port=$port;dbname=$dbname;sslmode=require;options=endpoint=ep-green-night-acel3qx9-pooler";
+ 
             self::$pdo = new PDO(
                 $dsn,
                 $user,
