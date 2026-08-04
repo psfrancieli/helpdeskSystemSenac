@@ -66,7 +66,7 @@ class TicketController {
                 descricao: $dadosRequisicao['descricao'] ?? '',
                 prioridade: $dadosRequisicao['prioridade'] ?? null,
                 patrimonio: $dadosRequisicao['patrimonio'] ?? '',
-                status: $dadosRequisicao['status'] ?? 'Aberto',
+                status: $dadosRequisicao['status'] ?? 'pendente',
                 id_categoria: $dadosRequisicao['id_categoria'] ?? null,
                 id_usuario: $dadosRequisicao['id_usuario'] ?? 0,
                 id_responsavel: $dadosRequisicao['id_responsavel'] ?? null,
@@ -122,5 +122,56 @@ class TicketController {
         }
     }
 }
+
+//Testes
+$controller = new TicketController();
+
+// //Listagem
+// $respostaListar = $controller->listar();
+// print_r($respostaListar);
+// echo "<hr>";
+
+// // Criar
+// $dadosNovoTicket = [
+//     'id' => '1111',
+//     'titulo' => 'Teclado parou de funcionar',
+//     'descricao' => 'As teclas de espaço e enter não respondem.',
+//     'prioridade' => 'media',
+//     'patrimonio' => 'PAT-102030',
+//     'status' => 'pendente',
+//     'id_categoria' => 2,
+//     'id_usuario' => 1,
+//     'id_responsavel' => null
+// ];
+// $respostaCriar = $controller->criar($dadosNovoTicket);
+// print_r($respostaCriar);
+// echo "<hr>";
+
+// //Exibir pelo id expecifico 
+// $idParaExibir = 1111; 
+// $respostaExibir = $controller->exibir($idParaExibir);
+// print_r($respostaExibir);
+// echo "<hr>";
+
+
+// //Atualizar prioridade
+// $idParaAtualizar = 317; 
+// $dadosPrioridade = [
+//     'prioridade' => 'alta'
+// ];
+// $respostaAtualizar = $controller->atualizarPrioridade($idParaAtualizar, $dadosPrioridade);
+// print_r($respostaAtualizar);
+// echo "<hr>";
+
+// //Encerrar ticket
+// $idParaEncerrar = 317; 
+// $dadosEncerrar = [
+//     'status' => 'concluido'
+// ];
+// $respostaEncerrar = $controller->encerrar($idParaEncerrar, $dadosEncerrar);
+// print_r($respostaEncerrar);
+// echo "<hr>";
+
+// echo "</pre>";
 
 ?>
