@@ -248,16 +248,25 @@ $router->post('/api/usuarios', function (): void {
 		$dados['uuid'] = null;
 
 		$usuarioLogado = new User(
-			0,
+			$_SESSION['auth_user']["id"],
 			null,
-			'Sistema',
-			'111.444.777-35',
-			'(11) 99999-9999',
-			'sistema@helpdesk.local',
+			$_SESSION['auth_user']["nome"],
+			$_SESSION['auth_user']["cpf"],
+			$_SESSION['auth_user']["telefone"],
+			$_SESSION['auth_user']["email"],
 			'nao_utilizado',
-			'analista',
-			true
+			$_SESSION['auth_user']["nivel"],
+			(bool) $_SESSION['auth_user']["ativo"]
 		);
+		// $_SESSION['auth_user'] = [
+		// 	'id' => $user->getId(),
+		// 	'nome' => $user->getNome(),
+		// 	'email' => $user->getEmail(),
+		// 	'nivel' => $user->getNivel(),
+		// 	'ativo' => $user->getAtivo(),
+		// ];
+
+		// chamar controller e não service
 
 		$service = new UserServices();
 		$service->cadastrarUsuario($usuarioLogado, $dados);

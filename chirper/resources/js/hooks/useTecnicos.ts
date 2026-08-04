@@ -52,3 +52,9 @@ export function useTecnicos(): UseTecnicosResult {
         reloadTecnicos: () => setRefreshIndex((value) => value + 1),
     };
 }
+
+// Assinatura incompatível da action
+// A rota em web.php:233 usa padrão [Classe, método], e o Router executa sem argumentos em Router.php:32.
+// O método atual de criação em CalledController.php:31 é store(): void (sem parâmetros).
+// Já o equivalente em TicketController.php:56 é criar(array $dadosRequisicao): array.
+// Se trocar direto, o PHP vai acusar falta de argumento (Too few arguments).
