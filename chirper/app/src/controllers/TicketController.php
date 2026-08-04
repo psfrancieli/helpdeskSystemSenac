@@ -15,7 +15,29 @@ class TicketController {
         $this->repository = new TicketRepository();
     }
 
-    public function listar(): array {
+    private function validarDadosTicket(array $dados): void {
+        if (empty($dados['titulo'])) {
+            throw new InvalidArgumentException("O titulo é obrigatório.");
+        }
+
+        if (empty($dados['descricao'])) {
+            throw new InvalidArgumentException("A descrição é obrigatória.");
+        }
+
+        if (empty($dados['id_usuario'])) {
+            throw new InvalidArgumentException("O usuario responsável pela abertura é obrigatório");
+        }
+
+        if (isset($dados['prioridade']) && !in_array($dados['prioridade'], ['baixa', 'media', 'alta'], true)) {
+            throw new InvalidArgumentException("Prioridade inválida. Use: baixa, media ou alta.");
+        }
+
+        if (isset($dados['status']) && !in_array($dados['status'], ['pendente', 'concluido', 'cancelado'], true)) {
+            throw new InvalidArgumentException("Status invalido.");
+        }
+    }
+
+    public function listarTicket(): array {
         try {
             $dados = $this->repository->listarTodos();
             
@@ -26,8 +48,6 @@ class TicketController {
 
         } catch (RuntimeException $e) {
             
-        http_response_code(500);
-
             return [
                 'status' => 'error',
                 'message' => 'Erro ao listar tickets: ' . $e->getMessage()
@@ -35,20 +55,16 @@ class TicketController {
         }
     }
 
-    public function exibir(int $id): array {
+    public function exibirTicket(int $id): array {
         try {
             $ticket = $this->repository->EncontrarTicketPorId($id);
             
-            http_response_code(200);
-
             return [
                 'status' => 'success',
                 'data' => $ticket->getAll()
             ];
             
         } catch (RuntimeException $e) {
-
-            http_response_code(404);
 
             return [
                 'status' => 'error',
@@ -59,6 +75,9 @@ class TicketController {
 
     public function criar(array $dadosRequisicao): array {
         try {
+
+            $this->validarDadosTicket($dadosRequisicao);
+
             $novoTicket = new Ticket(
                 id: null,
                 uuid: null, 
@@ -84,29 +103,32 @@ class TicketController {
         } catch (InvalidArgumentException $e) {
             return ['status' => 'error', 'message' => $e->getMessage()];
         } catch (RuntimeException $e) {
-            return ['status' => 'error', 'message' => 'Erro no banco: ' . $e->getMessage()];
+            return ['status' => 'error', 'message' => 'Erro no banco.' . $e->getMessage()];
         }
     }
 
     public function atualizarPrioridade(int $id, array $dadosRequisicao): array {
-        try {
-            if (empty($dadosRequisicao['prioridade'])) {
-                throw new InvalidArgumentException("A prioridade é obrigatória.");
-            }
+    try {
+        if (empty($dadosRequisicao['prioridade'])) {
+            throw new InvalidArgumentException("A prioridade é obrigatória.");
+        }
 
-            $this->repository->atualizarPrioridadeTicket($id, $dadosRequisicao['prioridade']);
+        $this->repository->atualizarPrioridadeTicket($id, $dadosRequisicao['prioridade']);
 
-            return [
-                'status' => 'success',
-                'message' => "Prioridade do ticket {$id} atualizada com sucesso."
-            ];
+        return [
+            'status' => 'success',
+            'message' => "Prioridade do ticket {$id} atualizada com sucesso."
+        ];
 
-        } catch (Exception $e) {
+        } catch (InvalidArgumentException $e) {
             return ['status' => 'error', 'message' => $e->getMessage()];
+
+        } catch (RuntimeException $e) {
+            return ['status' => 'error', 'messege' => $e->getMessage()];
         }
     }
     
-    public function encerrar(int $id, array $dadosRequisicao): array {
+    public function encerrarTicket(int $id, array $dadosRequisicao): array {
         try {
             $status = $dadosRequisicao['status'] ?? 'concluido';
             
@@ -127,7 +149,7 @@ class TicketController {
 $controller = new TicketController();
 
 // //Listagem
-// $respostaListar = $controller->listar();
+// $respostaListar = $controller->listarTicket();
 // print_r($respostaListar);
 // echo "<hr>";
 
@@ -148,27 +170,27 @@ $controller = new TicketController();
 // echo "<hr>";
 
 // //Exibir pelo id expecifico 
-// $idParaExibir = 1111; 
-// $respostaExibir = $controller->exibir($idParaExibir);
+// $idExibir = 1111; 
+// $respostaExibir = $controller->exibirTicket($idExibir);
 // print_r($respostaExibir);
 // echo "<hr>";
 
 
 // //Atualizar prioridade
-// $idParaAtualizar = 317; 
+// $idAtualizar = 317; 
 // $dadosPrioridade = [
 //     'prioridade' => 'alta'
 // ];
-// $respostaAtualizar = $controller->atualizarPrioridade($idParaAtualizar, $dadosPrioridade);
+// $respostaAtualizar = $controller->atualizarPrioridade($idAtualizar, $dadosPrioridade);
 // print_r($respostaAtualizar);
 // echo "<hr>";
 
 // //Encerrar ticket
-// $idParaEncerrar = 317; 
+// $idEncerrar = 317; 
 // $dadosEncerrar = [
 //     'status' => 'concluido'
 // ];
-// $respostaEncerrar = $controller->encerrar($idParaEncerrar, $dadosEncerrar);
+// $respostaEncerrar = $controller->encerrarTicket($idEncerrar, $dadosEncerrar);
 // print_r($respostaEncerrar);
 // echo "<hr>";
 
