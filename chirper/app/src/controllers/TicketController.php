@@ -68,7 +68,7 @@ class TicketController {
 
             return [
                 'status' => 'error',
-                'message' => 'Ticket não encontrado.'
+                'message' => 'Erro ao buscar Ticket.' 
             ];
         }
     }
@@ -97,13 +97,13 @@ class TicketController {
 
             return [
                 'status' => 'success',
-                'message' => 'Ticket criado com sucesso!'
+                'message' => 'Ticket criado com sucesso'
             ];
 
         } catch (InvalidArgumentException $e) {
             return ['status' => 'error', 'message' => $e->getMessage()];
         } catch (RuntimeException $e) {
-            return ['status' => 'error', 'message' => 'Erro no banco.' . $e->getMessage()];
+            return ['status' => 'error', 'message' => error_log($e->getMessage())];
         }
     }
 
@@ -124,7 +124,7 @@ class TicketController {
             return ['status' => 'error', 'message' => $e->getMessage()];
 
         } catch (RuntimeException $e) {
-            return ['status' => 'error', 'messege' => $e->getMessage()];
+            return ['status' => 'error', 'message' => error_log($e->getMessage())];
         }
     }
     
@@ -140,7 +140,7 @@ class TicketController {
             ];
 
         } catch (RuntimeException $e) {
-            return ['status' => 'error', 'message' => $e->getMessage()];
+            return ['status' => 'error', 'message' => 'Não foi possivel encerrar' . $e->getMessage()];
         }
     }
 }
