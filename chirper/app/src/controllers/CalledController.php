@@ -63,7 +63,7 @@ class CalledController extends Controller
                 !empty($dados['data_encerramento']) ? new DateTime((string) $dados['data_encerramento']) : null,
             );
 
-            $this->repository->CriarTicket($ticket);
+            $this->repository->criarTicket($ticket);
 
             $this->response([
                 'success' => true,

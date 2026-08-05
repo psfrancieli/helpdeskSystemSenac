@@ -50,13 +50,13 @@ class TicketServices {
         null
     );
 
-    $this->repository->CriarTicket($ticket);
+    $this->repository->criarTicket($ticket);
 
     return $ticket;
 }
 
     public function atualizarPrioridade(int $id, array $dadosAtualizados): Ticket {
-        $ticket = $this->repository->EncontrarTicketPorId($id);
+        $ticket = $this->repository->encontrarTicketPorId($id);
 
         if (!$ticket) {
             throw new \Exception("Ticket não encontrado!");
@@ -85,7 +85,7 @@ class TicketServices {
 
     public function encerrar(int $id): Ticket {
 
-        $ticket = $this->repository->EncontrarTicketPorId($id);
+        $ticket = $this->repository->encontrarTicketPorId($id);
 
         if (!$ticket) {
             throw new \Exception("Ticket não encontrado!");
@@ -103,7 +103,7 @@ class TicketServices {
     }
 
     public function atribuirTecnico(int $ticketId, int $idResponsavel): Ticket {
-        $ticket = $this->repository->EncontrarTicketPorId($ticketId);
+        $ticket = $this->repository->encontrarTicketPorId($ticketId);
 
         if (!$ticket) {
             throw new \Exception("Ticket não encontrado!");

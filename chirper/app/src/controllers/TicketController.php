@@ -57,7 +57,7 @@ class TicketController {
 
     public function exibirTicket(int $id): array {
         try {
-            $ticket = $this->repository->EncontrarTicketPorId($id);
+            $ticket = $this->repository->encontrarTicketPorId($id);
             
             return [
                 'status' => 'success',
@@ -93,7 +93,7 @@ class TicketController {
                 dataEncerramento: null
             );
 
-            $this->repository->CriarTicket($novoTicket);
+            $this->repository->criarTicket($novoTicket);
 
             return [
                 'status' => 'success',

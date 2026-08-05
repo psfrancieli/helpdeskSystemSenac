@@ -14,7 +14,7 @@ use RuntimeException;
 use PDO;
 
 class TicketRepository{
-    public function EncontrarTicketPorId(int $id):Ticket{
+    public function encontrarTicketPorId(int $id):Ticket {
         try{
             $sql = 'SELECT * FROM "CHAMADO" WHERE id = ?';
             $stmt = Database::getConnection()->prepare($sql);
@@ -43,40 +43,40 @@ class TicketRepository{
         }
     }
 
-    public function EncontrarTodosTickets(): string {
-        try {
-            $sql = 'SELECT * FROM "CHAMADO" ORDER BY data_abertura DESC';
-            $stmt = Database::getConnection()->prepare($sql);
-            $stmt->execute();
-            $dados = $stmt->fetchAll();
-            $tickets = [];
-            foreach($dados as $linha){
-                $dataAberturaObj = !empty($linha['data_abertura']) ? new DateTime($linha['data_abertura']) : null;
-                $dataEncerramentoObj = !empty($linha['data_encerramento']) ? new DateTime($linha['data_encerramento']) : null;
+    // public function EncontrarTodosTickets(): string {
+    //     try {
+    //         $sql = 'SELECT * FROM "CHAMADO" ORDER BY data_abertura DESC';
+    //         $stmt = Database::getConnection()->prepare($sql);
+    //         $stmt->execute();
+    //         $dados = $stmt->fetchAll();
+    //         $tickets = [];
+    //         foreach($dados as $linha){
+    //             $dataAberturaObj = !empty($linha['data_abertura']) ? new DateTime($linha['data_abertura']) : null;
+    //             $dataEncerramentoObj = !empty($linha['data_encerramento']) ? new DateTime($linha['data_encerramento']) : null;
                 
-                $ticket = new Ticket(
-                    $linha['id'],               
-                    $linha['uuid'],           
-                    $linha['titulo'],          
-                    $linha['descricao'],        
-                    $linha['prioridade'],       
-                    $linha['patrimonio'],      
-                    $linha['status'],           
-                    $linha['id_categoria'], 
-                    $linha['id_usuario'],      
-                    $linha['id_responsavel'],  
-                    $dataAberturaObj,          
-                    $dataEncerramentoObj
-                );
-                $tickets[] = $ticket->getAll(); 
-            }
-            return json_encode($tickets, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-        } catch (PDOException $e) {
-            throw new RuntimeException("Erro ao buscar chamados no banco", 0, $e);
-        }
-    }
+    //             $ticket = new Ticket(
+    //                 $linha['id'],               
+    //                 $linha['uuid'],           
+    //                 $linha['titulo'],          
+    //                 $linha['descricao'],        
+    //                 $linha['prioridade'],       
+    //                 $linha['patrimonio'],      
+    //                 $linha['status'],           
+    //                 $linha['id_categoria'], 
+    //                 $linha['id_usuario'],      
+    //                 $linha['id_responsavel'],  
+    //                 $dataAberturaObj,          
+    //                 $dataEncerramentoObj
+    //             );
+    //             $tickets[] = $ticket->getAll(); 
+    //         }
+    //         return json_encode($tickets, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+    //     } catch (PDOException $e) {
+    //         throw new RuntimeException("Erro ao buscar chamados no banco", 0, $e);
+    //     }
+    // }
 
-    public function CriarTicket(Ticket $ticket):void{
+    public function criarTicket(Ticket $ticket):void {
         try {
             $sql = 'INSERT INTO "CHAMADO" (titulo, descricao, prioridade, data_abertura, data_encerramento, patrimonio, id_categoria, id_usuario, id_responsavel, status) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
             $stmt = Database::getConnection()->prepare($sql);
@@ -101,7 +101,7 @@ class TicketRepository{
         }
     }
 
-    public function atualizarPrioridadeTicket(int $id, string $prioridade):void{
+    public function atualizarPrioridadeTicket(int $id, string $prioridade):void {
         try {
             $sql = 'UPDATE "CHAMADO" SET prioridade = ? WHERE id = ?';
             $stmt = Database::getConnection()->prepare($sql);
@@ -121,7 +121,7 @@ class TicketRepository{
         }
     }
 
-    public function atribuirResponsavelTicket(int $ticketId, int $idResponsavel): void {
+    public function atribuirResponsavelTicket(int $ticketId, int $idResponsavel):void {
         try {
             $sql = 'UPDATE "CHAMADO" SET id_responsavel = ? WHERE id = ?';
             $stmt = Database::getConnection()->prepare($sql);
@@ -129,9 +129,8 @@ class TicketRepository{
         } catch (PDOException $e) {
             throw new RuntimeException("Erro ao atribuir responsável ao chamado no banco", 0, $e);
         }
-}
-    public function listarTodos(): array
-    {
+    }
+    public function listarTodos(): array {
         try {
             $sql = '
                 SELECT
@@ -160,11 +159,45 @@ class TicketRepository{
             throw new RuntimeException('Erro ao listar chamados', 0, $e);
         }
     }
+
+    public function buscaPorDataAbertura(DateTime $data):Ticket {
+        try{
+            $sql = 'SELECT * FROM "CHAMADO" WHERE data_abertura = ?';
+            $stmt = Database::getConnection()->prepare($sql);
+            $stmt->execute([$data]);
+            $dados = $stmt->fetch();
+            
+            $dataAberturaObj = !empty($dados['data_abertura']) ? new DateTime($dados['data_abertura']) : null;
+            $dataEncerramentoObj = !empty($dados['data_encerramento']) ? new DateTime($dados['data_encerramento']) : null;
+            
+            return new Ticket(
+                $dados['id'],  
+                $dados['uuid'],
+                $dados['titulo'],
+                $dados['descricao'],
+                $dados['prioridade'],
+                $dados['patrimonio'],
+                $dados['status'],
+                $dados['id_categoria'],
+                $dados['id_usuario'], 
+                $dados['id_responsavel'],
+                $dataAberturaObj,
+                $dataEncerramentoObj
+            );
+        }catch(PDOException $e){
+            throw new RuntimeException("Erro ao buscar chamado no banco",0 , $e);
+        }
+    }
 }
+
+
+    // BUSCA DE UM CHAMADO POR DATA DE ABERTURA
+    $ticket = new TicketRepository();
+    echo $ticket->buscaPorDataAbertura(new DateTime('2023-01-01'));
 
     // BUSCA DE UM CHAMADO POR ID
     // $ticket = new TicketRepository();
-    // echo $ticket->EncontrarTicketPorId(317)->getTitulo();
+    // echo $ticket->encontrarTicketPorId(317)->getTitulo();
 
     // BUSCA DE TODOS OS CHAMADOS
     // $repositorio = new TicketRepository();
@@ -190,7 +223,7 @@ class TicketRepository{
     //     null                                 
     // );
     // try {
-    //     $repository->CriarTicket($novoTicket);
+    //     $repository->criarTicket($novoTicket);
     //     echo "\nDeu certo! O ticket foi criado no DB.\n";
     // } catch (Exception $e) {
     //     echo "\nDeu ruim na hora de salvar no banco: " . $e->getMessage() . "\n";
@@ -217,4 +250,12 @@ class TicketRepository{
     // } catch (Exception $e) {
     //     echo "\nErro ao encerrar chamado: " . $e->getMessage() . "\n";
     // }
+
+    // busca por data
+    // busca por data de encerramento
+    // busca por id do tec
+    // busca por id do user
+    // busca por id da categoria
+    // busca por prioridade
+    // busca por status
 ?>
