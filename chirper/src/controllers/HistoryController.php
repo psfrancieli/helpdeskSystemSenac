@@ -18,11 +18,6 @@ class HistoryController extends Controller {
             $data['id_usuario_tecnico']
             );
 
-            $history->setDescricao($data['description']);
-            $history->setData($data['data']);
-            $history->setChamado($data['id_chamado']);
-            $history->setTecnico($data['id_usuario_tecnico']);
-
             HistoryService::create($history);
             
             $this->response([
