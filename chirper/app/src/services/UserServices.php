@@ -184,6 +184,17 @@ class UserServices{
     
     return $userRepository->alterarNivelUsuario($id , $nivel);
 }
+public function encontrarPorEmail(string $email): ?User{
+    $userRepository = new UserRepository();
+    $emailNormalizado = EmailUtils::normalizar($email);
+    if(!EmailUtils::validar($emailNormalizado)){
+        throw new InvalidArgumentException("Email inválido.");
+    }
+    $usuario =  $userRepository->encontrarPorEmail($emailNormalizado);
+    return $usuario;
+
+
+}
 
 
 
