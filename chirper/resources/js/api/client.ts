@@ -34,7 +34,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<ApiResp
                 throw new ApiError(`Erro ${response.status}: ${response.statusText}`, response.status);
             }
 
-            throw new Error('Resposta inválida da API');
+            throw new Error(`Resposta inválida da API: ${rawBody} (status: ${response.status})`);
         }
     }
 
