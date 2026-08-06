@@ -27,7 +27,7 @@ class Ticket {
         string $descricao = '',          
         ?string $prioridade = null,       
         string $patrimonio = '',         
-        string $status = 'Aberto',       
+        ?string $status = null,       
         ?int $id_categoria = null,        
         int $id_usuario = 0,              
         ?int $id_responsavel = null,      

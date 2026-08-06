@@ -1,18 +1,19 @@
 <?php
 
 date_default_timezone_set('America/Sao_Paulo');
-require_once __DIR__ . "/../repositories/TicketRepository.php";
+require_once __DIR__ . "/../services/TicketServices.php";
 require_once __DIR__ . "/../models/Ticket.php";
+require_once __DIR__ . "/Controller.php";
 
-use src\repositories\TicketRepository;
 use src\models\Ticket;
+use src\services\TicketServices;
 
-class TicketController {
+class TicketController extends Controller {
     
-    private TicketRepository $repository;
+    private TicketServices $services;
 
     public function __construct() {
-        $this->repository = new TicketRepository();
+        $this->services = new TicketServices();
     }
 
     private function validarDadosTicket(array $dados): void {
@@ -28,8 +29,8 @@ class TicketController {
             throw new InvalidArgumentException("O usuario responsável pela abertura é obrigatório");
         }
 
-        if (isset($dados['prioridade']) && !in_array($dados['prioridade'], ['baixa', 'media', 'alta'], true)) {
-            throw new InvalidArgumentException("Prioridade inválida. Use: baixa, media ou alta.");
+        if (isset($dados['prioridade']) && !in_array($dados['prioridade'], ['baixa', 'media', 'alta', 'muito alta'], true)) {
+            throw new InvalidArgumentException("Prioridade inválida. Use: baixa, media, alta ou muito alta.");
         }
 
         if (isset($dados['status']) && !in_array($dados['status'], ['pendente', 'concluido', 'cancelado'], true)) {
@@ -37,43 +38,49 @@ class TicketController {
         }
     }
 
-    public function listarTicket(): array {
+    public function listarTicket(): void {
         try {
-            $dados = $this->repository->listarTodos();
+            $dados = $this->services->listarTudo();
             
-            return [
-                'status' => 'success',
-                'data' => $dados
-            ];
+            $this->response([
+                "success" => true,
+                "data" => $dados
+            ]);
 
-        } catch (RuntimeException $e) {
-            
-            return [
-                'status' => 'error',
-                'message' => 'Erro ao listar tickets: ' . $e->getMessage()
-            ];
+        } catch (Throwable $e) {
+
+            $this->response([
+                "success" => false,
+                "message" => $e->getMessage()
+            ], 400);
+
         }
     }
 
-    public function exibirTicket(int $id): array {
+    public function exibirTicket(int $id): void {
         try {
-            $ticket = $this->repository->EncontrarTicketPorId($id);
+            $ticket = $this->services->exibirTicket($id);
             
-            return [
-                'status' => 'success',
-                'data' => $ticket->getAll()
+            $resultado = [
+                "id" => $ticket->getId(),
             ];
-            
-        } catch (RuntimeException $e) {
 
-            return [
-                'status' => 'error',
-                'message' => 'Erro ao buscar Ticket.' 
-            ];
+            $this->response([
+                "success" => true,
+                "data" => $resultado
+            ]);
+            
+        } catch (Throwable $e) {
+
+            $this->response([
+                "success" => false,
+                "message" => $e->getMessage()
+            ], 400);
+
         }
     }
 
-    public function criar(array $dadosRequisicao): array {
+    public function criarTicket(array $dadosRequisicao): void {
         try {
 
             $this->validarDadosTicket($dadosRequisicao);
@@ -93,107 +100,77 @@ class TicketController {
                 dataEncerramento: null
             );
 
-            $this->repository->CriarTicket($novoTicket);
+            $this->services->criarTicket($novoTicket);
 
-            return [
-                'status' => 'success',
-                'message' => 'Ticket criado com sucesso'
-            ];
+            $this->response([
+                "success" => true,
+                "data" => [
+                    "titulo" => $novoTicket->getTitulo(),
+                    "descricao" => $novoTicket->getDescricao(),
+                    "prioridade" => $novoTicket->getPrioridade(),
+                    "status" => $novoTicket->getStatus(),
+                ]
+            ]);
 
         } catch (InvalidArgumentException $e) {
-            return ['status' => 'error', 'message' => $e->getMessage()];
-        } catch (RuntimeException $e) {
-            return ['status' => 'error', 'message' => error_log($e->getMessage())];
+            $this->response([
+                "success" => false,
+                "message" => $e->getMessage()
+            ], 400);
+
+        } catch (\Throwable $e) {
+            $this->response([
+                "success" => false,
+                "message" => ($e->getMessage())
+            ], 400);
         }
     }
 
-    public function atualizarPrioridade(int $id, array $dadosRequisicao): array {
-    try {
-        if (empty($dadosRequisicao['prioridade'])) {
-            throw new InvalidArgumentException("A prioridade é obrigatória.");
-        }
+    public function atualizarPrioridade(int $id, array $dadosRequisicao): void {
+        try {
+            if (empty($dadosRequisicao['prioridade'])) {
+                throw new InvalidArgumentException("A prioridade é obrigatória.");
+            }
 
-        $this->repository->atualizarPrioridadeTicket($id, $dadosRequisicao['prioridade']);
+            $this->services->atualizarPrioridade($id, $dadosRequisicao);
 
-        return [
-            'status' => 'success',
-            'message' => "Prioridade do ticket {$id} atualizada com sucesso."
-        ];
+            $this->response([
+                "success" => true,
+                "message" => "Prioridade do ticket {$id} atualizada com sucesso."
+            ]);
 
         } catch (InvalidArgumentException $e) {
-            return ['status' => 'error', 'message' => $e->getMessage()];
+            $this->response([
+                "success" => false,
+                "message" => $e->getMessage()
+            ], 400);
 
-        } catch (RuntimeException $e) {
-            return ['status' => 'error', 'message' => error_log($e->getMessage())];
+        } catch (\Throwable $e) {
+            $this->response([
+                "success" => false,
+                "message" => ($e->getMessage())
+            ], 400);
         }
     }
     
-    public function encerrarTicket(int $id, array $dadosRequisicao): array {
+    public function encerrarTicket(int $id): void {
         try {
-            $status = $dadosRequisicao['status'] ?? 'concluido';
-            
-            $this->repository->encerrarTicket($id, $status);
+            $this->services->encerrarTicket($id);
 
-            return [
-                'status' => 'success',
-                'message' => "Ticket {$id} encerrado com sucesso."
-            ];
+            $this->response([
+                "success" => true,
+                "message" => "Ticket do id: {$id} Encerrado."
+            ]);
 
-        } catch (RuntimeException $e) {
-            return ['status' => 'error', 'message' => 'Não foi possivel encerrar' . $e->getMessage()];
+        } catch (\Throwable $e) {
+            $this->response([
+                "success" => false,
+                "message" => 'Não foi possivel encerrar: ' . $e->getMessage()
+            ], 400);
         }
+
     }
 }
 
-//Testes
-$controller = new TicketController();
-
-// //Listagem
-// $respostaListar = $controller->listarTicket();
-// print_r($respostaListar);
-// echo "<hr>";
-
-// // Criar
-// $dadosNovoTicket = [
-//     'id' => '1111',
-//     'titulo' => 'Teclado parou de funcionar',
-//     'descricao' => 'As teclas de espaço e enter não respondem.',
-//     'prioridade' => 'media',
-//     'patrimonio' => 'PAT-102030',
-//     'status' => 'pendente',
-//     'id_categoria' => 2,
-//     'id_usuario' => 1,
-//     'id_responsavel' => null
-// ];
-// $respostaCriar = $controller->criar($dadosNovoTicket);
-// print_r($respostaCriar);
-// echo "<hr>";
-
-// //Exibir pelo id expecifico 
-// $idExibir = 1111; 
-// $respostaExibir = $controller->exibirTicket($idExibir);
-// print_r($respostaExibir);
-// echo "<hr>";
-
-
-// //Atualizar prioridade
-// $idAtualizar = 317; 
-// $dadosPrioridade = [
-//     'prioridade' => 'alta'
-// ];
-// $respostaAtualizar = $controller->atualizarPrioridade($idAtualizar, $dadosPrioridade);
-// print_r($respostaAtualizar);
-// echo "<hr>";
-
-// //Encerrar ticket
-// $idEncerrar = 317; 
-// $dadosEncerrar = [
-//     'status' => 'concluido'
-// ];
-// $respostaEncerrar = $controller->encerrarTicket($idEncerrar, $dadosEncerrar);
-// print_r($respostaEncerrar);
-// echo "<hr>";
-
-// echo "</pre>";
 
 ?>
