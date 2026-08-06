@@ -1,9 +1,9 @@
 <?php
 
-require __DIR__ . '/chirper/src/controllers/HistoryController.php';
+require_once __DIR__ . '/chirper/src/controllers/HistoryController.php';
 
 $data = [
-    'description' => 'Hoje e sexta feira',
+    'description' => 'Criado Agora pouco',
     'data' => new DateTime(),
     'id_chamado' => 1,
     'id_usuario_tecnico' => 3
@@ -11,5 +11,10 @@ $data = [
 
 HistoryController::create($data);
 
-# teste
+$id = 207;
+
+$tickets = HistoryController::getId($id);
+
+echo $tickets;
+
 ?>

@@ -22,8 +22,6 @@ class HistoryRepository {
             $history->getTecnico()
             ]);
 
-            echo "Inserido!";
-
         } catch (PDOException $e) {
             echo "Erro: " . $e->getMessage();
             return false;
