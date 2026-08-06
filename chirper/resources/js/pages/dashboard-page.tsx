@@ -6,7 +6,7 @@ import { NavLink, useParams } from "react-router-dom";
 import { useAuth } from "../context/auth-context";
 import { AnimatedTable } from "../components/dashboard/animated-table";
 import { EmptyState } from "../components/dashboard/empty-state";
-import { FloatingAssistant } from "../components/dashboard/floating-assistant";
+// import { FloatingAssistant } from "../components/dashboard/floating-assistant";
 import { DashboardHeader } from "../components/dashboard/header";
 import { Sidebar } from "../components/dashboard/sidebar";
 import { SkeletonGrid } from "../components/dashboard/skeleton-grid";
@@ -336,11 +336,11 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
           >
             <DashboardHeader user={authUser} />
           </motion.div>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2 rounded-2xl border border-amber-400/30 bg-amber-600/15 px-3 py-2 text-amber-100">
+          <div className="flex flex-wrap items-center justify-end gap-3">
+            {/* <div className="flex items-center gap-2 rounded-2xl border border-amber-400/30 bg-amber-600/15 px-3 py-2 text-amber-100">
               <Sparkles className="size-4" />
               Modo premium ativo
-            </div>
+            </div> */}
             <Button variant="ghost" onClick={onLogout}>
               <LogOut className="size-4" />
               Sair
@@ -764,7 +764,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
           </AnimatePresence>
         </section>
       </div>
-      <FloatingAssistant />
+      {/* <FloatingAssistant /> */}
       <nav className="glass-panel fixed bottom-3 left-1/2 z-40 flex -translate-x-1/2 gap-2 rounded-2xl p-2 lg:hidden">
         {[
           { key: "overview", label: "Home" },
