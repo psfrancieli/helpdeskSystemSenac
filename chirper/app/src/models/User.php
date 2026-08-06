@@ -85,6 +85,9 @@ class User{
     public function alterarSenha(string $senha):void{
         $this->senha = $senha;
     }
+    public function setCpf(string $cpf):void{
+        $this->cpf = $cpf;
+    }
 }
 
 ?>

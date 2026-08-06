@@ -14,6 +14,8 @@ class UserServices{
         if(!$usuario){
             throw new Exception('Usuario não encontrador');
         }
+        $usuario->alterarSenha("");
+        $usuario->setCpf("");
         return $usuario;
     }
 
@@ -38,13 +40,15 @@ class UserServices{
         if(!$usuario){
             throw new Exception('Usuario não encontrador');
         }
+        $usuario->alterarSenha("");
+        $usuario->setCpf("");
         return $usuario;
 
     }
 
     public function cadastrarUsuario(User $usuarioLogado,array $dados):bool{
         $userRepository = new UserRepository(); 
-        if($usuarioLogado->getNivel() !== 'analista'){
+        if($usuarioLogado->getNivel() !== 'analista' &&  $usuarioLogado->getNivel() !== 'adm'){
             throw new Exception("Acesso negado.");
         }
 
