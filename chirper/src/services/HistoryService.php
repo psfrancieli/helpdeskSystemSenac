@@ -15,10 +15,6 @@ class HistoryService
         
         $result = HistoryRepository::create($history);
 
-        if ($result) {
-            self::LogRegister($history);
-        }
-
         return $result;
     }
 
@@ -26,21 +22,5 @@ class HistoryService
     {
         return HistoryRepository::getById($id);
     }
-
-    private static function LogRegister(History $history): void
-{
-    $mensagem =
-        "[" . date("d/m/Y H:i:s") . "] " .
-        "Chamado: #" . $history->getChamado() .
-        " | Técnico: " . $history->getTecnico() .
-        " | " . $history->getDescricao() .
-        PHP_EOL;
-
-    file_put_contents(
-        __DIR__ . "/../../../history.log",
-        $mensagem,
-        FILE_APPEND
-    );
-}
 
 }

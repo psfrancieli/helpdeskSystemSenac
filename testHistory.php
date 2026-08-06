@@ -9,12 +9,13 @@ $data = [
     'id_usuario_tecnico' => 3
 ];
 
-HistoryController::create($data);
+$history = new HistoryController();
+
+$history->create($data);
 
 $id = 207;
 
-$tickets = HistoryController::getId($id);
+$result = $history->getId($id);
 
-echo $tickets;
 
 ?>
