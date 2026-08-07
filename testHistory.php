@@ -13,6 +13,8 @@ $history = new HistoryController();
 
 // $history->create($data);
 
-$response = $history->getId(1);
+$response = $history->getByTicketId(1);
+
+echo $response;
 
 ?>

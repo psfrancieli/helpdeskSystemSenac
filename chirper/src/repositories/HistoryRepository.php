@@ -55,6 +55,27 @@ class HistoryRepository {
                 
         }
     }
+
+    public static function getByTicketId(int $id) {
+
+        try {
+
+            $db = new Database();
+            $sql = 'SELECT * FROM "HISTORICO" WHERE id_chamado = ?';
+            $stmt = $db->getConnection()->prepare($sql);
+            $stmt->execute([$id]);
+            $history = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$history) {
+                return null;
+            }
+
+        } catch (PDOException $e) {
+
+            throw new RuntimeException("Erro ao buscar o historico no banco",0 , $e);
+                
+        }
+    }
 }
 
 ?>

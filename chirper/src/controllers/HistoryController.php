@@ -64,4 +64,24 @@ class HistoryController extends Controller
             ], 400);
         }
     }
+    public function getByTicketId(int $id)
+    {
+        try {
+            if (empty($id)) {
+                throw new InvalidArgumentException("historico não existe");
+            }
+
+            $data = HistoryService::getByTicketId($id);
+
+            echo $data;
+
+            exit;
+        } catch (Throwable $e) {
+            $this->response([
+                "success" => false,
+                "message" => $e->getMessage()
+            ], 400);
+        }
+    }
 }
+
