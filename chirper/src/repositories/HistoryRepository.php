@@ -16,10 +16,10 @@ class HistoryRepository {
             $stmt = $db->getConnection()->prepare($sql);
 
             return $stmt->execute([
-            $history->getDescricao(),
-            $history->getData()->format('Y-m-d H:i:s'),
-            $history->getChamado(),
-            $history->getTecnico()
+                    $history->getDescricao(),
+                    $history->getData()->format('Y-m-d H:i:s'),
+                    $history->getChamado(),
+                    $history->getTecnico()
             ]);
 
         } catch (PDOException $e) {
