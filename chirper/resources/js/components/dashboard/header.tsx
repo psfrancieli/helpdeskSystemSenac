@@ -26,9 +26,15 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
                 >
                     <Bell className="size-5" />
                 </button>
-                <Avatar>
-                    <AvatarFallback>{user.nome.split(' ').map((name) => name[0]).slice(0, 2).join('')}</AvatarFallback>
-                </Avatar>
+                <button
+                    type="button"
+                    className="flex size-11 items-center justify-center rounded-xl border border-stone-600 bg-stone-900/55 text-stone-200 transition-all hover:border-amber-500/50 hover:text-white"
+                >
+                    <Avatar>
+                        <AvatarFallback>{user.nome.split(' ').map((name) => name[0]).slice(0, 2).join('')}</AvatarFallback>
+                    </Avatar>
+                </button>
+
             </div>
         </header>
     );
