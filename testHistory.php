@@ -11,11 +11,8 @@ $data = [
 
 $history = new HistoryController();
 
-$history->create($data);
+// $history->create($data);
 
-$id = 207;
-
-$history->getId($id);
-
+$response = $history->getId(1);
 
 ?>

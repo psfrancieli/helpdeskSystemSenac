@@ -32,19 +32,28 @@ class HistoryRepository {
 
         try {
 
-        $db = new Database();
-        $sql = 'SELECT * FROM "HISTORICO" WHERE id = ?';
-        $stmt = $db->getConnection()->prepare($sql);
-        $stmt->execute([$id]);
-        $history = $stmt->fetch(PDO::FETCH_ASSOC);
-        return json_encode($history);
+            $db = new Database();
+            $sql = 'SELECT * FROM "HISTORICO" WHERE id = ?';
+            $stmt = $db->getConnection()->prepare($sql);
+            $stmt->execute([$id]);
+            $history = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    } catch (PDOException $e) {
+            if (!$history) {
+                return null;
+            }
 
-        return json_encode([
-            "erro" => $e->getMessage()
-        ]);
-    }
+            return new History(
+                new DateTime($history['data']),
+                $history['descricao'],
+                $history['id_chamado'],
+                $history['id_usuario_tecnico']
+            );
+
+        } catch (PDOException $e) {
+
+            throw new RuntimeException("Erro ao buscar o historico no banco",0 , $e);
+                
+        }
     }
 }
 

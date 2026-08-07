@@ -6,57 +6,62 @@ require_once __DIR__ . '/../repositories/HistoryRepository.php';
 require_once __DIR__ . '/../services/HistoryService.php';
 require_once __DIR__ . '/Controller.php';
 
-class HistoryController extends Controller {
+class HistoryController extends Controller
+{
 
-    public function create(array $data) {
+    public function create(array $data)
+    {
 
         try {
             $history = new History(
-            $data['data'],
-            $data['description'],
-            $data['id_chamado'],
-            $data['id_usuario_tecnico']
+                $data['data'],
+                $data['description'],
+                $data['id_chamado'],
+                $data['id_usuario_tecnico']
             );
 
             HistoryService::create($history);
-            
+
             $this->response([
                 "success" => true,
                 "message" => "Historico cadastrado com sucesso."
             ], 201);
-
         } catch (PDOException $e) {
-
-        return $this->response([
+            $this->response([
                 "success" => false,
                 "message" => $e->getMessage()
             ], 400);
-    }
+        }
     }
 
 
-    public function getId(int $id) {
+    public function getId(int $id)
+    {
         try {
             if (empty($id)) {
-            throw new InvalidArgumentException("historico não existe");
+                throw new InvalidArgumentException("historico não existe");
             }
 
-            $data = HistoryRepository::getById($id);
+            $data = HistoryService::getById($id);
 
+            $history = [
+                    "descricao" => $data->getDescricao(),
+                    "data" => $data->getData()->format("Y-m-d H:i:s"),
+                    "id_chamado" => $data->getChamado(),
+                    "id_usuario_tecnico" => $data->getTecnico()
+                ];
 
-            return $this->response([
+            $this->response([
                 "success" => true,
-                "data" => $data
-            ], 201);
+                "data" => $history
+            ], 200);
+
+            exit;
         } catch (Throwable $e) {
-
-            return $this->response([
-                        "success" => false,
-                        "message" => $e->getMessage()
-                    ], 400);
-
+            $this->response([
+                "success" => false,
+                "message" => $e->getMessage()
+            ], 400);
         }
     }
 }
-
-?>

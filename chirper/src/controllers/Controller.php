@@ -24,7 +24,7 @@ class Controller
         */
     }
 
-    protected function response($data, int $status = 200): void
+    protected function response($data, int $status = 200)
     {
         http_response_code($status);//Status e o tipo de resposta exemplo: 200 é ok , 404 e não encontrado
         header("Content-Type: application/json"); //Responsavel por avisar que a requisição q estou enviando e um json
