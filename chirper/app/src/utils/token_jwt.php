@@ -21,17 +21,13 @@ use Firebase\JWT\JWT;
 
 use Firebase\JWT\Key;
 
-$env = parse_ini_file(__DIR__ . '/../../../../../.env');
+$env = parse_ini_file(__DIR__ . '/../../../../.env');
  
 
-define('SECRET_KEY'  , $env['SECRETKEY']);
-
-
-
+define('SECRET_KEY', "{$env["SECRETKEY"]}");
  
 
 function criarToken($paylod){
-
     $token = [
 
         "iss" => "OctopusSystem.com",

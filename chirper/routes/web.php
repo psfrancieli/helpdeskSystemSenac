@@ -430,10 +430,7 @@ $router->post('/api/login', function (): void {
 	}
 });
 
-$router->post('/api/login1', function():void{
-	$controller = new UserController();
-	$controller->login();
-});
+
 
 $router->get('/api/me', function (): void {
 	$currentUser = apiCurrentAuthUser();
@@ -475,3 +472,14 @@ $router->post('/api/logout', function (): void {
 	]);
 });
 
+
+// -----------------------------------------------------------------------------------
+$router->post('/api/v2/login', function():void{
+	$controller = new UserController();
+	$controller->login();
+});
+
+$router->get('/api/v2/listarusuario', function():void{
+	$controller = new UserController();
+	$controller->encontrarTodos1();
+});

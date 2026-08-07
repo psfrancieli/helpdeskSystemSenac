@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/Controller.php';
 require_once __DIR__ . '/../services/UserServices.php';
-
+require_once __DIR__ . '/../utils/token_jwt.php';
 /* 
 Caso vcs estejam usando essa classe de exemplo repare que as Resposta ou Reponse sempre tem o "success" , isso sera muito util para
 verificar no front end entao usem de modelo 
@@ -64,10 +64,43 @@ class UserController extends Controller
     // ============================
     // Buscar todos os usuários
     // ============================
-    public function encontrarTodos(User $usuarioLogado): void
-    {
+    public function encontrarTodos(User $usuarioLogado): void{
         try {
 
+            $usuarios = $this->service->encontrarTodosUsuarios($usuarioLogado);
+            $resultado = [];
+            foreach($usuarios as $usuario){
+               $resultado[] = [
+                "id" => $usuario->getId(),
+                "nome" => $usuario->getNome(),
+                "email" => $usuario->getEmail(),
+                "telefone" => $usuario->getTelefone(),
+                "cpf" => $usuario->getCpf()
+            ];
+            }
+
+            $this->response([
+                "success" => true,
+                "data" => $resultado
+            ]);
+
+        } catch (Throwable $e) {
+
+            $this->response([
+                "success" => false,
+                "message" => $e->getMessage()
+            ], 400);
+
+        }
+    }
+
+     public function encontrarTodos1(): void{
+        try {
+            $userJWT = validateTokenJWT();
+            $usuarioLogado = new User(
+                $userJWT['id'] , null , $userJWT['nome'] , $userJWT['cpf'] ,
+                 $userJWT['telefone'] , $userJWT['email'] , $userJWT['senha'] , $userJWT['nivel'] 
+            );
             $usuarios = $this->service->encontrarTodosUsuarios($usuarioLogado);
             $resultado = [];
             foreach($usuarios as $usuario){
