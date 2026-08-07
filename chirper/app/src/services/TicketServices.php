@@ -7,7 +7,6 @@ require_once __DIR__ . "/../repositories/TicketRepository.php";
 
 use src\repositories\TicketRepository; 
 use src\models\Ticket;
-use DateTime;
 
 
 //Codificação dos metodos
@@ -20,40 +19,72 @@ class TicketServices {
         $this->repository = new TicketRepository();
     }
 
-    public function criarTicket(
-        string $titulo,
-        string $descricao,
-        string $prioridade,
-        string $patrimonio,
-        string $status,
-        int $id_categoria,
-        int $id_usuario
-    ): Ticket
-    {
-    $prioridadesValidas = ['baixa', 'media', 'alta', 'muito alta'];
-    if (!in_array(strtolower($prioridade), $prioridadesValidas)) {
-        throw new \Exception("A prioridade informada é inválida.");
+    public function listarTudo(): array {
+        $dados = $this->repository->listarTodos();
+        $objetos = [];
+
+        if(!$dados) {
+            return []; 
+        }
+
+        foreach ($dados as $linha) {
+            $ticket = new Ticket(
+                id: $linha['id'],
+                uuid: $linha['uuid'],
+                titulo: $linha['titulo'],
+                descricao: $linha['descricao'], 
+                prioridade: $linha['prioridade'],
+                patrimonio: $linha['patrimonio'],
+                status: $linha['status'],
+                dataAbertura: new \DateTime($linha['data_abertura']),
+                dataEncerramento: $linha['data_encerramento'] ? new \DateTime($linha['data_encerramento']) : null
+            );
+
+            $objetos[] = $ticket;
+        }
+
+        return $objetos;
     }
 
-    $ticket = new Ticket(
-        0,
-        null,
-        $titulo, 
-        $descricao, 
-        $prioridade, 
-        $patrimonio,
-        $status, 
-        $id_categoria, 
-        $id_usuario, 
-        null, 
-        new DateTime(), 
-        null
-    );
+    public function exibirTicket(int $id): Ticket {
+        if($id <= 0) {
+            throw new \InvalidArgumentException("ID está incorreto!");
+        }
 
-    $this->repository->criarTicket($ticket);
+        $ticket = $this->repository->EncontrarTicketPorId($id);
 
-    return $ticket;
-}
+        if(!$ticket) {
+            throw new \RuntimeException("Não foi possivel encontrar o ticket.");
+        }
+
+        return $ticket;
+    }
+
+    public function criarTicket(Ticket $ticket): Ticket
+    {
+        $prioridadesValidas = ['baixa', 'media', 'alta', 'muito alta'];
+        if (!in_array(strtolower($ticket->getPrioridade()), $prioridadesValidas)) {
+            throw new \Exception("A prioridade informada é inválida.");
+        }
+
+        $statusValidos = ['pendente', 'concluido', 'cancelado'];
+            $status = strtolower(trim((string) ($ticket->getStatus() ?: 'pendente')));
+            if (!in_array($status, $statusValidos, true)) {
+                throw new \InvalidArgumentException("O status informado é inválido.");
+            }
+
+        $idUsuario = $ticket->getIdUsuario();
+            if (empty($idUsuario) || (int) $idUsuario <= 0) {
+                throw new \InvalidArgumentException("O usuário solicitante é obrigatório.");
+            }
+
+        $ticket->setStatus($status);
+
+        $this->repository->CriarTicket($ticket);
+
+        return $ticket;
+
+    }
 
     public function atualizarPrioridade(int $id, array $dadosAtualizados): Ticket {
         $ticket = $this->repository->encontrarTicketPorId($id);
@@ -83,7 +114,7 @@ class TicketServices {
         return $ticket;
     }
 
-    public function encerrar(int $id): Ticket {
+    public function encerrarTicket(int $id): Ticket {
 
         $ticket = $this->repository->encontrarTicketPorId($id);
 
@@ -113,26 +144,6 @@ class TicketServices {
         $ticket->setIdResponsavel($idResponsavel);
 
         return $ticket;
+    }
 }
-}
-
-
-//Teste
-
-// $service = new TicketServices();
-
-// echo "<h3>Testando a conexão e criação...</h3>";
-
-// $novoTicket = $service->criarTicket(
-//     'Teste Simples',       
-//     'Descrição de teste.', 
-//     'alta',                
-//     'pat-001',            
-//     'pendente',           
-//     1,                     
-//     1                 
-// );
-
-// echo "<pre>";
-// print_r($novoTicket);
-// echo "</pre>";
+?>

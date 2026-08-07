@@ -4,6 +4,10 @@ require_once __DIR__ . '/Controller.php';
 require_once __DIR__ . '/../models/Ticket.php';
 require_once __DIR__ . '/../repositories/TicketRepository.php';
 
+
+use src\models\Ticket;
+use src\repositories\TicketRepository;
+
 class CalledController extends Controller
 {
     private TicketRepository $repository;
