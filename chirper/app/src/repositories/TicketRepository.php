@@ -230,7 +230,48 @@ class TicketRepository{
             throw new RuntimeException("Erro ao buscar chamado no banco",0 , $e);
         }
     }
+
+    public function contarChamados(): int {
+        try {
+            $sql = 'SELECT COUNT(*) AS total FROM "CHAMADO"';
+            $stmt = Database::getConnection()->query($sql);
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (int)$resultado['total'];
+        } catch (PDOException $e) {
+            throw new RuntimeException("Erro ao contar chamados no banco", 0, $e);
+        }
+    }
+
+    public function contarChamadosResolvidos(): int {
+        try {
+            $sql = 'SELECT COUNT(*) AS total FROM "CHAMADO" WHERE status = ?';
+            $stmt = Database::getConnection()->prepare($sql);
+            $stmt->execute(['concluido']);
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (int)$resultado['total'];
+        } catch (PDOException $e) {
+            throw new RuntimeException("Erro ao contar chamados resolvidos no banco", 0, $e);
+        }
+    }
+
+    public function calcularTaxaResolucao(int $totalChamados, int $chamadosResolvidos): float {
+        if ($totalChamados === 0) {
+            return 0.0;
+        }
+        $taxa = ($chamadosResolvidos / $totalChamados) * 100;
+        return round($taxa, 2);
+    }
 }
+
+
+    // TAXA DE RESOLUÇÃO DE CHAMADOS
+    // $repository = new TicketRepository();
+    // $totalChamados = $repository->contarChamados();
+    // $chamadosResolvidos = $repository->contarChamadosResolvidos();
+    // $taxaResolucao = $repository->calcularTaxaResolucao($totalChamados, $chamadosResolvidos);
+    // echo "Total de chamados: $totalChamados\n";
+    // echo "Chamados resolvidos: $chamadosResolvidos\n";
+    // echo "Taxa de resolução: $taxaResolucao%\n";
 
 
     // BUSCA DE UM CHAMADO POR DATA DE ENCERRAMENTO
