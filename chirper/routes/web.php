@@ -7,6 +7,7 @@ require_once __DIR__ . '/../app/src/models/User.php';
 require_once __DIR__ . '/../app/src/utils/CpfUtils.php';
 require_once __DIR__ . '/../app/src/utils/PhoneUtils.php';
 require_once __DIR__ . '/../app/Http/Support/ChamadoActions.php';
+require_once __DIR__ . '/../app/src/controllers/UserController.php';
 
 if (!function_exists('apiJsonResponse')) {
 	function apiJsonResponse(array $payload, int $status = 200): void
@@ -427,6 +428,11 @@ $router->post('/api/login', function (): void {
 			'message' => $e->getMessage(),
 		], 500);
 	}
+});
+
+$router->post('/api/login1', function():void{
+	$controller = new UserController();
+	$controller->login();
 });
 
 $router->get('/api/me', function (): void {

@@ -24,6 +24,7 @@ class UserServices{
             throw new Exception("Acesso negado.");
         }
         $user = new UserRepository();
+        
         return $user->encontrarTodosUsuarios();
     }
 
@@ -188,18 +189,23 @@ class UserServices{
     
     return $userRepository->alterarNivelUsuario($id , $nivel);
 }
-public function encontrarPorEmail(string $email): ?User{
-    $userRepository = new UserRepository();
-    $emailNormalizado = EmailUtils::normalizar($email);
-    if(!EmailUtils::validar($emailNormalizado)){
-        throw new InvalidArgumentException("Email inválido.");
+
+public function login(string $email, string $senha): ?User{
+        $userRepository = new UserRepository();
+        $emailNormalizado = EmailUtils::normalizar($email);
+        if(!EmailUtils::validar($emailNormalizado)){
+            throw new InvalidArgumentException("Email inválido.");
+        }
+        $usuario = $userRepository->encontrarPorEmail($emailNormalizado);
+        if (!$usuario){ throw new InvalidArgumentException("Login invalido");}
+        if (!PasswordUtils::verificar($senha, $usuario->getSenha())){
+            throw new InvalidArgumentException("Usuario ou senha invalido!");
+        }
+        $usuario->alterarSenha("");
+        $usuario->setCpf("");
+        return $usuario;
     }
-    $usuario =  $userRepository->encontrarPorEmail($emailNormalizado);
-    return $usuario;
-
-
-}
-
+ 
 
 
 }

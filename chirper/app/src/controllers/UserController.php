@@ -284,34 +284,39 @@ class UserController extends Controller
 
         }
     }
-    public function encontrarPorEmail():void{
+    public function login():void{
         try{
-
             $dados = $this->getBody();
-            $usuario = $this->service->encontrarPorEmail($dados['email']);
+            if (!isset($dados['email'], $dados['senha'])){
+                $this->response([
+                    "success" => false,
+                    "message" => "Todos os campos devem ser preenchidos."
+                ], 400);
+            }
+            $usuario = $this->service->login($dados['email'], $dados['senha']);
+ 
             $user = [
-            "id" => $usuario->getId(),
-            "nome" => $usuario->getNome(),
-            "email" => $usuario->getEmail(),
-            "telefone" => $usuario->getTelefone(),
-            "cpf" => $usuario->getCpf(),
-            "nivel" => $usuario->getNivel()
+                "id" => $usuario->getId(),
+                "nome" => $usuario->getNome(),
+                "email" => $usuario->getEmail(),
+                "telefone" => $usuario->getTelefone(),
+                "cpf" => $usuario->getCpf(),
+                "senha" => $usuario->getSenha(),
+                "nivel" => $usuario->getNivel()
             ];
             $this->response([
                     "success" => true,
-                    "data" => $user
-            
+                    "data" => criarToken($user),
+                    "nivel" => $usuario->getNivel()
                 ]);
         }
         catch (Throwable $e) {
-
             $this->response([
                 "success" => false,
                 "message" => $e->getMessage()
             ], 400);
-
         }
-        }
+    }
       
 }
 //
