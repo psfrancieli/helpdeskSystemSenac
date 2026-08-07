@@ -160,30 +160,71 @@ class TicketRepository{
         }
     }
 
-    public function buscaPorDataAbertura(DateTime $data):Ticket {
+    public function buscaPorDataAbertura(DateTime $data): ?array {
         try{
-            $sql = 'SELECT * FROM "CHAMADO" WHERE data_abertura = ?';
+            $sql = 'SELECT * FROM "CHAMADO" WHERE data_abertura::DATE = ?';
             $stmt = Database::getConnection()->prepare($sql);
-            $stmt->execute([$data]);
-            $dados = $stmt->fetch();
-            
-            $dataAberturaObj = !empty($dados['data_abertura']) ? new DateTime($dados['data_abertura']) : null;
-            $dataEncerramentoObj = !empty($dados['data_encerramento']) ? new DateTime($dados['data_encerramento']) : null;
-            
-            return new Ticket(
-                $dados['id'],  
-                $dados['uuid'],
-                $dados['titulo'],
-                $dados['descricao'],
-                $dados['prioridade'],
-                $dados['patrimonio'],
-                $dados['status'],
-                $dados['id_categoria'],
-                $dados['id_usuario'], 
-                $dados['id_responsavel'],
-                $dataAberturaObj,
-                $dataEncerramentoObj
-            );
+            $stmt->execute([$data->format('Y-m-d')]);
+            $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if (empty($dados)) {
+                return null;
+            }
+            $tickets = [];
+            foreach ($dados as $linha) {
+                $dataAberturaObj = !empty($linha['data_abertura']) ? new DateTime($linha['data_abertura']) : null;
+                $dataEncerramentoObj = !empty($linha['data_encerramento']) ? new DateTime($linha['data_encerramento']) : null;
+                
+                $tickets[] = new Ticket(
+                    $linha['id'],
+                    $linha['uuid'],
+                    $linha['titulo'] ?? null,
+                    $linha['descricao'] ?? null,
+                    $linha['prioridade'],
+                    $linha['patrimonio'] ?? null,
+                    $linha['status'],
+                    $linha['id_categoria'] ?? null,
+                    $linha['id_usuario'] ?? null,
+                    $linha['id_responsavel'] ?? null,
+                    $dataAberturaObj,
+                    $dataEncerramentoObj
+                );
+            }
+            return $tickets;
+        }catch(PDOException $e){
+            throw new RuntimeException("Erro ao buscar chamado no banco",0 , $e);
+        }
+    }
+
+    public function buscaPorDataEncerramento(DateTime $data): ?array {
+        try{
+            $sql = 'SELECT * FROM "CHAMADO" WHERE data_encerramento::DATE = ?';
+            $stmt = Database::getConnection()->prepare($sql);
+            $stmt->execute([$data->format('Y-m-d')]);
+            $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if (empty($dados)) {
+                return null;
+            }
+            $tickets = [];
+            foreach ($dados as $linha) {
+                $dataAberturaObj = !empty($linha['data_abertura']) ? new DateTime($linha['data_abertura']) : null;
+                $dataEncerramentoObj = !empty($linha['data_encerramento']) ? new DateTime($linha['data_encerramento']) : null;
+                
+                $tickets[] = new Ticket(
+                    $linha['id'],
+                    $linha['uuid'],
+                    $linha['titulo'] ?? null,
+                    $linha['descricao'] ?? null,
+                    $linha['prioridade'],
+                    $linha['patrimonio'] ?? null,
+                    $linha['status'],
+                    $linha['id_categoria'] ?? null,
+                    $linha['id_usuario'] ?? null,
+                    $linha['id_responsavel'] ?? null,
+                    $dataAberturaObj,
+                    $dataEncerramentoObj
+                );
+            }
+            return $tickets;
         }catch(PDOException $e){
             throw new RuntimeException("Erro ao buscar chamado no banco",0 , $e);
         }
@@ -191,10 +232,16 @@ class TicketRepository{
 }
 
 
-    // BUSCA DE UM CHAMADO POR DATA DE ABERTURA
-    $ticket = new TicketRepository();
-    echo $ticket->buscaPorDataAbertura(new DateTime('2023-01-01'));
+    // BUSCA DE UM CHAMADO POR DATA DE ENCERRAMENTO
+    // $ticket = new TicketRepository();
+    // $ticketEncontrado = $ticket->buscaPorDataEncerramento(new DateTime('2026-08-06'));
+    // var_dump($ticketEncontrado);
 
+    // BUSCA DE UM CHAMADO POR DATA DE ABERTURA
+    // $ticket = new TicketRepository();
+    // $ticketEncontrado = $ticket->buscaPorDataAbertura(new DateTime('2026-06-08'));
+    // var_dump($ticketEncontrado);
+    
     // BUSCA DE UM CHAMADO POR ID
     // $ticket = new TicketRepository();
     // echo $ticket->encontrarTicketPorId(317)->getTitulo();
@@ -250,12 +297,4 @@ class TicketRepository{
     // } catch (Exception $e) {
     //     echo "\nErro ao encerrar chamado: " . $e->getMessage() . "\n";
     // }
-
-    // busca por data
-    // busca por data de encerramento
-    // busca por id do tec
-    // busca por id do user
-    // busca por id da categoria
-    // busca por prioridade
-    // busca por status
 ?>
