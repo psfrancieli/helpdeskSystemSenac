@@ -415,6 +415,7 @@ $router->post('/api/login', function (): void {
 			'email' => $user->getEmail(),
 			'nivel' => $user->getNivel(),
 			'ativo' => $user->getAtivo(),
+			'telefone' => $user->getTelefone(),
 		];
 
 		apiJsonResponse([
@@ -444,6 +445,55 @@ $router->get('/api/me', function (): void {
 		'success' => true,
 		'data' => $currentUser,
 	]);
+});
+
+$router->post('/api/me', function (): void {
+	try {
+		$currentUser = apiRequireAuthUser();
+
+		$payload = apiReadJsonBody();
+		$telefoneRaw = isset($payload['telefone']) ? (string) $payload['telefone'] : '';
+
+		if ($telefoneRaw === '') {
+			apiJsonResponse([
+				'success' => false,
+				'message' => 'Telefone é obrigatório.',
+			], 400);
+		}
+
+		$usuarioLogado = new User(
+			$currentUser['id'],
+			'',
+			$currentUser['nome'],
+			'111.444.777-35',
+			$currentUser['telefone'] !== '' ? $currentUser['telefone'] : '(11) 99999-9999',
+			$currentUser['email'],
+			'nao_utilizado',
+			$currentUser['nivel'],
+			(bool) $currentUser['ativo']
+		);
+
+		$service = new UserServices();
+		$service->atualizarTelefone($usuarioLogado, $telefoneRaw);
+
+		$telefoneFormatado = PhoneUtils::formatar($telefoneRaw);
+		$_SESSION['auth_user']['telefone'] = $telefoneFormatado;
+
+		apiJsonResponse([
+			'success' => true,
+			'data' => apiCurrentAuthUser(),
+		]);
+	} catch (InvalidArgumentException $e) {
+		apiJsonResponse([
+			'success' => false,
+			'message' => $e->getMessage(),
+		], 400);
+	} catch (Throwable $e) {
+		apiJsonResponse([
+			'success' => false,
+			'message' => 'Erro ao atualizar telefone.',
+		], 500);
+	}
 });
 
 $router->post('/api/logout', function (): void {

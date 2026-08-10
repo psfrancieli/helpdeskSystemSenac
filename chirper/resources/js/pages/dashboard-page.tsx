@@ -24,7 +24,7 @@ import {
 import { useChamados } from "../hooks/useChamados";
 import { useTecnicos } from "../hooks/useTecnicos";
 import { assignTechnicianToChamado, createChamado } from "../services/chamadoService";
-import { createUsuario } from "../services/usuarioService";
+import { createUsuario, updateMeuTelefone  } from "../services/usuarioService";
 import type {
   CreateApiUserInput,
   CreateChamadoInput,
@@ -120,7 +120,7 @@ function isValidCpf(cpf: string): boolean {
 }
 
 export function DashboardPage({ onLogout }: DashboardPageProps) {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const { section: sectionParam } = useParams();
   const section = normalizeSection(sectionParam);
   const currentUser = user;
@@ -161,6 +161,14 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
   const [isAssigningTicketId, setIsAssigningTicketId] = useState<number | null>(null);
   const [assignmentFeedback, setAssignmentFeedback] = useState<string | null>(null);
   const [assignmentError, setAssignmentError] = useState<string | null>(null);
+  const [profilePhone, setProfilePhone] = useState(authUser.telefone.replace(/\D/g, ""));
+  const [isSubmittingProfile, setIsSubmittingProfile] = useState(false);
+  const [profileSubmitError, setProfileSubmitError] = useState<string | null>(null);
+  const [profileSubmitSuccess, setProfileSubmitSuccess] = useState<string | null>(null);
+
+  useEffect(() => {
+    setProfilePhone(authUser.telefone.replace(/\D/g, ""));
+  }, [authUser.telefone]);
 
   useEffect(() => {
     setTicketForm(createInitialTicketForm(authUser.id));
@@ -323,6 +331,25 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
       }
     } finally {
       setIsSubmittingUser(false);
+    }
+  }
+
+  async function handleProfileSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setIsSubmittingProfile(true);
+    setProfileSubmitError(null);
+    setProfileSubmitSuccess(null);
+
+    try {
+      const result = await updateMeuTelefone(profilePhone);
+      setProfilePhone(result.telefone.replace(/\D/g, ""));
+      await refreshUser();
+      setProfileSubmitSuccess("Telefone atualizado com sucesso.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Erro ao atualizar telefone";
+      setProfileSubmitError(message);
+    } finally {
+      setIsSubmittingProfile(false);
     }
   }
 
@@ -760,7 +787,71 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                 </Card>
               ) : null}
 
+              {canAccessCurrentSection && section === "perfil" ? (
+                <Card>
+                  <CardContent className="space-y-4 py-4">
+                    <div>
+                      <p className="text-lg font-semibold text-stone-100">Meu Perfil</p>
+                      <p className="text-sm text-stone-400">Visualize seus dados e mantenha seu telefone atualizado.</p>
+                    </div>
 
+                    {profileSubmitError ? (
+                      <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+                        {profileSubmitError}
+                      </div>
+                    ) : null}
+
+                    {profileSubmitSuccess ? (
+                      <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
+                        {profileSubmitSuccess}
+                      </div>
+                    ) : null}
+
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="space-y-2">
+                        <span className="text-sm text-stone-200">Nome</span>
+                        <div className="w-full rounded-xl border border-stone-700 bg-stone-900/60 px-3 py-2 text-stone-300">
+                          {authUser.nome}
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <span className="text-sm text-stone-200">Email</span>
+                        <div className="w-full rounded-xl border border-stone-700 bg-stone-900/60 px-3 py-2 text-stone-300">
+                          {authUser.email}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <span className="text-sm text-stone-200">Cargo</span>
+                      <div>
+                        <Badge variant="success">{authUser.nivel}</Badge>
+                      </div>
+                    </div>
+
+                    <form className="space-y-4" onSubmit={handleProfileSubmit}>
+                      <label className="block space-y-2">
+                        <span className="text-sm text-stone-200">Telefone</span>
+                        <input
+                          type="text"
+                          value={profilePhone}
+                          onChange={(event) => setProfilePhone(event.target.value.replace(/\D/g, "").slice(0, 11))}
+                          maxLength={11}
+                          inputMode="numeric"
+                          className="w-full rounded-xl border border-stone-700 bg-stone-950 px-3 py-2 text-stone-100 placeholder:text-stone-500"
+                          placeholder="11999998888"
+                          required
+                        />
+                      </label>
+
+                      <Button type="submit" disabled={isSubmittingProfile}>
+                        {isSubmittingProfile ? "Salvando..." : "Salvar telefone"}
+                      </Button>
+                    </form>
+                  </CardContent>
+                </Card>
+              ) : null}
             </motion.div>
           </AnimatePresence>
         </section>
