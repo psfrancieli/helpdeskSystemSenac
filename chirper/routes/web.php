@@ -52,6 +52,7 @@ if (!function_exists('apiCurrentAuthUser')) {
 			'email' => (string) $sessionUser['email'],
 			'nivel' => (string) $sessionUser['nivel'],
 			'ativo' => (bool) $sessionUser['ativo'],
+			'telefone' => (string) ($sessionUser['telefone'] ?? ''),
 		];
 	}
 }

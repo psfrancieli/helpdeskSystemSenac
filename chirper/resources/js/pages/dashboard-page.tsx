@@ -38,10 +38,10 @@ interface DashboardPageProps {
 }
 
 const sectionVisibilityByRole: Record<UserRole, DashboardSection[]> = {
-  usuario: ["overview", "chamados", "historico", "criarChamado"],
-  tecnico: ["overview", "chamados", "historico", "criarChamado"],
-  analista: ["overview", "usuarios", "chamados", "historico", "status", "criarChamado", "criarUsuario"],
-  adm: ["overview", "usuarios", "chamados", "historico", "status", "criarChamado", "criarUsuario"],
+  usuario: ["overview", "chamados", "historico", "criarChamado", "perfil"],
+  tecnico: ["overview", "chamados", "historico", "criarChamado", "perfil"],
+  analista: ["overview", "usuarios", "chamados", "historico", "status", "criarChamado", "criarUsuario", "perfil"],
+  adm: ["overview", "usuarios", "chamados", "historico", "status", "criarChamado", "criarUsuario", "perfil"],
 };
 
 function normalizeSection(sectionParam?: string): DashboardSection {
@@ -54,6 +54,7 @@ function normalizeSection(sectionParam?: string): DashboardSection {
     "status",
     "criarChamado",
     "criarUsuario",
+    "perfil"
   ]);
 
   if (!sectionParam || !accepted.has(sectionParam as DashboardSection)) {
