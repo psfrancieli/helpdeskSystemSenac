@@ -43,39 +43,6 @@ class TicketRepository{
         }
     }
 
-    // public function EncontrarTodosTickets(): string {
-    //     try {
-    //         $sql = 'SELECT * FROM "CHAMADO" ORDER BY data_abertura DESC';
-    //         $stmt = Database::getConnection()->prepare($sql);
-    //         $stmt->execute();
-    //         $dados = $stmt->fetchAll();
-    //         $tickets = [];
-    //         foreach($dados as $linha){
-    //             $dataAberturaObj = !empty($linha['data_abertura']) ? new DateTime($linha['data_abertura']) : null;
-    //             $dataEncerramentoObj = !empty($linha['data_encerramento']) ? new DateTime($linha['data_encerramento']) : null;
-                
-    //             $ticket = new Ticket(
-    //                 $linha['id'],               
-    //                 $linha['uuid'],           
-    //                 $linha['titulo'],          
-    //                 $linha['descricao'],        
-    //                 $linha['prioridade'],       
-    //                 $linha['patrimonio'],      
-    //                 $linha['status'],           
-    //                 $linha['id_categoria'], 
-    //                 $linha['id_usuario'],      
-    //                 $linha['id_responsavel'],  
-    //                 $dataAberturaObj,          
-    //                 $dataEncerramentoObj
-    //             );
-    //             $tickets[] = $ticket->getAll(); 
-    //         }
-    //         return json_encode($tickets, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-    //     } catch (PDOException $e) {
-    //         throw new RuntimeException("Erro ao buscar chamados no banco", 0, $e);
-    //     }
-    // }
-
     public function criarTicket(Ticket $ticket):void {
         try {
             $sql = 'INSERT INTO "CHAMADO" (titulo, descricao, prioridade, data_abertura, data_encerramento, patrimonio, id_categoria, id_usuario, id_responsavel, status) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
@@ -108,6 +75,16 @@ class TicketRepository{
             $stmt->execute([$prioridade, $id]);
         } catch (PDOException $e) {
             throw new RuntimeException("Erro ao atualizar prioridade do chamado no banco",0 , $e);
+        }
+    }
+
+    public function atualizarStatusTicket(int $id, string $status):void {
+        try {
+            $sql = 'UPDATE "CHAMADO" SET status = ? WHERE id = ?';
+            $stmt = Database::getConnection()->prepare($sql);
+            $stmt->execute([$status, $id]);
+        } catch (PDOException $e) {
+            throw new RuntimeException("Erro ao atualizar status do chamado no banco",0 , $e);
         }
     }
     
@@ -254,6 +231,18 @@ class TicketRepository{
         }
     }
 
+    public function contarChamadosPendentes(): int {
+        try {
+            $sql = 'SELECT COUNT(*) AS total FROM "CHAMADO" WHERE status = ?';
+            $stmt = Database::getConnection()->prepare($sql);
+            $stmt->execute(['pendente']);
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (int)$resultado['total'];
+        } catch (PDOException $e) {
+            throw new RuntimeException("Erro ao contar chamados pendentes no banco", 0, $e);
+        }
+    }
+
     public function calcularTaxaResolucao(int $totalChamados, int $chamadosResolvidos): float {
         if ($totalChamados === 0) {
             return 0.0;
@@ -261,8 +250,202 @@ class TicketRepository{
         $taxa = ($chamadosResolvidos / $totalChamados) * 100;
         return round($taxa, 2);
     }
+
+    public function relatorioPorCategoria(): array {
+        try {
+            $sql = '
+                SELECT 
+                    cat.nome AS categoria,
+                    COUNT(c.id) AS quantidade,
+                    ROUND(COUNT(c.id) * 100.0 / SUM(COUNT(c.id)) OVER(), 2) AS porcentagem
+                FROM "CHAMADO" c
+                INNER JOIN "CATEGORIA" cat ON c.id_categoria = cat.id
+                GROUP BY cat.nome
+                ORDER BY quantidade DESC
+            ';
+
+            $stmt = Database::getConnection()->query($sql);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        } catch (PDOException $e) {
+            throw new RuntimeException('Erro ao buscar indicadores de categoria', 0, $e);
+        }
+    }
+
+    public function contarChamadosPorPeriodo(\DateTime $dataInicial, \DateTime $dataFinal): int {
+        try {
+            $sql = 'SELECT COUNT(*) AS total FROM "CHAMADO" WHERE data_abertura::DATE BETWEEN ? AND ?';
+            $stmt = Database::getConnection()->prepare($sql);
+            
+            $stmt->execute([
+                $dataInicial->format('Y-m-d'), 
+                $dataFinal->format('Y-m-d')
+            ]);
+            
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (int)($resultado['total'] ?? 0);
+        } catch (PDOException $e) {
+            throw new RuntimeException("Erro ao contar chamados por período", 0, $e);
+        }
+    }
+
+    public function buscarTicketsPorStatus(string $status): ? array {
+        try {
+            $sql = 'SELECT * FROM "CHAMADO" WHERE status = ?';
+            $stmt = Database::getConnection()->prepare($sql);
+            $stmt->execute([$status]);
+            $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if (empty($dados)) {
+                return null;
+            }
+            $tickets = [];
+            foreach ($dados as $linha) {
+                $dataAberturaObj = !empty($linha['data_abertura']) ? new DateTime($linha['data_abertura']) : null;
+                $dataEncerramentoObj = !empty($linha['data_encerramento']) ? new DateTime($linha['data_encerramento']) : null;
+                
+                $tickets[] = new Ticket(
+                    $linha['id'],
+                    $linha['uuid'],
+                    $linha['titulo'] ?? null,
+                    $linha['descricao'] ?? null,
+                    $linha['prioridade'],
+                    $linha['patrimonio'] ?? null,
+                    $linha['status'],
+                    $linha['id_categoria'] ?? null,
+                    $linha['id_usuario'] ?? null,
+                    $linha['id_responsavel'] ?? null,
+                    $dataAberturaObj,
+                    $dataEncerramentoObj
+                );
+            }
+            return $tickets;
+        } catch (PDOException $e) {
+            throw new RuntimeException("Erro ao buscar chamados por status no banco", 0, $e);
+        }
+    }
+
+    public function contarChamadosResolvidosPorPeriodo(\DateTime $dataInicial, \DateTime $dataFinal): int {
+        try {
+            $sql = 'SELECT COUNT(*) AS total FROM "CHAMADO" WHERE status = ? AND data_encerramento::DATE BETWEEN ? AND ?';
+            $stmt = Database::getConnection()->prepare($sql);
+            
+            $stmt->execute([
+                'concluido', 
+                $dataInicial->format('Y-m-d'),
+                $dataFinal->format('Y-m-d') 
+            ]);
+            
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (int)($resultado['total'] ?? 0);
+        } catch (PDOException $e) {
+            throw new RuntimeException("Erro ao contar chamados resolvidos por período", 0, $e);
+        }
+    }
+
+    public function contarChamadosPendentesPorPeriodo(\DateTime $dataInicial, \DateTime $dataFinal): int {
+        try {
+            $sql = 'SELECT COUNT(*) AS total FROM "CHAMADO" WHERE status = ? AND data_abertura::DATE BETWEEN ? AND ?';
+            $stmt = Database::getConnection()->prepare($sql);
+            
+            $stmt->execute([
+                'pendente', 
+                $dataInicial->format('Y-m-d'),
+                $dataFinal->format('Y-m-d') 
+            ]);
+            
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (int)($resultado['total'] ?? 0);
+        } catch (PDOException $e) {
+            throw new RuntimeException("Erro ao contar chamados pendentes por período", 0, $e);
+        }
+    }
+
+    public function relatorioPorCategoriaPorPeriodo(\DateTime $dataInicial, \DateTime $dataFinal): array {
+        try {
+            $sql = '
+                SELECT 
+                    cat.nome AS categoria,
+                    COUNT(c.id) AS quantidade,
+                    ROUND(COUNT(c.id) * 100.0 / SUM(COUNT(c.id)) OVER(), 2) AS porcentagem
+                FROM "CHAMADO" c
+                INNER JOIN "CATEGORIA" cat ON c.id_categoria = cat.id
+                WHERE c.data_abertura::DATE BETWEEN ? AND ?
+                GROUP BY cat.nome
+                ORDER BY quantidade DESC
+            ';
+
+            $stmt = Database::getConnection()->prepare($sql);
+            $stmt->execute([
+                $dataInicial->format('Y-m-d'),
+                $dataFinal->format('Y-m-d')
+            ]);
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        } catch (PDOException $e) {
+            throw new RuntimeException('Erro ao buscar indicadores de categoria por período', 0, $e);
+        }
+    }
 }
 
+    // EXEMPLOS DE USO DO REPOSITÓRIO DE CHAMADOS
+
+    // CONTAR CHAMADOS PENDENTES POR PERÍODO
+    // $repository = new TicketRepository();
+    // $dataInicial = new DateTime('2026-07-01');
+    // $dataFinal = new DateTime('2026-09-30');
+    // $indicadores = $repository->relatorioPorCategoriaPorPeriodo($dataInicial, $dataFinal);
+    // foreach ($indicadores as $linha) {
+    //     echo "Categoria: " . $linha['categoria'] . " | ";
+    //     echo "Quantidade: " . $linha['quantidade'] . " | ";
+    //     echo "Porcentagem: " . $linha['porcentagem'] . "%<br>";
+    // }
+
+    // CONTAR CHAMADOS PENDENTES POR PERÍODO
+    // $repository = new TicketRepository();
+    // $dataInicial = new DateTime('2026-07-01');
+    // $dataFinal = new DateTime('2026-09-30');
+    // $quantidadePendentes = $repository->contarChamadosPendentesPorPeriodo($dataInicial, $dataFinal);
+    // echo "Quantidade de chamados pendentes entre " . $dataInicial->format('Y-m-d') . " e " . $dataFinal->format('Y-m-d') . ": " . "Quantidade: " . $quantidadePendentes . "\n";
+
+    // CONTAR CHAMADOS RESOLVIDOS POR PERÍODO
+    // $repository = new TicketRepository();
+    // $dataInicial = new DateTime('2026-07-01');
+    // $dataFinal = new DateTime('2026-09-30');
+    // $quantidadeResolvidos = $repository->contarChamadosResolvidosPorPeriodo($dataInicial, $dataFinal);
+    // echo "Quantidade de chamados resolvidos entre " . $dataInicial->format('Y-m-d') . " e " . $dataFinal->format('Y-m-d') . ": " . "Quantidade" . $quantidadeResolvidos . "\n";
+
+    // BUSCAR CHAMADOS POR STATUS
+    // $repository = new TicketRepository();
+    // $tickets = $repository->buscarTicketsPorStatus("pendente");
+    // echo "Chamados com status 'pendente':\n";
+    // if ($tickets) {
+    //     foreach ($tickets as $ticket) {
+    //         echo "ID: " . $ticket->getId() . ", Título: " . $ticket->getTitulo() . ", Status: " . $ticket->getStatus() . "<br>";
+    //     }
+    // } else {
+    //     echo "Nenhum chamado encontrado com o status especificado.\n";
+    // }
+
+    // ATUALIZAR O STATUS DO CHAMADO
+    // $repository = new TicketRepository();
+    // $repository->atualizarStatusTicket(317, "pendente");
+
+    // RELATÓRIO DE CHAMADOS POR PERÍODO
+    // $repositorio = new TicketRepository();
+    // $dataInicial = new DateTime('2026-06-01');
+    // $dataFinal = new DateTime('2026-06-30');
+    // $quantidadeChamados = $repositorio->contarChamadosPorPeriodo($dataInicial, $dataFinal);
+    // echo "Quantidade de chamados entre " . $dataInicial->format('Y-m-d') . " e " . $dataFinal->format('Y-m-d') . ": " .  "quantidade: " . $quantidadeChamados . "\n";
+
+    // RELATÓRIO DE CHAMADOS POR CATEGORIA
+    // $repositorio = new TicketRepository();
+    // $indicadores = $repositorio->relatorioPorCategoria();
+    // foreach ($indicadores as $linha) {
+    //     echo "Categoria: " . $linha['categoria'] . " | ";
+    //     echo "Quantidade: " . $linha['quantidade'] . " | ";
+    //     echo "Porcentagem: " . $linha['porcentagem'] . "%<br>";
+    //  }
 
     // TAXA DE RESOLUÇÃO DE CHAMADOS
     // $repository = new TicketRepository();
@@ -272,7 +455,6 @@ class TicketRepository{
     // echo "Total de chamados: $totalChamados\n";
     // echo "Chamados resolvidos: $chamadosResolvidos\n";
     // echo "Taxa de resolução: $taxaResolucao%\n";
-
 
     // BUSCA DE UM CHAMADO POR DATA DE ENCERRAMENTO
     // $ticket = new TicketRepository();
@@ -286,7 +468,7 @@ class TicketRepository{
     
     // BUSCA DE UM CHAMADO POR ID
     // $ticket = new TicketRepository();
-    // echo $ticket->encontrarTicketPorId(317)->getTitulo();
+    // echo $ticket->encontrarTicketPorId(317)->getStatus();
 
     // BUSCA DE TODOS OS CHAMADOS
     // $repositorio = new TicketRepository();
@@ -294,7 +476,7 @@ class TicketRepository{
     // header('Content-Type: application/json; charset=utf-8');
     // echo $json;
 
-    // BLOCO DE TESTE: CRIAR UM NOVO CHAMADO
+    // CRIAR UM NOVO CHAMADO
     // $repository = new TicketRepository();
     // $dataAbertura = new DateTime(); 
     // $novoTicket = new Ticket(                                                       
