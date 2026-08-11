@@ -22,14 +22,16 @@ class HistoryService
         return $result;
     }
 
-    public static function getByTicketId(int $id): ?History
-    {
-        $result = HistoryRepository::getById($id);
-        if (!$result){
-            throw new Exception("Historico não encontrado!");
-        }
-        return $result;
+    public static function getByTicketId(int $id): array
+{
+    $result = HistoryRepository::getByTicketId($id);
+
+    if (!$result) {
+        throw new Exception("Histórico não encontrado!");
     }
+
+    return $result;
+}
 
     
 

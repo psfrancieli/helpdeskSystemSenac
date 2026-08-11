@@ -45,11 +45,11 @@ class HistoryController extends Controller
             $data = HistoryService::getById($id);
 
             $history = [
-                    "descricao" => $data->getDescricao(),
-                    "data" => $data->getData()->format("Y-m-d H:i:s"),
-                    "id_chamado" => $data->getChamado(),
-                    "id_usuario_tecnico" => $data->getTecnico()
-                ];
+                "descricao" => $data->getDescricao(),
+                "data" => $data->getData()->format("Y-m-d H:i:s"),
+                "id_chamado" => $data->getChamado(),
+                "id_usuario_tecnico" => $data->getTecnico()
+            ];
 
             $this->response([
                 "success" => true,
@@ -65,23 +65,35 @@ class HistoryController extends Controller
         }
     }
     public function getByTicketId(int $id)
-    {
-        try {
-            if (empty($id)) {
-                throw new InvalidArgumentException("historico não existe");
-            }
-
-            $data = HistoryService::getByTicketId($id);
-
-            echo $data;
-
-            exit;
-        } catch (Throwable $e) {
-            $this->response([
-                "success" => false,
-                "message" => $e->getMessage()
-            ], 400);
+{
+    try {
+        if (empty($id)) {
+            throw new InvalidArgumentException("Histórico não existe");
         }
+
+        $dados = HistoryService::getByTicketId($id);
+
+        $historicos = [];
+
+        foreach ($dados as $historico) {
+            $historicos[] = [
+                "data" => $historico->getData()->format("Y-m-d H:i:s"),
+                "descricao" => $historico->getDescricao(),
+                "id_chamado" => $historico->getChamado(),
+                "id_usuario_tecnico" => $historico->getTecnico()
+            ];
+        }
+
+        $this->response([
+            "success" => true,
+            "data" => $historicos
+        ], 200);
+
+    } catch (Throwable $e) {
+        $this->response([
+            "success" => false,
+            "message" => $e->getMessage()
+        ], 400);
     }
 }
-
+}
