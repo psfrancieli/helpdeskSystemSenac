@@ -119,6 +119,13 @@ function isValidCpf(cpf: string): boolean {
   return digits.endsWith(`${first}${second}`);
 }
 
+function formatTelefoneDisplay(digits: string): string {
+  if (digits.length === 0) return "";
+  if (digits.length <= 2) return `(${digits}`;
+  if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+}
+
 export function DashboardPage({ onLogout }: DashboardPageProps) {
   const { user, refreshUser } = useAuth();
   const { section: sectionParam } = useParams();
@@ -165,6 +172,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
   const [isSubmittingProfile, setIsSubmittingProfile] = useState(false);
   const [profileSubmitError, setProfileSubmitError] = useState<string | null>(null);
   const [profileSubmitSuccess, setProfileSubmitSuccess] = useState<string | null>(null);
+  const [isEditingPhone, setIsEditingPhone] = useState(false);
 
   useEffect(() => {
     setProfilePhone(authUser.telefone.replace(/\D/g, ""));
@@ -345,6 +353,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
       setProfilePhone(result.telefone.replace(/\D/g, ""));
       await refreshUser();
       setProfileSubmitSuccess("Telefone atualizado com sucesso.");
+      setIsEditingPhone(false);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Erro ao atualizar telefone";
       setProfileSubmitError(message);
@@ -362,18 +371,8 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
             initial={{ opacity: 0, y: -16 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <DashboardHeader user={authUser} />
+          <DashboardHeader user={authUser} onLogout={onLogout} />
           </motion.div>
-          <div className="flex flex-wrap items-center justify-end gap-3">
-            {/* <div className="flex items-center gap-2 rounded-2xl border border-amber-400/30 bg-amber-600/15 px-3 py-2 text-amber-100">
-              <Sparkles className="size-4" />
-              Modo premium ativo
-            </div> */}
-            <Button variant="ghost" onClick={onLogout}>
-              <LogOut className="size-4" />
-              Sair
-            </Button>
-          </div>
           <AnimatePresence mode="wait">
             <motion.div
               key={section}
@@ -807,6 +806,13 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                       </div>
                     ) : null}
 
+                    <div className="space-y-2">
+                      {/* <span className="text-sm text-stone-200">Cargo</span> */}
+                      <div>
+                        <Badge variant="success">{authUser.nivel}</Badge>
+                      </div>
+                    </div>
+                    
                     <div className="grid gap-4 md:grid-cols-2">
                       <div className="space-y-2">
                         <span className="text-sm text-stone-200">Nome</span>
@@ -823,35 +829,54 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                       </div>
                     </div>
 
+
+
                     <div className="space-y-2">
-                      <span className="text-sm text-stone-200">Cargo</span>
-                      <div>
-                        <Badge variant="success">{authUser.nivel}</Badge>
-                      </div>
+                      <span className="text-sm text-stone-200">Telefone</span>
+
+                      {isEditingPhone ? (
+                        <form className="flex flex-wrap items-center gap-2" onSubmit={handleProfileSubmit}>
+                          <input
+                            type="text"
+                            value={formatTelefoneDisplay(profilePhone)}
+                            onChange={(event) => setProfilePhone(event.target.value.replace(/\D/g, "").slice(0, 11))}
+                            inputMode="numeric"
+                            autoFocus
+                            className="min-w-0 flex-1 rounded-xl border border-stone-700 bg-stone-950 px-3 py-2 text-stone-100 placeholder:text-stone-500"
+                            placeholder="(11) 99999-9999"
+                            required
+                          />
+                          <Button type="submit" disabled={isSubmittingProfile}>
+                            {isSubmittingProfile ? "Salvando..." : "Salvar"}
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => {
+                              setIsEditingPhone(false);
+                              setProfilePhone(authUser.telefone.replace(/\D/g, ""));
+                              setProfileSubmitError(null);
+                            }}
+                          >
+                            Cancelar
+                          </Button>
+                        </form>
+                      ) : (
+                        <div className="flex items-center justify-between gap-3 rounded-xl border border-stone-700 bg-stone-900/60 px-3 py-2">
+                          <span className="text-stone-300">{formatTelefoneDisplay(profilePhone)}</span>
+                          <button
+                            type="button"
+                            onClick={() => setIsEditingPhone(true)}
+                            className="text-sm font-medium text-amber-400 transition-colors hover:text-amber-300"
+                          >
+                            Editar
+                          </button>
+                        </div>
+                      )}
                     </div>
-
-                    <form className="space-y-4" onSubmit={handleProfileSubmit}>
-                      <label className="block space-y-2">
-                        <span className="text-sm text-stone-200">Telefone</span>
-                        <input
-                          type="text"
-                          value={profilePhone}
-                          onChange={(event) => setProfilePhone(event.target.value.replace(/\D/g, "").slice(0, 11))}
-                          maxLength={11}
-                          inputMode="numeric"
-                          className="w-full rounded-xl border border-stone-700 bg-stone-950 px-3 py-2 text-stone-100 placeholder:text-stone-500"
-                          placeholder="11999998888"
-                          required
-                        />
-                      </label>
-
-                      <Button type="submit" disabled={isSubmittingProfile}>
-                        {isSubmittingProfile ? "Salvando..." : "Salvar telefone"}
-                      </Button>
-                    </form>
                   </CardContent>
                 </Card>
-              ) : null}
+              ) : null}          
             </motion.div>
           </AnimatePresence>
         </section>

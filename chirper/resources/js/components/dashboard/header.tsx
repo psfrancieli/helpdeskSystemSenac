@@ -1,19 +1,21 @@
-import { Bell, Search } from 'lucide-react';
+import { Bell, LogOut, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { HelpdeskUser } from '@/types/helpdesk';
 
 interface DashboardHeaderProps {
     user: HelpdeskUser;
+    onLogout: () => void;
 }
 
-export function DashboardHeader({ user }: DashboardHeaderProps) {
+export function DashboardHeader({ user, onLogout }: DashboardHeaderProps) {
     return (
         <header className="glass-panel flex flex-wrap items-center justify-between gap-4 rounded-3xl p-5">
             <div>
-                <p className="text-sm text-stone-300">Bem-vinda de volta,</p>
+                <p className="text-sm text-stone-300">Olá novamente,</p>
                 <h1 className="text-2xl font-semibold text-white">{user.nome}</h1>
             </div>
             <div className="flex flex-1 items-center justify-end gap-3">
@@ -36,6 +38,10 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
                         <AvatarFallback>{user.nome.split(' ').map((name) => name[0]).slice(0, 2).join('')}</AvatarFallback>
                     </Avatar>
                 </Link>
+                <Button variant="ghost" onClick={onLogout}>
+                    <LogOut className="size-4" />
+                    Sair
+                </Button>
             </div>
         </header>
     );
