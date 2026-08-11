@@ -479,7 +479,50 @@ $router->post('/api/v2/login', function():void{
 	$controller->login();
 });
 
+
 $router->get('/api/v2/listarusuario', function():void{
 	$controller = new UserController();
-	$controller->encontrarTodos1();
+	$controller->encontrarTodosV2();
+});
+
+
+$router->post('/api/v2/listarPorCpf', function():void{
+	$controller = new UserController();
+	$controller->encontrarPorCpfV2();
+});
+
+
+$router->post('/api/v2/cadastrarUsuario', function():void{
+	
+	$controller = new UserController();
+	$controller->cadastrarUsuarioV2();
+});
+
+
+$router->delete('/api/v2/deletarUsuario', function():void{
+	$controller = new UserController();
+	$controller->deletarUsuarioV2();
+});
+
+
+$router->patch('/api/v2/resetarSenha', function():void{
+	$controller = new UserController();
+	$controller->resetarSenhaV2();
+});
+
+
+$router->patch('/api/v2/atualizarTelefone' , function():void{
+	$controller = new UserController();
+	$controller->atualizarTelefoneV2();
+});
+
+
+$router->patch('/api/v2/ativarUsuario', function():void{
+	$controller = new UserController();
+	$controller->ativarUsuarioV2();
+});
+
+$router->patch('/api/v2/alterarNivel' , function(): void{
+	$controller = new UserController();
+	$controller->alterarNivelV2();
 });

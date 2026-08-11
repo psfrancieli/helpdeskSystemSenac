@@ -81,6 +81,9 @@ class UserServices{
         if(!PhoneUtils::validar($dados['telefone'])){
             throw new InvalidArgumentException("Telefone inválido");
         }
+        if($usuarioLogado->getNivel() === 'analista' && $dados['nivel'] === 'adm'){
+            throw new DomainException("Você nao tem permissão para cadastrar um administrador.");
+        }
         $dados['telefone'] = PhoneUtils::formatar($dados['telefone']);
         $dados['email'] = EmailUtils::normalizar($dados['email']);
         $dados['cpf'] = CpfUtils::formatar($dados['cpf']);
@@ -151,7 +154,7 @@ class UserServices{
             throw new Exception("Acesso negado.");  
         }
         if($user->getAtivo()){
-            throw new Exception("O usuario ja esta ativo no sistema! ");
+            throw new Exception("O usuario já esta ativo no sistema!");
         }
         return $userRepository->ativarUsuario($id);
     }
