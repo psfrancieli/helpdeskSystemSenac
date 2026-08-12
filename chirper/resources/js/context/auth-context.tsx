@@ -37,7 +37,8 @@ function loadStoredUser(): HelpdeskUser | null {
             typeof parsed.nome !== 'string' ||
             typeof parsed.email !== 'string' ||
             typeof parsed.nivel !== 'string' ||
-            typeof parsed.ativo !== 'boolean'
+            typeof parsed.ativo !== 'boolean' ||
+            typeof parsed.telefone !== 'string'
         ) {
             return null;
         }
