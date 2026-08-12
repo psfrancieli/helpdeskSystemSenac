@@ -112,7 +112,8 @@ class UserController extends Controller
                 "nome" => $usuario->getNome(),
                 "email" => $usuario->getEmail(),
                 "telefone" => $usuario->getTelefone(),
-                "cpf" => $usuario->getCpf()
+                "cpf" => $usuario->getCpf(),
+                "nivel" => $usuario->getNivel()
             ];
 
             $this->response([
@@ -283,49 +284,35 @@ class UserController extends Controller
 
         }
     }
-    public function store(): void
-    {
-        try {
+    public function encontrarPorEmail():void{
+        try{
+
             $dados = $this->getBody();
-
-            foreach (['nome', 'cpf', 'telefone', 'email', 'senha'] as $campo) {
-                if (!array_key_exists($campo, $dados) || $dados[$campo] === '' || $dados[$campo] === null) {
-                    $this->response([
-                        'success' => false,
-                        'message' => sprintf('Campo obrigatório ausente: %s', $campo),
-                    ], 400);
-                }
-            }
-
-            $dados['id'] = null;
-            $dados['uuid'] = null;
-
-            // Fluxo temporário sem autenticação completa no roteador.
-            $usuarioLogado = new User(
-                0,
-                null,
-                'Sistema',
-                '111.444.777-35',
-                '(11) 99999-9999',
-                'sistema@helpdesk.local',
-                'nao_utilizado',
-                'analista',
-                true
-            );
-
-            $this->service->cadastrarUsuario($usuarioLogado, $dados);
-
+            $usuario = $this->service->encontrarPorEmail($dados['email']);
+            $user = [
+            "id" => $usuario->getId(),
+            "nome" => $usuario->getNome(),
+            "email" => $usuario->getEmail(),
+            "telefone" => $usuario->getTelefone(),
+            "cpf" => $usuario->getCpf(),
+            "nivel" => $usuario->getNivel()
+            ];
             $this->response([
-                'success' => true,
-                'message' => 'Usuário cadastrado com sucesso.',
-            ], 201);
-        } catch (Throwable $e) {
-            $this->response([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ], 400);
+                    "success" => true,
+                    "data" => $user
+            
+                ]);
         }
-    }
+        catch (Throwable $e) {
+
+            $this->response([
+                "success" => false,
+                "message" => $e->getMessage()
+            ], 400);
+
+        }
+        }
+      
 }
 //
 // {

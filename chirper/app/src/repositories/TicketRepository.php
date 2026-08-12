@@ -140,6 +140,7 @@ class TicketRepository{
                     c.titulo,
                     c.patrimonio,
                     c.prioridade,
+                    c.descricao,
                     c.data_abertura,
                     c.data_encerramento,
                     c.status,
