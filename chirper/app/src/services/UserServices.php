@@ -4,6 +4,7 @@ require_once __DIR__ . '/../repositories/UserRepository.php';
 require_once __DIR__ . '/../utils/CpfUtils.php';
 require_once __DIR__ . '/../utils/EmailUtils.php';
 require_once __DIR__ . '/../utils/PhoneUtils.php';
+require_once __DIR__ . '/../utils/LoginRateLimit.php';
 class UserServices{
     public function encontrarPorId(User $usuarioLogado , int $id): ?User{
         if($usuarioLogado->getNivel() !== 'adm' && $usuarioLogado->getNivel() !== 'analista'){
@@ -194,18 +195,28 @@ class UserServices{
 }
 
 public function login(string $email, string $senha): ?User{
+        // $loginRate = new LoginRateLimiter();
+        // if($loginRate->estaBloqueado($email)){
+        //     throw new Exception("Você atingiu o limite de tentativas, por favor tente entrar mais tarde,");
+        // }
+        
         $userRepository = new UserRepository();
         $emailNormalizado = EmailUtils::normalizar($email);
         if(!EmailUtils::validar($emailNormalizado)){
             throw new InvalidArgumentException("Email inválido.");
         }
         $usuario = $userRepository->encontrarPorEmail($emailNormalizado);
-        if (!$usuario){ throw new InvalidArgumentException("Login invalido");}
+        if (!$usuario){ 
+            // $loginRate->registrarTentativa($emailNormalizado);
+            throw new InvalidArgumentException("Login invalido");
+            }
         if (!PasswordUtils::verificar($senha, $usuario->getSenha())){
+            // $loginRate->registrarTentativa($emailNormalizado);
             throw new InvalidArgumentException("Usuario ou senha invalido!");
         }
         $usuario->alterarSenha("");
         $usuario->setCpf("");
+        // $loginRate->limpar($emailNormalizado);
         return $usuario;
     }
  
