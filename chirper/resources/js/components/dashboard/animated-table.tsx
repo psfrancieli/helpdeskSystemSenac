@@ -1,5 +1,5 @@
-import { motion } from 'framer-motion';
-import type { ChangeEvent } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Fragment, useState, type ChangeEvent } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -43,6 +43,14 @@ export function AnimatedTable({
     userRole,
 }: AnimatedTableProps) {
     const showAssignmentColumn = canAssignTechnicians && (userRole === 'analista' || userRole === 'adm');
+
+    const columnCount = 5 + (showAssignmentColumn ? 1 : 0);
+
+    const [expandedTicketId, setExpandedTicketId] = useState<number | null>(null);
+
+    function toggleExpanded(ticketId: number) {
+        setExpandedTicketId((current) => (current === ticketId ? null : ticketId));
+    }
 
     function handleTechnicianChange(ticketId: number, event: ChangeEvent<HTMLSelectElement>) {
         const technicianId = Number(event.target.value);
@@ -88,48 +96,88 @@ export function AnimatedTable({
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-stone-700/60">
-                            {rows.map((row, index) => (
-                                <motion.tr
-                                    key={row.id}
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.2 + index * 0.07 }}
-                                    className="hover:bg-stone-800/45"
-                                >
-                                    <td className="px-3 py-3 text-stone-100">{row.titulo}</td>
-                                    <td className="px-3 py-3 text-stone-300">{row.categoria}</td>
-                                    <td className="px-3 py-3">
-                                        <Badge variant={priorityVariant(row.prioridade)}>{row.prioridade}</Badge>
-                                    </td>
-                                    <td className="px-3 py-3 capitalize text-stone-200">{row.status}</td>
-                                    <td className="px-3 py-3 text-stone-300">{row.responsavel ?? 'A definir'}</td>
-                                    {showAssignmentColumn ? (
-                                        <td className="px-3 py-3">
-                                            <select
-                                                value={row.tecnicoId ?? ''}
-                                                disabled={isAssigningTicketId === row.id || techniciansLoading || technicians.length === 0}
-                                                onChange={(event) => handleTechnicianChange(row.id, event)}
-                                                className="w-full min-w-44 rounded-xl border border-stone-700 bg-stone-950 px-3 py-2 text-stone-100 disabled:cursor-not-allowed disabled:opacity-60"
-                                            >
-                                                <option value="">
-                                                    {techniciansLoading ? 'Carregando técnicos...' : 'Selecionar técnico'}
-                                                </option>
-                                                {technicians.map((technician) => (
-                                                    <option key={technician.id} value={technician.id}>
-                                                        {technician.nome}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            {isAssigningTicketId === row.id ? (
-                                                <p className="mt-1 text-xs text-amber-200">Atribuindo...</p>
+                            {rows.map((row, index) => {
+                                const isExpanded = expandedTicketId === row.id;
+
+                                return (
+                                    <Fragment key={row.id}>
+                                        <motion.tr
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: 0.2 + index * 0.07 }}
+                                            onClick={() => toggleExpanded(row.id)}
+                                            className="cursor-pointer hover:bg-stone-800/45"
+                                        >
+                                            <td className="px-3 py-3 text-stone-100">{row.titulo}</td>
+                                            <td className="px-3 py-3 text-stone-300">{row.categoria}</td>
+                                            <td className="px-3 py-3">
+                                                <Badge variant={priorityVariant(row.prioridade)}>{row.prioridade}</Badge>
+                                            </td>
+                                            <td className="px-3 py-3 capitalize text-stone-200">{row.status}</td>
+                                            <td className="px-3 py-3 text-stone-300">{row.responsavel ?? 'A definir'}</td>
+                                            {showAssignmentColumn ? (
+                                                <td
+                                                    className="px-3 py-3"
+                                                    onClick={(event) => event.stopPropagation()}
+                                                >
+                                                    <select
+                                                        value={row.tecnicoId ?? ''}
+                                                        disabled={isAssigningTicketId === row.id || techniciansLoading || technicians.length === 0}
+                                                        onChange={(event) => handleTechnicianChange(row.id, event)}
+                                                        className="w-full min-w-44 rounded-xl border border-stone-700 bg-stone-950 px-3 py-2 text-stone-100 disabled:cursor-not-allowed disabled:opacity-60"
+                                                    >
+                                                        <option value="">
+                                                            {techniciansLoading ? 'Carregando técnicos...' : 'Selecionar técnico'}
+                                                        </option>
+                                                        {technicians.map((technician) => (
+                                                            <option key={technician.id} value={technician.id}>
+                                                                {technician.nome}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                    {isAssigningTicketId === row.id ? (
+                                                        <p className="mt-1 text-xs text-amber-200">Atribuindo...</p>
+                                                    ) : null}
+                                                    {!techniciansLoading && technicians.length === 0 ? (
+                                                        <p className="mt-1 text-xs text-stone-500">Nenhum técnico disponível</p>
+                                                    ) : null}
+                                                </td>
                                             ) : null}
-                                            {!techniciansLoading && technicians.length === 0 ? (
-                                                <p className="mt-1 text-xs text-stone-500">Nenhum técnico disponível</p>
+                                        </motion.tr>
+
+                                        <AnimatePresence initial={false}>
+                                            {isExpanded ? (
+                                                <motion.tr
+                                                    key={`${row.id}-details`}
+                                                    initial={{ opacity: 0 }}
+                                                    animate={{ opacity: 1 }}
+                                                    exit={{ opacity: 0 }}
+                                                    className="bg-stone-900/60"
+                                                >
+                                    
+                                                    <td colSpan={columnCount} className="px-3 py-4">
+                                                        <motion.div
+                                                            initial={{ height: 0, opacity: 0 }}
+                                                            animate={{ height: 'auto', opacity: 1 }}
+                                                            exit={{ height: 0, opacity: 0 }}
+                                                            transition={{ duration: 0.2 }}
+                                                            className="overflow-hidden"
+                                                        >
+                                                            <p className="mb-1 text-xs uppercase tracking-wide text-stone-400">
+                                                                Descrição
+                                                            </p>
+                                                            
+                                                            <p className="whitespace-pre-wrap text-sm text-stone-200">
+                                                                {row.descricao?.trim() ? row.descricao : 'Nenhuma descrição informada.'}
+                                                            </p>
+                                                        </motion.div>
+                                                    </td>
+                                                </motion.tr>
                                             ) : null}
-                                        </td>
-                                    ) : null}
-                                </motion.tr>
-                            ))}
+                                        </AnimatePresence>
+                                    </Fragment>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>
@@ -137,5 +185,3 @@ export function AnimatedTable({
         </Card>
     );
 }
-
-

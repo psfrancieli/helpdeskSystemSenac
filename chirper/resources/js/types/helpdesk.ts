@@ -42,6 +42,7 @@ export interface HelpdeskStatus {
 export interface HelpdeskTicket {
     id: number;
     titulo: string;
+    descricao?: string;
     patrimonio: string;
     prioridade: TicketPriority;
     categoria: string;
@@ -71,4 +72,3 @@ export interface DashboardMetric {
     growth: number;
     trend: number[];
 }
-
