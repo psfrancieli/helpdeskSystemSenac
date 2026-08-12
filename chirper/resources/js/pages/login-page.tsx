@@ -65,7 +65,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                     <Card className="w-full rounded-3xl p-1">
                         <CardHeader>
                             <CardTitle className="text-2xl">Entrar</CardTitle>
-                            <CardDescription>Acesse seu painel helpdesk premium.</CardDescription>
+                            <CardDescription>Acesse seu painel.</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <form className="space-y-4" onSubmit={handleSubmit}>
@@ -135,7 +135,9 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                                         <span className="relative z-10">{isLoading ? 'Entrando...' : 'Entrar'}</span>
                                     </motion.button>
                                 </AnimatePresence>
-                                
+                                {/* <Button type="button" size="lg" variant="outline" className="w-full">
+                                    Login com Google
+                                </Button> */}
                             </form>
                         </CardContent>
                     </Card>

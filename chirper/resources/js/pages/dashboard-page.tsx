@@ -1,12 +1,9 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { LogOut, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { NavLink, useParams } from "react-router-dom";
-
 import { useAuth } from "../context/auth-context";
 import { AnimatedTable } from "../components/dashboard/animated-table";
 import { EmptyState } from "../components/dashboard/empty-state";
-import { FloatingAssistant } from "../components/dashboard/floating-assistant";
 import { DashboardHeader } from "../components/dashboard/header";
 import { Sidebar } from "../components/dashboard/sidebar";
 import { SkeletonGrid } from "../components/dashboard/skeleton-grid";
@@ -24,7 +21,7 @@ import {
 import { useChamados } from "../hooks/useChamados";
 import { useTecnicos } from "../hooks/useTecnicos";
 import { assignTechnicianToChamado, createChamado } from "../services/chamadoService";
-import { createUsuario } from "../services/usuarioService";
+import { createUsuario, updateMeuTelefone  } from "../services/usuarioService";
 import type {
   CreateApiUserInput,
   CreateChamadoInput,
@@ -38,10 +35,10 @@ interface DashboardPageProps {
 }
 
 const sectionVisibilityByRole: Record<UserRole, DashboardSection[]> = {
-  usuario: ["overview", "chamados", "historico", "criarChamado"],
-  tecnico: ["overview", "chamados", "historico", "criarChamado"],
-  analista: ["overview", "usuarios", "chamados", "historico", "status", "criarChamado", "criarUsuario"],
-  adm: ["overview", "usuarios", "chamados", "historico", "status", "criarChamado", "criarUsuario"],
+  usuario: ["overview", "chamados", "historico", "criarChamado", "perfil"],
+  tecnico: ["overview", "chamados", "historico", "criarChamado", "perfil"],
+  analista: ["overview", "usuarios", "chamados", "historico", "criarChamado", "criarUsuario", "perfil"],
+  adm: ["overview", "usuarios", "chamados", "historico", "criarChamado", "criarUsuario", "perfil"],
 };
 
 function normalizeSection(sectionParam?: string): DashboardSection {
@@ -51,9 +48,9 @@ function normalizeSection(sectionParam?: string): DashboardSection {
     "usuarios",
     "chamados",
     "historico",
-    "status",
     "criarChamado",
     "criarUsuario",
+    "perfil"
   ]);
 
   if (!sectionParam || !accepted.has(sectionParam as DashboardSection)) {
@@ -118,8 +115,15 @@ function isValidCpf(cpf: string): boolean {
   return digits.endsWith(`${first}${second}`);
 }
 
+function formatTelefoneDisplay(digits: string): string {
+  if (digits.length === 0) return "";
+  if (digits.length <= 2) return `(${digits}`;
+  if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+}
+
 export function DashboardPage({ onLogout }: DashboardPageProps) {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const { section: sectionParam } = useParams();
   const section = normalizeSection(sectionParam);
   const currentUser = user;
@@ -160,6 +164,15 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
   const [isAssigningTicketId, setIsAssigningTicketId] = useState<number | null>(null);
   const [assignmentFeedback, setAssignmentFeedback] = useState<string | null>(null);
   const [assignmentError, setAssignmentError] = useState<string | null>(null);
+  const [profilePhone, setProfilePhone] = useState(authUser.telefone.replace(/\D/g, ""));
+  const [isSubmittingProfile, setIsSubmittingProfile] = useState(false);
+  const [profileSubmitError, setProfileSubmitError] = useState<string | null>(null);
+  const [profileSubmitSuccess, setProfileSubmitSuccess] = useState<string | null>(null);
+  const [isEditingPhone, setIsEditingPhone] = useState(false);
+
+  useEffect(() => {
+    setProfilePhone(authUser.telefone.replace(/\D/g, ""));
+  }, [authUser.telefone]);
 
 const [isUpdatingStatusId, setIsUpdatingStatusId] = useState<number | null>(null);
 
@@ -361,6 +374,26 @@ const handleUpdateStatus = async (ticketId: number, novoStatus: string) => {
     }
   }
 
+  async function handleProfileSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setIsSubmittingProfile(true);
+    setProfileSubmitError(null);
+    setProfileSubmitSuccess(null);
+
+    try {
+      const result = await updateMeuTelefone(profilePhone);
+      setProfilePhone(result.telefone.replace(/\D/g, ""));
+      await refreshUser();
+      setProfileSubmitSuccess("Telefone atualizado com sucesso.");
+      setIsEditingPhone(false);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Erro ao atualizar telefone";
+      setProfileSubmitError(message);
+    } finally {
+      setIsSubmittingProfile(false);
+    }
+  }
+
   return (
     <main className="min-h-screen p-4 md:p-6">
       <div className="mx-auto flex max-w-7xl gap-4 xl:gap-6">
@@ -370,18 +403,8 @@ const handleUpdateStatus = async (ticketId: number, novoStatus: string) => {
             initial={{ opacity: 0, y: -16 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <DashboardHeader user={authUser} />
+          <DashboardHeader user={authUser} onLogout={onLogout} />
           </motion.div>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2 rounded-2xl border border-amber-400/30 bg-amber-600/15 px-3 py-2 text-amber-100">
-              <Sparkles className="size-4" />
-              Modo premium ativo
-            </div>
-            <Button variant="ghost" onClick={onLogout}>
-              <LogOut className="size-4" />
-              Sair
-            </Button>
-          </div>
           <AnimatePresence mode="wait">
             <motion.div
               key={section}
@@ -541,7 +564,7 @@ const handleUpdateStatus = async (ticketId: number, novoStatus: string) => {
                   </div>
                 )
               ) : null}
-              {canAccessCurrentSection && section === "status" ? (
+              {/* {canAccessCurrentSection && section === "status" ? (
                 <Card>
                   <CardContent className="space-y-3 py-4">
                     {statuses.map((status) => (
@@ -559,7 +582,7 @@ const handleUpdateStatus = async (ticketId: number, novoStatus: string) => {
                     ))}
                   </CardContent>
                 </Card>
-              ) : null}
+              ) : null} */}
               {canAccessCurrentSection && section === "historico" ? (
                 <EmptyState
                   title="Histórico em preparação"
@@ -797,12 +820,99 @@ const handleUpdateStatus = async (ticketId: number, novoStatus: string) => {
                 </Card>
               ) : null}
 
+              {canAccessCurrentSection && section === "perfil" ? (
+                <Card>
+                  <CardContent className="space-y-4 py-4">
+                    <div>
+                      <p className="text-lg font-semibold text-stone-100">Meu Perfil</p>
+                      <p className="text-sm text-stone-400">Visualize seus dados e mantenha seu telefone atualizado.</p>
+                    </div>
 
+                    {profileSubmitError ? (
+                      <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+                        {profileSubmitError}
+                      </div>
+                    ) : null}
+
+                    {profileSubmitSuccess ? (
+                      <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
+                        {profileSubmitSuccess}
+                      </div>
+                    ) : null}
+
+                    <div className="space-y-2">
+                      <div>
+                        <Badge variant="success">{authUser.nivel}</Badge>
+                      </div>
+                    </div>
+                    
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="space-y-2">
+                        <span className="text-sm text-stone-200">Nome</span>
+                        <div className="w-full rounded-xl border border-stone-700 bg-stone-900/60 px-3 py-2 text-stone-300">
+                          {authUser.nome}
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <span className="text-sm text-stone-200">Email</span>
+                        <div className="w-full rounded-xl border border-stone-700 bg-stone-900/60 px-3 py-2 text-stone-300">
+                          {authUser.email}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <span className="text-sm text-stone-200">Telefone</span>
+
+                      {isEditingPhone ? (
+                        <form className="flex flex-wrap items-center gap-2" onSubmit={handleProfileSubmit}>
+                          <input
+                            type="text"
+                            value={formatTelefoneDisplay(profilePhone)}
+                            onChange={(event) => setProfilePhone(event.target.value.replace(/\D/g, "").slice(0, 11))}
+                            inputMode="numeric"
+                            autoFocus
+                            className="min-w-0 flex-1 rounded-xl border border-stone-700 bg-stone-950 px-3 py-2 text-stone-100 placeholder:text-stone-500"
+                            placeholder="(11) 99999-9999"
+                            required
+                          />
+                          <Button type="submit" disabled={isSubmittingProfile}>
+                            {isSubmittingProfile ? "Salvando..." : "Salvar"}
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => {
+                              setIsEditingPhone(false);
+                              setProfilePhone(authUser.telefone.replace(/\D/g, ""));
+                              setProfileSubmitError(null);
+                            }}
+                          >
+                            Cancelar
+                          </Button>
+                        </form>
+                      ) : (
+                        <div className="flex items-center justify-between gap-3 rounded-xl border border-stone-700 bg-stone-900/60 px-3 py-2">
+                          <span className="text-stone-300">{formatTelefoneDisplay(profilePhone)}</span>
+                          <button
+                            type="button"
+                            onClick={() => setIsEditingPhone(true)}
+                            className="text-sm font-medium text-amber-400 transition-colors hover:text-amber-300"
+                          >
+                            Editar
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : null}          
             </motion.div>
           </AnimatePresence>
         </section>
       </div>
-      <FloatingAssistant />
+      {/* <FloatingAssistant /> */}
       <nav className="glass-panel fixed bottom-3 left-1/2 z-40 flex -translate-x-1/2 gap-2 rounded-2xl p-2 lg:hidden">
         {[
           { key: "overview", label: "Home" },
