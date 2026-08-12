@@ -19,10 +19,10 @@ export function DashboardHeader({ user, onLogout }: DashboardHeaderProps) {
                 <h1 className="text-2xl font-semibold text-white">{user.nome}</h1>
             </div>
             <div className="flex flex-1 items-center justify-end gap-3">
-                <div className="relative max-w-sm flex-1 min-w-48">
+                {/* <div className="relative max-w-sm flex-1 min-w-48">
                     <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
                     <Input className="pl-9" placeholder="Busca global..." />
-                </div>
+                </div> */}
                 <button
                     type="button"
                     className="flex size-11 items-center justify-center rounded-xl border border-stone-600 bg-stone-900/55 text-stone-200 transition-all hover:border-amber-500/50 hover:text-white"
