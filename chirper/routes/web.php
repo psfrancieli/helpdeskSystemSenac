@@ -7,6 +7,7 @@ require_once __DIR__ . '/../app/src/models/User.php';
 require_once __DIR__ . '/../app/src/utils/CpfUtils.php';
 require_once __DIR__ . '/../app/src/utils/PhoneUtils.php';
 require_once __DIR__ . '/../app/Http/Support/ChamadoActions.php';
+require_once __DIR__ . '/../app/src/controllers/TicketController.php';
 
 if (!function_exists('apiJsonResponse')) {
 	function apiJsonResponse(array $payload, int $status = 200): void
@@ -131,21 +132,10 @@ if (!function_exists('apiSerializeUsuario')) {
 }
 
 $router->get('/api/chamados', function (): void {
-	try {
-		$actions = new ChamadoActions();
-		$chamados = $actions->listarComTecnicoId();
-
-		apiJsonResponse([
-			'success' => true,
-			'data' => $chamados,
-		]);
-	} catch (Throwable $e) {
-		apiJsonResponse([
-			'success' => false,
-			'message' => 'Erro ao buscar chamados.',
-		], 500);
-	}
+    $controller = new TicketController();
+    $controller->listarTicket();
 });
+
 $router->get('/api/usuarios', function (): void {
 	try {
 		$currentUser = apiRequireAuthUser();
@@ -231,19 +221,17 @@ $router->get('/api/tecnicos', function (): void {
 		], 500);
 	}
 });
-$router->post('/api/chamados', [CalledController::class, 'store']);
-$router->post('/api/usuarios', function (): void {
-	try {
-		$dados = apiReadJsonBody();
+$router->post('/api/chamados', function (): void {
+    $dados = apiReadJsonBody(); 
+    $controller = new TicketController();
+    $controller->criarTicket($dados);
+});
 
-		foreach (['nome', 'cpf', 'telefone', 'email', 'senha'] as $campo) {
-			if (!array_key_exists($campo, $dados) || $dados[$campo] === '' || $dados[$campo] === null) {
-				apiJsonResponse([
-					'success' => false,
-					'message' => sprintf('Campo obrigatório ausente: %s', $campo),
-				], 400);
-			}
-		}
+$router->post('/api/chamados/atualizar-status', function (): void {
+    $dados = apiReadJsonBody(); 
+    $controller = new TicketController();
+    $controller->atualizarStatus($dados);
+});
 
 		$dados['id'] = null;
 		$dados['uuid'] = null;
