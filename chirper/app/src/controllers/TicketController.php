@@ -37,7 +37,6 @@ class TicketController extends Controller {
             throw new InvalidArgumentException("Status invalido.");
         }
     }
-
     public function listarTicket(): void {
         try {
             $dados = $this->services->listarTudo();
@@ -56,7 +55,6 @@ class TicketController extends Controller {
 
         }
     }
-
     public function exibirTicket(int $id): void {
         try {
             $ticket = $this->services->exibirTicket($id);
@@ -79,7 +77,6 @@ class TicketController extends Controller {
 
         }
     }
-
     public function criarTicket(array $dadosRequisicao): void {
         try {
 
@@ -125,7 +122,6 @@ class TicketController extends Controller {
             ], 400);
         }
     }
-
     public function atualizarPrioridade(int $id, array $dadosRequisicao): void {
         try {
             if (empty($dadosRequisicao['prioridade'])) {
@@ -152,7 +148,6 @@ class TicketController extends Controller {
             ], 400);
         }
     }
-    
     public function encerrarTicket(int $id): void {
         try {
             $this->services->encerrarTicket($id);
