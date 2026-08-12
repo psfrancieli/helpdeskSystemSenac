@@ -386,9 +386,103 @@ class TicketRepository{
             throw new RuntimeException('Erro ao buscar indicadores de categoria por período', 0, $e);
         }
     }
+
+    public function buscarTicketPorUserId(int $userId): ?array {
+        try {
+            $sql = 'SELECT * FROM "CHAMADO" WHERE id_usuario = ?';
+            $stmt = Database::getConnection()->prepare($sql);
+            $stmt->execute([$userId]);
+            $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if (empty($dados)) {
+                return null;
+            }
+            $tickets = [];
+            foreach ($dados as $linha) {
+                $dataAberturaObj = !empty($linha['data_abertura']) ? new DateTime($linha['data_abertura']) : null;
+                $dataEncerramentoObj = !empty($linha['data_encerramento']) ? new DateTime($linha['data_encerramento']) : null;
+                
+                $tickets[] = new Ticket(
+                    $linha['id'],
+                    $linha['uuid'],
+                    $linha['titulo'] ?? null,
+                    $linha['descricao'] ?? null,
+                    $linha['prioridade'],
+                    $linha['patrimonio'] ?? null,
+                    $linha['status'],
+                    $linha['id_categoria'] ?? null,
+                    $linha['id_usuario'] ?? null,
+                    $linha['id_responsavel'] ?? null,
+                    $dataAberturaObj,
+                    $dataEncerramentoObj
+                );
+            }
+            return $tickets;
+        } catch (PDOException $e) {
+            throw new RuntimeException("Erro ao buscar chamados por usuário no banco", 0, $e);
+        }
+    }
+
+    public function buscarTicketPorResponsavelId(int $responsavelId): ?array {
+        try {
+            $sql = 'SELECT * FROM "CHAMADO" WHERE id_responsavel = ?';
+            $stmt = Database::getConnection()->prepare($sql);
+            $stmt->execute([$responsavelId]);
+            $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if (empty($dados)) {
+                return null;
+            }
+            $tickets = [];
+            foreach ($dados as $linha) {
+                $dataAberturaObj = !empty($linha['data_abertura']) ? new DateTime($linha['data_abertura']) : null;
+                $dataEncerramentoObj = !empty($linha['data_encerramento']) ? new DateTime($linha['data_encerramento']) : null;
+                
+                $tickets[] = new Ticket(
+                    $linha['id'],
+                    $linha['uuid'],
+                    $linha['titulo'] ?? null,
+                    $linha['descricao'] ?? null,
+                    $linha['prioridade'],
+                    $linha['patrimonio'] ?? null,
+                    $linha['status'],
+                    $linha['id_categoria'] ?? null,
+                    $linha['id_usuario'] ?? null,
+                    $linha['id_responsavel'] ?? null,
+                    $dataAberturaObj,
+                    $dataEncerramentoObj
+                );
+            }
+            return $tickets;
+        } catch (PDOException $e) {
+            throw new RuntimeException("Erro ao buscar chamados por responsável no banco", 0, $e);
+        }
+    }
 }
 
     // EXEMPLOS DE USO DO REPOSITÓRIO DE CHAMADOS
+
+    // BUSCA DE CHAMADOS POR RESPONSÁVEL ID
+    // $repository = new TicketRepository();
+    // $tickets = $repository->buscarTicketPorResponsavelId(2);
+    // echo "Chamados do responsável com ID 12:\n";
+    // if ($tickets) {
+    //     foreach ($tickets as $ticket) {
+    //         echo "<br>" . "ID: " . $ticket->getId() . ", Título: " . $ticket->getTitulo() . ", Status: " . $ticket->getStatus() . "<br>";
+    //     }
+    // } else {
+    //     echo "Nenhum chamado encontrado para o responsável especificado.\n";
+    // }
+
+    // BUSCA DE CHAMADOS POR USER ID
+    // $repository = new TicketRepository();
+    // $tickets = $repository->buscarTicketPorUserId(1);
+    // echo "Chamados do usuário com ID 1:\n";
+    // if ($tickets) {
+    //     foreach ($tickets as $ticket) {
+    //         echo "<br>" . "ID: " . $ticket->getId() . ", Título: " . $ticket->getTitulo() . ", Status: " . $ticket->getStatus() . "<br>";
+    //     }
+    // } else {
+    //     echo "Nenhum chamado encontrado para o usuário especificado.\n";
+    // }
 
     // CONTAR CHAMADOS PENDENTES POR PERÍODO
     // $repository = new TicketRepository();
@@ -421,7 +515,7 @@ class TicketRepository{
     // echo "Chamados com status 'pendente':\n";
     // if ($tickets) {
     //     foreach ($tickets as $ticket) {
-    //         echo "ID: " . $ticket->getId() . ", Título: " . $ticket->getTitulo() . ", Status: " . $ticket->getStatus() . "<br>";
+    //         echo "<br>" . "ID: " . $ticket->getId() . ", Título: " . $ticket->getTitulo() . ", Status: " . $ticket->getStatus() . "<br>";
     //     }
     // } else {
     //     echo "Nenhum chamado encontrado com o status especificado.\n";
