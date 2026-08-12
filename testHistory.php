@@ -3,18 +3,16 @@
 require_once __DIR__ . '/chirper/src/controllers/HistoryController.php';
 
 $data = [
-    'description' => 'Criado Agora pouquinhoo',
+    'description' => 'Feito al',
     'data' => new DateTime(),
-    'id_chamado' => 1,
+    'id_chamado' => 2,
     'id_usuario_tecnico' => 3
 ];
 
 $history = new HistoryController();
 
-// $history->create($data);
+$history->create($data);
 
-$response = $history->getByTicketId(1);
 
-echo $response;
 
 ?>
