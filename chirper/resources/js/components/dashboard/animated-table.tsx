@@ -28,19 +28,23 @@ interface AnimatedTableProps {
     technicianLoadError?: string | null;
     onAssignTechnician?: (ticketId: number, technicianId: number) => void;
     userRole?: UserRole;
+    onUpdateStatus?: (ticketId: number, newStatus: string) => void;
+    isUpdatingStatusId?: number | null;
 }
 
 export function AnimatedTable({
-    rows,
-    canAssignTechnicians = false,
-    technicians = [],
-    isAssigningTicketId = null,
-    assignmentFeedback = null,
-    assignmentError = null,
-    techniciansLoading = false,
-    technicianLoadError = null,
-    onAssignTechnician,
-    userRole,
+  rows,
+  canAssignTechnicians = false,
+  technicians = [],
+  isAssigningTicketId = null,
+  assignmentFeedback = null,
+  assignmentError = null,
+  techniciansLoading = false,
+  technicianLoadError = null,
+  onAssignTechnician,
+  userRole,
+  isUpdatingStatusId = null,
+  onUpdateStatus,
 }: AnimatedTableProps) {
     const showAssignmentColumn = canAssignTechnicians && (userRole === 'analista' || userRole === 'adm');
 
@@ -113,7 +117,32 @@ export function AnimatedTable({
                                             <td className="px-3 py-3">
                                                 <Badge variant={priorityVariant(row.prioridade)}>{row.prioridade}</Badge>
                                             </td>
-                                            <td className="px-3 py-3 capitalize text-stone-200">{row.status}</td>
+                                            <td className="px-3 py-3" onClick={(event) => event.stopPropagation()}>
+                                                <select
+                                                    value={row.status}
+                                                    // Desabilita se estiver carregando a alteração ou se o usuário NÃO for analista/adm
+                                                    disabled={
+                                                        isUpdatingStatusId === row.id || 
+                                                        (userRole !== 'adm' && userRole !== 'analista')
+                                                    }
+                                                    onChange={(event) => onUpdateStatus?.(row.id, event.target.value)}
+                                                    className="w-full min-w-36 rounded-xl border border-stone-700 bg-stone-950 px-3 py-2 text-stone-100 capitalize disabled:cursor-not-allowed disabled:opacity-60"
+                                                >
+                                                    <option value="pendente">Pendente</option>
+                                                    
+                                                    {/* Mostra as outras opções apenas se o usuário for autorizado */}
+                                                    {(userRole === 'adm' || userRole === 'analista') && (
+                                                        <>
+                                                            <option value="concluido">Concluído</option>
+                                                            <option value="cancelado">Cancelado</option>
+                                                        </>
+                                                    )}
+                                                </select>
+                                                
+                                                {isUpdatingStatusId === row.id ? (
+                                                    <p className="mt-1 text-xs text-amber-200">Atualizando...</p>
+                                                ) : null}
+                                            </td>
                                             <td className="px-3 py-3 text-stone-300">{row.responsavel ?? 'A definir'}</td>
                                             {showAssignmentColumn ? (
                                                 <td

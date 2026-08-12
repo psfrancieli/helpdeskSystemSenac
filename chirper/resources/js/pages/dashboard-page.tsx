@@ -161,6 +161,42 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
   const [assignmentFeedback, setAssignmentFeedback] = useState<string | null>(null);
   const [assignmentError, setAssignmentError] = useState<string | null>(null);
 
+const [isUpdatingStatusId, setIsUpdatingStatusId] = useState<number | null>(null);
+
+const handleUpdateStatus = async (ticketId: number, novoStatus: string) => {
+    setIsUpdatingStatusId(ticketId); 
+
+    try {
+        const resposta = await fetch('/api/chamados/atualizar-status', {
+            method: 'POST', 
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            credentials: 'include', 
+            
+            body: JSON.stringify({
+                id_chamado: ticketId,
+                status: novoStatus
+            })
+        });
+
+        const dados = await resposta.json();
+
+        if (!dados.success) {
+            throw new Error(dados.message || 'Erro desconhecido ao atualizar.');
+        }
+
+        console.log("Status atualizado:", dados.data);
+
+    } catch (erro: any) {
+        console.error("Erro na atualização:", erro);
+        alert(erro.message || "Erro ao atualizar o status do chamado.");
+    } finally {
+        setIsUpdatingStatusId(null); 
+    }
+};
+
   useEffect(() => {
     setTicketForm(createInitialTicketForm(authUser.id));
   }, [authUser.id]);
@@ -390,6 +426,8 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                           techniciansLoading={isTecnicosLoading}
                           onAssignTechnician={handleAssignTechnician}
                           userRole={authUser.nivel}
+                          isUpdatingStatusId={isUpdatingStatusId}
+                          onUpdateStatus={handleUpdateStatus}
                         />
                       )}
                     </>
