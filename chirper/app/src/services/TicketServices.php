@@ -168,18 +168,58 @@ class TicketServices {
 
         return $ticket;
     }
+
+    public function buscaTicketsPorDataAbertura(\DateTime $data): array {
+        $tickets = $this->repository->buscaPorDataAbertura($data);
+        if(!$tickets) {
+            return []; 
+        }
+
+        $dadosLimpos = [];
+
+        foreach ($tickets as $ticket) {
+            $dadosLimpos[] = $ticket->getAll(); 
+        }
+        return $dadosLimpos;
+    }
+
+    public function buscaTicketsPorDataEncerramento(\DateTime $data): array {
+        $tickets = $this->repository->buscaPorDataEncerramento($data);
+        if(!$tickets) {
+            return []; 
+        }
+        $dadosLimpos = [];
+
+        foreach ($tickets as $ticket) {
+            $dadosLimpos[] = $ticket->getAll(); 
+        }
+        return $dadosLimpos;
+    }
+
+    public function buscaTicketsStatus(string $status): array {
+        $tickets = $this->repository->buscarTicketsPorStatus($status);
+        if(!$tickets) {
+            return []; 
+        }
+        $dadosLimpos = [];
+
+        foreach ($tickets as $ticket) {
+            $dadosLimpos[] = $ticket->getAll(); 
+        }
+        return $dadosLimpos;
+    }
 }
 
 // =========================================================================
 // BLOCO DE TESTES
 // =========================================================================
 
-// ini_set('display_errors', 1);
-// error_reporting(E_ALL);
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 
-// echo "<h1>Testes do TicketServices</h1>";
+echo "<h1>Testes do TicketServices</h1>";
 
-// $service = new TicketServices();
+$service = new TicketServices();
 
 // // =========================================================================
 // // 1. TESTE: LISTAR TUDO
@@ -227,7 +267,7 @@ class TicketServices {
 // // =========================================================================
 // // VARIÁVEL PARA OS PRÓXIMOS TESTES (Mude para o ID de um chamado que exista)
 // // =========================================================================
-// $idTeste = 23; 
+$idTeste = 82; 
 // echo "<hr><i>Rodando testes de atualização para o Ticket ID: {$idTeste}</i><hr>";
 
 // // =========================================================================
@@ -300,8 +340,53 @@ class TicketServices {
 //     echo "<pre>";
 //     print_r($ticketEncerrado);
 //     echo "</pre>";
-//     echo "<i>Teste comentado para não fechar o ticket no banco sem querer. Descomente o bloco para testar.</i><br>";
 // } catch (\Exception $e) {
 //     echo "<b>Erro ao encerrar:</b> " . $e->getMessage() . "<br>";
 // }
+
+// // =========================================================================
+// // 8. TESTE: BUSCA POR DATA DE ABERTURA
+// // =========================================================================
+// echo "<h3>8. Busca por Data de Abertura</h3>";
+// try {
+//     $dataBusca = new \DateTime('2026-08-11');
+//     $ticketsPorData = $service->buscaTicketsPorDataAbertura($dataBusca);
+//     echo "Sucesso! Foram encontrados " . count($ticketsPorData) . " chamados abertos em " . $dataBusca->format('Y-m-d') . ".<br>";
+//     echo "<pre>";
+//     print_r($ticketsPorData);
+//     echo "</pre>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro na busca por data:</b> " . $e->getMessage() . "<br>";
+// }
+
+// // =========================================================================
+// // 9. TESTE: BUSCA POR DATA DE ENCERRAMENTO
+// // =========================================================================
+// echo "<h3>9. Busca por Data de Encerramento</h3>";
+// try {
+//     $data = new \DateTime('2026-08-08');
+//     $ticketsEncerrados = $service->buscaTicketsPorDataEncerramento($data);
+//     echo "Sucesso! Foram encontrados " . count($ticketsEncerrados) . " chamados encerrados em " . $data->format('Y-m-d') . ".<br>";
+//     echo "<pre>";
+//     print_r($ticketsEncerrados);
+//     echo "</pre>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro na busca por data de encerramento:</b> " . $e->getMessage() . "<br>";
+// }
+
+// // =========================================================================
+// // 10. TESTE: BUSCA POR STATUS
+// // =========================================================================
+// echo "<h3>10. Busca por Status</h3>";
+// try {
+//     $statusBusca = 'cancelado';
+//     $ticketsPorStatus = $service->buscaTicketsStatus($statusBusca);
+//     echo "Sucesso! Foram encontrados " . count($ticketsPorStatus) . " chamados com status '{$statusBusca}'.<br>";
+//     echo "<pre>";
+//     print_r($ticketsPorStatus);
+//     echo "</pre>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro na busca por status:</b> " . $e->getMessage() . "<br>";
+// }
+
 ?>
