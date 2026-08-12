@@ -1,8 +1,12 @@
 export type UserRole = 'adm' | 'analista' | 'tecnico' | 'usuario';
 export type TicketPriority = 'baixa' | 'media' | 'alta' | 'muito alta';
 export type TicketStatus = 'pendente' | 'cancelado' | 'concluido';
+<<<<<<< HEAD
 export type DashboardSection = 'overview' | 'usuarios' | 'chamados' | 'historico' | 'status' | 'criarChamado' | 'criarUsuario';
 export type NotificationType = 'novo' | 'atribuido' | 'resolvido' | 'cancelado' | 'atualizado';
+=======
+export type DashboardSection = 'overview' | 'usuarios' | 'chamados' | 'historico' | 'status' | 'criarChamado' | 'criarUsuario' | 'perfil';
+>>>>>>> dev
 
 export interface HelpdeskUser {
     id: number;
@@ -10,6 +14,7 @@ export interface HelpdeskUser {
     email: string;
     nivel: UserRole;
     ativo: boolean;
+    telefone: string;
 }
 
 export interface CreateHelpdeskUser {
