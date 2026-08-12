@@ -1,12 +1,9 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { LogOut, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { NavLink, useParams } from "react-router-dom";
-
 import { useAuth } from "../context/auth-context";
 import { AnimatedTable } from "../components/dashboard/animated-table";
 import { EmptyState } from "../components/dashboard/empty-state";
-// import { FloatingAssistant } from "../components/dashboard/floating-assistant";
 import { DashboardHeader } from "../components/dashboard/header";
 import { Sidebar } from "../components/dashboard/sidebar";
 import { SkeletonGrid } from "../components/dashboard/skeleton-grid";
@@ -40,8 +37,8 @@ interface DashboardPageProps {
 const sectionVisibilityByRole: Record<UserRole, DashboardSection[]> = {
   usuario: ["overview", "chamados", "historico", "criarChamado", "perfil"],
   tecnico: ["overview", "chamados", "historico", "criarChamado", "perfil"],
-  analista: ["overview", "usuarios", "chamados", "historico", "status", "criarChamado", "criarUsuario", "perfil"],
-  adm: ["overview", "usuarios", "chamados", "historico", "status", "criarChamado", "criarUsuario", "perfil"],
+  analista: ["overview", "usuarios", "chamados", "historico", "criarChamado", "criarUsuario", "perfil"],
+  adm: ["overview", "usuarios", "chamados", "historico", "criarChamado", "criarUsuario", "perfil"],
 };
 
 function normalizeSection(sectionParam?: string): DashboardSection {
@@ -51,7 +48,6 @@ function normalizeSection(sectionParam?: string): DashboardSection {
     "usuarios",
     "chamados",
     "historico",
-    "status",
     "criarChamado",
     "criarUsuario",
     "perfil"
@@ -530,7 +526,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                   </div>
                 )
               ) : null}
-              {canAccessCurrentSection && section === "status" ? (
+              {/* {canAccessCurrentSection && section === "status" ? (
                 <Card>
                   <CardContent className="space-y-3 py-4">
                     {statuses.map((status) => (
@@ -548,7 +544,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                     ))}
                   </CardContent>
                 </Card>
-              ) : null}
+              ) : null} */}
               {canAccessCurrentSection && section === "historico" ? (
                 <EmptyState
                   title="Histórico em preparação"
@@ -807,7 +803,6 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                     ) : null}
 
                     <div className="space-y-2">
-                      {/* <span className="text-sm text-stone-200">Cargo</span> */}
                       <div>
                         <Badge variant="success">{authUser.nivel}</Badge>
                       </div>
@@ -828,8 +823,6 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                         </div>
                       </div>
                     </div>
-
-
 
                     <div className="space-y-2">
                       <span className="text-sm text-stone-200">Telefone</span>
