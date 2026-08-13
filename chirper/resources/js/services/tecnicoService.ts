@@ -19,5 +19,6 @@ export async function fetchTecnicos(): Promise<HelpdeskUser[]> {
         email: tecnico.email,
         nivel: 'tecnico',
         ativo: tecnico.ativo,
+        telefone: tecnico.telefone ?? '',
     }));
 }

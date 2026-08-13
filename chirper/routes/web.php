@@ -383,7 +383,24 @@ $router->post('/api/chamados/atualizar-status', function (): void {
 		], 500);
 	}
 });
+$router->get('/api/categorias', function (): void {
+	try {
+		apiRequireAuthUser();
 
+		$stmt = Database::getConnection()->query('SELECT id, nome FROM "CATEGORIA" ORDER BY nome ASC');
+		$categorias = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+		apiJsonResponse([
+			'success' => true,
+			'data' => $categorias,
+		]);
+	} catch (Throwable $e) {
+		apiJsonResponse([
+			'success' => false,
+			'message' => 'Erro ao listar categorias.',
+		], 500);
+	}
+});
 $router->post('/api/login', function (): void {
 	try {
 		$payload = apiReadJsonBody();
