@@ -1,12 +1,7 @@
 export type UserRole = 'adm' | 'analista' | 'tecnico' | 'usuario';
 export type TicketPriority = 'baixa' | 'media' | 'alta' | 'muito alta';
 export type TicketStatus = 'pendente' | 'cancelado' | 'concluido';
-<<<<<<< HEAD
-export type DashboardSection = 'overview' | 'usuarios' | 'chamados' | 'historico' | 'status' | 'criarChamado' | 'criarUsuario';
-export type NotificationType = 'novo' | 'atribuido' | 'resolvido' | 'cancelado' | 'atualizado';
-=======
 export type DashboardSection = 'overview' | 'usuarios' | 'chamados' | 'historico' | 'status' | 'criarChamado' | 'criarUsuario' | 'perfil';
->>>>>>> dev
 
 export interface HelpdeskUser {
     id: number;
@@ -80,7 +75,6 @@ export interface DashboardMetric {
 
 export interface HelpdeskNotification {
     id: string;
-    type: NotificationType;
     title: string;
     detail: string;
     ticketId: number;
