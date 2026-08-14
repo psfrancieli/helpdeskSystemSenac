@@ -196,6 +196,18 @@ public function encontrarPorEmail(string $email): ?User{
 
 }
 
+public function setDefaultPassword(int $id)
+{
+    $DefaultPassword = "123456";
+
+    $hash = password_hash($DefaultPassword, PASSWORD_DEFAULT);
+
+    $userRepository = new UserRepository();
+
+    return $userRepository->alterarSenha($hash, $id);
+
+}
+
 
 
 }
