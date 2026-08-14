@@ -384,6 +384,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
         <Sidebar allowedItems={allowedSections} />
         <section className="w-full space-y-4">
           <motion.div
+            className="relative z-40"
             initial={{ opacity: 0, y: -16 }}
             animate={{ opacity: 1, y: 0 }}
           >
