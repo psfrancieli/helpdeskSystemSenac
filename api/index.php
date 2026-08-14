@@ -1,3 +1,5 @@
 <?php
-require_once __DIR__ . '/../chirper/routes/web.php';
+declare(strict_types=1);
+
+require_once __DIR__ . '/../chirper/public/index.php';
 
