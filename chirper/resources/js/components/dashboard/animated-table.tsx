@@ -66,6 +66,33 @@ export function AnimatedTable({
         onAssignTechnician(ticketId, technicianId);
     }
 
+    function handleStatusChange(ticketId: number, event: ChangeEvent<HTMLSelectElement>) {
+        const newStatus = event.target.value;
+        const selectElement = event.target;
+
+        selectElement.blur();
+
+        if (newStatus === 'pendente') {
+            setTimeout(() => {
+                alert(`Chamado #${ticketId} marcado como Pendente!`);
+            }, 0);
+        }
+
+        if (newStatus === 'concluido') {
+            setTimeout(() => {
+                alert(`Chamado #${ticketId} marcado como Concluído!`);
+            }, 0);
+        }
+
+        if (newStatus === 'cancelado') {
+            setTimeout(() => {
+                alert(`Chamado #${ticketId} marcado como Cancelado!`);
+            }, 0);
+        }
+
+        onUpdateStatus?.(ticketId, newStatus);
+    }
+
     return (
         <Card>
             <CardHeader>
@@ -125,7 +152,7 @@ export function AnimatedTable({
                                                         isUpdatingStatusId === row.id || 
                                                         (userRole !== 'adm' && userRole !== 'analista')
                                                     }
-                                                    onChange={(event) => onUpdateStatus?.(row.id, event.target.value)}
+                                                    onChange={(event) => handleStatusChange(row.id, event)}
                                                     className="w-full min-w-36 rounded-xl border border-stone-700 bg-stone-950 px-3 py-2 text-stone-100 capitalize disabled:cursor-not-allowed disabled:opacity-60"
                                                 >
                                                     <option value="pendente">Pendente</option>

@@ -248,7 +248,81 @@ class TicketController extends Controller {
             ], 400);
         }
     }
+
+    public function atualizarStatus(int $id, string $status, ?array $currentUser = null): void {
+        try {
+            if (!in_array($status, ['pendente', 'concluido', 'cancelado'], true)) {
+                throw new InvalidArgumentException("Status inválido. Use: pendente, concluido ou cancelado.");
+            }
+ 
+            if ($currentUser !== null && ($currentUser['nivel'] ?? '') === 'tecnico') {
+                $ticketAtual = $this->services->exibirTicket($id);
+ 
+                if ((int) $ticketAtual->getIdResponsavel() !== (int) $currentUser['id']) {
+                    throw new RuntimeException("Técnico só pode alterar status de chamados atribuídos a si.", 403);
+                }
+            }
+ 
+            $ticketAtualizado = $this->services->atualizarStatus($id, $status);
+ 
+            $this->response([
+                "success" => true,
+                "data" => $ticketAtualizado,
+            ]);
+ 
+        } catch (InvalidArgumentException $e) {
+            $this->response([
+                "success" => false,
+                "message" => $e->getMessage()
+            ], 400);
+ 
+        } catch (RuntimeException $e) {
+            $this->response([
+                "success" => false,
+                "message" => $e->getMessage()
+            ], 403);
+ 
+        } catch (\Throwable $e) {
+            $this->response([
+                "success" => false,
+                "message" => $e->getMessage()
+            ], 400);
+        }
+    }
+
+   public function atribuirTecnico(int $chamadoId, int $tecnicoId): void
+{
+    try {
+
+        $this->services->atribuirTecnico(
+            $chamadoId,
+            $tecnicoId
+        );
+
+        $this->response([
+            'success' => true,
+            'message' => 'Técnico atribuído ao chamado com sucesso.',
+            'data' => [
+                'id_chamado' => $chamadoId,
+                'tecnico_id' => $tecnicoId
+            ]
+        ]);
+
+    } catch (\Throwable $e) {
+
+        $this->response([
+            'success' => false,
+            'message' => $e->getMessage()
+        ], 400);
+    }
 }
+}
+
+
+
+
+
+
 
 /*
 =========================================================================
