@@ -5,7 +5,6 @@ import type { FormEvent } from 'react';
 
 import { FloatingBackground } from '@/components/fx/floating-background';
 import { OctopusMascot } from '@/components/mascot/octopus-mascot';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -137,9 +136,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                                         <span className="relative z-10">{isLoading ? 'Entrando...' : 'Entrar'}</span>
                                     </motion.button>
                                 </AnimatePresence>
-                                {/* <Button type="button" size="lg" variant="outline" className="w-full">
-                                    Login com Google
-                                </Button> */}
                             </form>
                         </CardContent>
                     </Card>
