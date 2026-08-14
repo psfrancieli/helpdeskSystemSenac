@@ -18,8 +18,8 @@ class Database
             $dbname = "neondb";
             $port = 5432;
 
-            $user = $env['PGUSER'];
-            $password = $env['PGPASSWORD'];
+            $user = getenv('PGUSER');
+            $password = getenv('PGPASSWORD');
 
             $dsn = "pgsql:host=$host;port=$port;dbname=$dbname;sslmode=require;options='endpoint=ep-green-night-acel3qx9-pooler'";
 
