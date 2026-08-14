@@ -14,6 +14,8 @@ class UserServices{
         if(!$usuario){
             throw new Exception('Usuario não encontrador');
         }
+        $usuario->alterarSenha("");
+        $usuario->setCpf("");
         return $usuario;
     }
 
@@ -22,6 +24,7 @@ class UserServices{
             throw new Exception("Acesso negado.");
         }
         $user = new UserRepository();
+        
         return $user->encontrarTodosUsuarios();
     }
 
@@ -38,13 +41,15 @@ class UserServices{
         if(!$usuario){
             throw new Exception('Usuario não encontrador');
         }
+        $usuario->alterarSenha("");
+        $usuario->setCpf("");
         return $usuario;
 
     }
 
     public function cadastrarUsuario(User $usuarioLogado,array $dados):bool{
         $userRepository = new UserRepository(); 
-        if($usuarioLogado->getNivel() !== 'analista'){
+        if($usuarioLogado->getNivel() !== 'analista' &&  $usuarioLogado->getNivel() !== 'adm'){
             throw new Exception("Acesso negado.");
         }
 
@@ -75,6 +80,9 @@ class UserServices{
  
         if(!PhoneUtils::validar($dados['telefone'])){
             throw new InvalidArgumentException("Telefone inválido");
+        }
+        if($usuarioLogado->getNivel() === 'analista' && $dados['nivel'] === 'adm'){
+            throw new DomainException("Você nao tem permissão para cadastrar um administrador.");
         }
         $dados['telefone'] = PhoneUtils::formatar($dados['telefone']);
         $dados['email'] = EmailUtils::normalizar($dados['email']);
@@ -146,7 +154,7 @@ class UserServices{
             throw new Exception("Acesso negado.");  
         }
         if($user->getAtivo()){
-            throw new Exception("O usuario ja esta ativo no sistema! ");
+            throw new Exception("O usuario já esta ativo no sistema!");
         }
         return $userRepository->ativarUsuario($id);
     }
@@ -184,18 +192,23 @@ class UserServices{
     
     return $userRepository->alterarNivelUsuario($id , $nivel);
 }
-public function encontrarPorEmail(string $email): ?User{
-    $userRepository = new UserRepository();
-    $emailNormalizado = EmailUtils::normalizar($email);
-    if(!EmailUtils::validar($emailNormalizado)){
-        throw new InvalidArgumentException("Email inválido.");
+
+public function login(string $email, string $senha): ?User{
+        $userRepository = new UserRepository();
+        $emailNormalizado = EmailUtils::normalizar($email);
+        if(!EmailUtils::validar($emailNormalizado)){
+            throw new InvalidArgumentException("Email inválido.");
+        }
+        $usuario = $userRepository->encontrarPorEmail($emailNormalizado);
+        if (!$usuario){ throw new InvalidArgumentException("Login invalido");}
+        if (!PasswordUtils::verificar($senha, $usuario->getSenha())){
+            throw new InvalidArgumentException("Usuario ou senha invalido!");
+        }
+        $usuario->alterarSenha("");
+        $usuario->setCpf("");
+        return $usuario;
     }
-    $usuario =  $userRepository->encontrarPorEmail($emailNormalizado);
-    return $usuario;
-
-
-}
-
+ 
 
 
 }

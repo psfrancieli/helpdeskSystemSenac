@@ -33,13 +33,14 @@ class UserRepository{
                 $usuario['id'],
                 $usuario['uuid'],           
                 $usuario['nome'],
-                $usuario['CPF'],
+                "",
                 $usuario['telefone'],
                 $usuario['email'],
-                $usuario['senha'],
+                "",
                 $usuario['nivel'],
                 $usuario['ativo']
             );
+        
             }
             return $usuarios;
 

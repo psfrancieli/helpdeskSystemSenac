@@ -7,6 +7,7 @@ require_once __DIR__ . '/../app/src/models/User.php';
 require_once __DIR__ . '/../app/src/utils/CpfUtils.php';
 require_once __DIR__ . '/../app/src/utils/PhoneUtils.php';
 require_once __DIR__ . '/../app/Http/Support/ChamadoActions.php';
+require_once __DIR__ . '/../app/src/controllers/UserController.php';
 
 if (!function_exists('apiJsonResponse')) {
 	function apiJsonResponse(array $payload, int $status = 200): void
@@ -431,6 +432,8 @@ $router->post('/api/login', function (): void {
 	}
 });
 
+
+
 $router->get('/api/me', function (): void {
 	$currentUser = apiCurrentAuthUser();
 
@@ -520,3 +523,57 @@ $router->post('/api/logout', function (): void {
 	]);
 });
 
+
+// -----------------------------------------------------------------------------------
+$router->post('/api/v2/login', function():void{
+	$controller = new UserController();
+	$controller->login();
+});
+
+
+$router->get('/api/v2/listarusuario', function():void{
+	$controller = new UserController();
+	$controller->encontrarTodosV2();
+});
+
+
+$router->post('/api/v2/listarPorCpf', function():void{
+	$controller = new UserController();
+	$controller->encontrarPorCpfV2();
+});
+
+
+$router->post('/api/v2/cadastrarUsuario', function():void{
+	
+	$controller = new UserController();
+	$controller->cadastrarUsuarioV2();
+});
+
+
+$router->delete('/api/v2/deletarUsuario', function():void{
+	$controller = new UserController();
+	$controller->deletarUsuarioV2();
+});
+
+
+$router->patch('/api/v2/resetarSenha', function():void{
+	$controller = new UserController();
+	$controller->resetarSenhaV2();
+});
+
+
+$router->patch('/api/v2/atualizarTelefone' , function():void{
+	$controller = new UserController();
+	$controller->atualizarTelefoneV2();
+});
+
+
+$router->patch('/api/v2/ativarUsuario', function():void{
+	$controller = new UserController();
+	$controller->ativarUsuarioV2();
+});
+
+$router->patch('/api/v2/alterarNivel' , function(): void{
+	$controller = new UserController();
+	$controller->alterarNivelV2();
+});

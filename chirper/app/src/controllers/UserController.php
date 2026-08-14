@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/Controller.php';
 require_once __DIR__ . '/../services/UserServices.php';
-
+require_once __DIR__ . '/../utils/token_jwt.php';
 /* 
 Caso vcs estejam usando essa classe de exemplo repare que as Resposta ou Reponse sempre tem o "success" , isso sera muito util para
 verificar no front end entao usem de modelo 
@@ -64,10 +64,43 @@ class UserController extends Controller
     // ============================
     // Buscar todos os usuários
     // ============================
-    public function encontrarTodos(User $usuarioLogado): void
-    {
+    public function encontrarTodos(User $usuarioLogado): void{
         try {
 
+            $usuarios = $this->service->encontrarTodosUsuarios($usuarioLogado);
+            $resultado = [];
+            foreach($usuarios as $usuario){
+               $resultado[] = [
+                "id" => $usuario->getId(),
+                "nome" => $usuario->getNome(),
+                "email" => $usuario->getEmail(),
+                "telefone" => $usuario->getTelefone(),
+                "cpf" => $usuario->getCpf()
+            ];
+            }
+
+            $this->response([
+                "success" => true,
+                "data" => $resultado
+            ]);
+
+        } catch (Throwable $e) {
+
+            $this->response([
+                "success" => false,
+                "message" => $e->getMessage()
+            ], 400);
+
+        }
+    }
+
+     public function encontrarTodosV2(): void{
+        try {
+            $userJWT = validateTokenJWT();
+            $usuarioLogado = new User(
+                $userJWT['id'] , null , $userJWT['nome'] , $userJWT['cpf'] ,
+                 $userJWT['telefone'] , $userJWT['email'] , $userJWT['senha'] , $userJWT['nivel'] 
+            );
             $usuarios = $this->service->encontrarTodosUsuarios($usuarioLogado);
             $resultado = [];
             foreach($usuarios as $usuario){
@@ -131,12 +164,76 @@ class UserController extends Controller
 
         }
     }
+    public function encontrarPorCpfV2(): void
+    {
+        try {
+            $userJWT = validateTokenJWT();
+            $usuarioLogado = new User(
+                $userJWT['id'] , null , $userJWT['nome'] , $userJWT['cpf'] ,
+                 $userJWT['telefone'] , $userJWT['email'] , $userJWT['senha'] , $userJWT['nivel'] 
+            );
+            $dados = $this->getBody();
+
+            $usuario = $this->service->encontrarPorCpf(
+                $usuarioLogado,
+                $dados['cpf']
+            );
+
+            $user = [
+                "id" => $usuario->getId(),
+                "nome" => $usuario->getNome(),
+                "email" => $usuario->getEmail(),
+                "telefone" => $usuario->getTelefone(),
+                "cpf" => $usuario->getCpf(),
+                "nivel" => $usuario->getNivel()
+            ];
+
+            $this->response([
+                "success" => true,
+                "data" => $user
+        
+            ]);
+
+        } catch (Throwable $e) {
+
+            $this->response([
+                "success" => false,
+                "message" => $e->getMessage()
+            ], 400);
+
+        }
+    }
 
 
     public function cadastrarUsuario(User $usuarioLogado): void
     {
         try {
 
+            $dados = $this->getBody();
+
+            $this->service->cadastrarUsuario($usuarioLogado, $dados);
+
+            $this->response([
+                "success" => true,
+                "message" => "Usuário cadastrado com sucesso."
+            ], 201);
+
+        } catch (Throwable $e) {
+
+            $this->response([
+                "success" => false,
+                "message" => $e->getMessage()
+            ], 400);
+
+        }
+    }
+    public function cadastrarUsuarioV2(): void
+    {
+        try {
+            $userJWT = validateTokenJWT();
+            $usuarioLogado = new User(
+                $userJWT['id'] , null , $userJWT['nome'] , $userJWT['cpf'] ,
+                $userJWT['telefone'] , $userJWT['email'] , $userJWT['senha'] , $userJWT['nivel']);
             $dados = $this->getBody();
 
             $this->service->cadastrarUsuario($usuarioLogado, $dados);
@@ -177,7 +274,30 @@ class UserController extends Controller
 
         }
     }
+    public function deletarUsuarioV2(): void
+        {
+            try {
+                $userJWT = validateTokenJWT();
+                $usuarioLogado = new User(
+                $userJWT['id'] , null , $userJWT['nome'] , $userJWT['cpf'] ,
+                $userJWT['telefone'] , $userJWT['email'] , $userJWT['senha'] , $userJWT['nivel']);
+                $dados = $this->getBody();
+                $this->service->deletarUsuario($usuarioLogado, (int)$dados['id']);
 
+                $this->response([
+                    "success" => true,
+                    "message" => "Usuário desativado."
+                ]);
+
+            } catch (Throwable $e) {
+
+                $this->response([
+                    "success" => false,
+                    "message" => $e->getMessage()
+                ], 400);
+
+            }
+        }
   
     public function resetarSenha(User $usuarioLogado, int $id): void
     {
@@ -205,12 +325,69 @@ class UserController extends Controller
 
         }
     }
+    public function resetarSenhaV2(): void
+    {
+        try {
+            $userJWT = validateTokenJWT();
+            $usuarioLogado = new User(
+            $userJWT['id'] , null , $userJWT['nome'] , $userJWT['cpf'] ,
+            $userJWT['telefone'] , $userJWT['email'] , $userJWT['senha'] , $userJWT['nivel']);
+            $dados = $this->getBody();
+
+            $this->service->resetarSenha(
+                $usuarioLogado,
+                $dados['senha'],
+                (int)$dados['id']
+            );
+
+            $this->response([
+                "success" => true,
+                "message" => "Senha alterada com sucesso."
+            ]);
+
+        } catch (Throwable $e) {
+
+            $this->response([
+                "success" => false,
+                "message" => $e->getMessage()
+            ], 400);
+
+        }
+    }
 
 
     public function atualizarTelefone(User $usuarioLogado): void
     {
         try {
 
+            $dados = $this->getBody();
+
+            $this->service->atualizarTelefone(
+                $usuarioLogado,
+                $dados['telefone']
+            );
+
+            $this->response([
+                "success" => true,
+                "message" => "Telefone atualizado."
+            ]);
+
+        } catch (Throwable $e) {
+
+            $this->response([
+                "success" => false,
+                "message" => $e->getMessage()
+            ], 400);
+
+        }
+    }
+    public function atualizarTelefoneV2(): void
+    {
+        try {
+            $userJWT = validateTokenJWT();
+            $usuarioLogado = new User(
+            $userJWT['id'] , null , $userJWT['nome'] , $userJWT['cpf'] ,
+            $userJWT['telefone'] , $userJWT['email'] , $userJWT['senha'] , $userJWT['nivel']);
             $dados = $this->getBody();
 
             $this->service->atualizarTelefone(
@@ -257,6 +434,33 @@ class UserController extends Controller
 
         }
     }
+    public function ativarUsuarioV2(): void
+    {
+        try {
+            $userJWT = validateTokenJWT();
+            $usuarioLogado = new User(
+            $userJWT['id'] , null , $userJWT['nome'] , $userJWT['cpf'] ,
+            $userJWT['telefone'] , $userJWT['email'] , $userJWT['senha'] , $userJWT['nivel']);
+            $dados = $this->getBody();
+            $this->service->ativarUsuario(
+                $usuarioLogado,
+                (int)$dados['id']
+            );
+
+            $this->response([
+                "success" => true,
+                "message" => "Usuário ativado."
+            ]);
+
+        } catch (Throwable $e) {
+
+            $this->response([
+                "success" => false,
+                "message" => $e->getMessage()
+            ], 400);
+
+        }
+    }
 
     public function alterarNivel(User $usuarioLogado, int $id): void
     {
@@ -284,26 +488,27 @@ class UserController extends Controller
 
         }
     }
-    public function encontrarPorEmail():void{
-        try{
-
+    public function alterarNivelV2(): void
+    {
+        try {
+            $userJWT = validateTokenJWT();
+            $usuarioLogado = new User(
+            $userJWT['id'] , null , $userJWT['nome'] , $userJWT['cpf'] ,
+            $userJWT['telefone'] , $userJWT['email'] , $userJWT['senha'] , $userJWT['nivel']);
             $dados = $this->getBody();
-            $usuario = $this->service->encontrarPorEmail($dados['email']);
-            $user = [
-            "id" => $usuario->getId(),
-            "nome" => $usuario->getNome(),
-            "email" => $usuario->getEmail(),
-            "telefone" => $usuario->getTelefone(),
-            "cpf" => $usuario->getCpf(),
-            "nivel" => $usuario->getNivel()
-            ];
+
+            $this->service->alterarNivel(
+                $usuarioLogado,
+                $dados['id'],
+                $dados['nivel']
+            );
+
             $this->response([
-                    "success" => true,
-                    "data" => $user
-            
-                ]);
-        }
-        catch (Throwable $e) {
+                "success" => true,
+                "message" => "Nível alterado com sucesso."
+            ]);
+
+        } catch (Throwable $e) {
 
             $this->response([
                 "success" => false,
@@ -311,7 +516,40 @@ class UserController extends Controller
             ], 400);
 
         }
+    }
+    public function login():void{
+        try{
+            $dados = $this->getBody();
+            if (!isset($dados['email'], $dados['senha'])){
+                $this->response([
+                    "success" => false,
+                    "message" => "Todos os campos devem ser preenchidos."
+                ], 400);
+            }
+            $usuario = $this->service->login($dados['email'], $dados['senha']);
+ 
+            $user = [
+                "id" => $usuario->getId(),
+                "nome" => $usuario->getNome(),
+                "email" => $usuario->getEmail(),
+                "telefone" => $usuario->getTelefone(),
+                "cpf" => $usuario->getCpf(),
+                "senha" => $usuario->getSenha(),
+                "nivel" => $usuario->getNivel()
+            ];
+            $this->response([
+                    "success" => true,
+                    "data" => criarToken($user),
+                    "nivel" => $usuario->getNivel()
+                ]);
         }
+        catch (Throwable $e) {
+            $this->response([
+                "success" => false,
+                "message" => $e->getMessage()
+            ], 400);
+        }
+    }
       
 }
 //
