@@ -37,6 +37,7 @@ class TicketController extends Controller {
             throw new InvalidArgumentException("Status invalido.");
         }
     }
+
     public function listarTicket(): void {
         try {
             $dados = $this->services->listarTudo();
@@ -55,6 +56,7 @@ class TicketController extends Controller {
 
         }
     }
+
     public function exibirTicket(int $id): void {
         try {
             $ticket = $this->services->exibirTicket($id);
@@ -77,6 +79,7 @@ class TicketController extends Controller {
 
         }
     }
+
     public function criarTicket(array $dadosRequisicao): void {
         try {
 
@@ -122,6 +125,7 @@ class TicketController extends Controller {
             ], 400);
         }
     }
+    
     public function atualizarPrioridade(int $id, array $dadosRequisicao): void {
         try {
             if (empty($dadosRequisicao['prioridade'])) {
@@ -148,6 +152,7 @@ class TicketController extends Controller {
             ], 400);
         }
     }
+
     public function encerrarTicket(int $id): void {
         try {
             $this->services->encerrarTicket($id);
@@ -165,7 +170,135 @@ class TicketController extends Controller {
         }
 
     }
+
+    public function buscarTicketsStatus(string $status): void {
+        try {
+            $tickets = $this->services->buscaTicketsStatus($status);
+
+            if (empty($tickets)) {
+                $this->response([
+                    "success" => true,
+                    "data" => [],
+                    "message" => "Nenhum ticket encontrado com o status: {$status}."
+                ]);
+                return;
+            }
+
+            $this->response([
+                "success" => true,
+                "data" => $tickets
+            ]);
+
+        } catch (\Throwable $e) {
+            $this->response([
+                "success" => false,
+                "message" => 'Erro ao buscar tickets por status: ' . $e->getMessage()
+            ], 400);
+        }
+    }
+
+    public function buscarTicketsDataAbertura(\DateTime $data): void {
+        try {
+            $tickets = $this->services->buscaTicketsPorDataAbertura($data);
+
+            if (empty($tickets)) {
+                $this->response([
+                    "success" => true,
+                    "data" => [],
+                    "message" => "Nenhum ticket encontrado com a data de abertura: {$data->format('Y-m-d')}."
+                ]);
+                return;
+            }
+
+            $this->response([
+                "success" => true,
+                "data" => $tickets
+            ]);
+
+        } catch (\Throwable $e) {
+            $this->response([
+                "success" => false,
+                "message" => 'Erro ao buscar tickets por data de abertura: ' . $e->getMessage()
+            ], 400);
+        }
+    }
+
+    public function buscarTicketsDataEncerramento(\DateTime $data): void {
+        try {
+            $tickets = $this->services->buscaTicketsPorDataEncerramento($data);
+
+            if (empty($tickets)) {
+                $this->response([
+                    "success" => true,
+                    "data" => [],
+                    "message" => "Nenhum ticket encontrado com a data de encerramento: {$data->format('Y-m-d')}."
+                ]);
+                return;
+            }
+
+            $this->response([
+                "success" => true,
+                "data" => $tickets
+            ]);
+
+        } catch (\Throwable $e) {
+            $this->response([
+                "success" => false,
+                "message" => 'Erro ao buscar tickets por data de encerramento: ' . $e->getMessage()
+            ], 400);
+        }
+    }
 }
 
+/*
+=========================================================================
+TESTES DO CONTROLLER (Filtros de Busca)
+=========================================================================
+*/
 
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
+$controller = new TicketController();
+
+
+// =========================================================================
+// 1. TESTE: BUSCAR TICKETS POR STATUS
+// =========================================================================
+// echo "<h3>1. Teste: Buscar Tickets por Status ('pendente')</h3>";
+// try {
+//     $controller->buscarTicketsStatus('pendente');
+//     echo "<br><br><b>Teste de status vazio (inexistente):</b><br>";
+//     $controller->buscarTicketsStatus('status_maluco');
+
+// } catch (\Exception $e) {
+//     echo "<b>Erro:</b> " . $e->getMessage() . "<br>";
+// }
+
+// =========================================================================
+// 2. TESTE: BUSCAR TICKETS POR DATA DE ABERTURA
+// =========================================================================
+
+// echo "<h3>2. Teste: Buscar Tickets por Data de Abertura</h3>";
+// try {
+//     $dataAberturaTeste = new \DateTime('2026-08-08'); 
+//     $controller->buscarTicketsDataAbertura($dataAberturaTeste);
+
+// } catch (\Exception $e) {
+//     echo "<b>Erro:</b> " . $e->getMessage() . "<br>";
+// }
+
+
+// =========================================================================
+// 3. TESTE: BUSCAR TICKETS POR DATA DE ENCERRAMENTO
+// =========================================================================
+// echo "<h3>3. Teste: Buscar Tickets por Data de Encerramento</h3>";
+// try {
+//     $dataEncerramentoTeste = new \DateTime('2026-08-11'); 
+    
+//     $controller->buscarTicketsDataEncerramento($dataEncerramentoTeste);
+
+// } catch (\Exception $e) {
+//     echo "<b>Erro:</b> " . $e->getMessage() . "<br>";
+// }
 ?>
