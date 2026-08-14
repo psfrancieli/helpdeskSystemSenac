@@ -289,6 +289,45 @@ class TicketServices {
         }
         return $dadosLimpos;
     }
+
+    public function buscarTicketsPornomeChamado(string $nomeChamado): array {
+        $tickets = $this->repository->buscarChamadosNomeChamado($nomeChamado);
+        if(!$tickets) {
+            return []; 
+        }
+        $dadosLimpos = [];
+
+        foreach ($tickets as $ticket) {
+            $dadosLimpos[] = $ticket->getAll(); 
+        }
+        return $dadosLimpos;
+    }
+
+    public function buscarTicketNaoResolvido(): array {
+        $tickets = $this->repository->buscarTicketNaoResolvido();
+        if(!$tickets) {
+            return []; 
+        }
+        $dadosLimpos = [];
+
+        foreach ($tickets as $ticket) {
+            $dadosLimpos[] = $ticket->getAll(); 
+        }
+        return $dadosLimpos;
+    }
+
+    public function buscarTicketNomeUser(string $nomeUsuario): array {
+        $tickets = $this->repository->buscarChamadosNomeUser($nomeUsuario);
+        if(!$tickets) {
+            return []; 
+        }
+        $dadosLimpos = [];
+
+        foreach ($tickets as $ticket) {
+            $dadosLimpos[] = $ticket->getAll(); 
+        }
+        return $dadosLimpos;
+    }
 }
 
 // =========================================================================
@@ -584,6 +623,50 @@ $idTeste = 82;
 //     echo "Sucesso! Foram encontrados " . count($ticketsPorNome) . " chamados para o usuário com nome '{$nomeUsuario}'.<br>";
 //     echo "<pre>";
 //     print_r($ticketsPorNome);
+//     echo "</pre>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao buscar tickets por nome de usuário:</b> " . $e->getMessage() . "<br>";
+// }
+
+// =========================================================================
+// 20. TESTE: BUSCAR TICKETS POR NOME DE CHAMADO
+// =========================================================================
+// echo "<h3>20. Buscar Tickets por Nome de Chamado</h3>";
+// try {
+//     $nomeChamado = 'xbox';
+//     $ticketsPorNomeChamado = $service->buscarTicketsPornomeChamado($nomeChamado);
+//     echo "Foram encontrados " . count($ticketsPorNomeChamado) . " chamados com nome '{$nomeChamado}'.<br>";
+//     echo "<pre>";
+//     print_r($ticketsPorNomeChamado);
+//     echo "</pre>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao buscar tickets por nome de chamado:</b> " . $e->getMessage() . "<br>";
+// }
+
+// =========================================================================
+// 21. TESTE: BUSCAR TICKETS NÃO RESOLVIDOS
+// =========================================================================
+// echo "<h3>21. Buscar Tickets Não Resolvidos</h3>";
+// try {
+//     $ticketsNaoResolvidos = $service->buscarTicketNaoResolvido();
+//     echo "Foram encontrados " . count($ticketsNaoResolvidos) . " chamados não resolvidos.<br>";
+//     echo "<pre>";
+//     print_r($ticketsNaoResolvidos);
+//     echo "</pre>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao buscar tickets não resolvidos:</b> " . $e->getMessage() . "<br>";
+// }
+
+// =========================================================================
+// 22. TESTE: BUSCAR TICKETS POR NOME DE USUÁRIO
+// =========================================================================
+// echo "<h3>22. Buscar Tickets por Nome de Usuário</h3>";
+// try {
+//     $nomeUsuario = 'Fran';
+//     $ticketsPorNomeUsuario = $service->buscarTicketNomeUser($nomeUsuario);
+//     echo "Foram encontrados " . count($ticketsPorNomeUsuario) . " chamados para o usuário com nome '{$nomeUsuario}'.<br>";
+//     echo "<pre>";
+//     print_r($ticketsPorNomeUsuario);
 //     echo "</pre>";
 // } catch (\Exception $e) {
 //     echo "<b>Erro ao buscar tickets por nome de usuário:</b> " . $e->getMessage() . "<br>";

@@ -493,6 +493,41 @@ class TicketRepository{
         }
     }
 
+    public function buscarTicketNaoResolvido(): ?array {
+        try {
+            $sql = 'SELECT * FROM "CHAMADO" WHERE status = ?';
+            $stmt = Database::getConnection()->prepare($sql);
+            $stmt->execute(['não resolvido']);
+            $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if (empty($dados)) {
+                return [];
+            }
+            $tickets = [];
+            foreach ($dados as $linha) {
+                $dataAberturaObj = !empty($linha['data_abertura']) ? new DateTime($linha['data_abertura']) : null;
+                $dataEncerramentoObj = !empty($linha['data_encerramento']) ? new DateTime($linha['data_encerramento']) : null;
+                
+                $tickets[] = new Ticket(
+                    $linha['id'],
+                    $linha['uuid'],
+                    $linha['titulo'] ?? null,
+                    $linha['descricao'] ?? null,
+                    $linha['prioridade'],
+                    $linha['patrimonio'] ?? null,
+                    $linha['status'],
+                    $linha['id_categoria'] ?? null,
+                    $linha['id_usuario'] ?? null,
+                    $linha['id_responsavel'] ?? null,
+                    $dataAberturaObj,
+                    $dataEncerramentoObj
+                );
+            }
+            return $tickets;
+        } catch (PDOException $e) {
+            throw new RuntimeException("Erro ao buscar chamados não resolvidos no banco", 0, $e);
+        }
+    }
+
     public function buscarTicketPorResponsavelId(int $responsavelId): ?array {
         try {
             $sql = 'SELECT * FROM "CHAMADO" WHERE id_responsavel = ?';
@@ -500,7 +535,7 @@ class TicketRepository{
             $stmt->execute([$responsavelId]);
             $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
             if (empty($dados)) {
-                return null;
+                return [];
             }
             $tickets = [];
             foreach ($dados as $linha) {
@@ -535,7 +570,7 @@ class TicketRepository{
             $stmt->execute(['%' . $nomeUsuario . '%']);
             $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
             if (empty($dados)) {
-                return null;
+                return [];
             }
             $tickets = [];
             foreach ($dados as $linha) {
@@ -562,11 +597,80 @@ class TicketRepository{
             throw new RuntimeException("Erro ao buscar chamados por nome de usuário no banco", 0, $e);
         }
     }
+
+    public function buscarChamadosNomeChamado(string $nomeChamado): ?array {   
+        try {
+            $sql = 'SELECT * FROM "CHAMADO" WHERE titulo ILIKE ?';
+            $stmt = Database::getConnection()->prepare($sql);
+            $stmt->execute(['%' . $nomeChamado . '%']);
+            $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if (empty($dados)) {
+                return [];
+            }
+            $tickets = [];
+            foreach ($dados as $linha) {
+                $dataAberturaObj = !empty($linha['data_abertura']) ? new DateTime($linha['data_abertura']) : null;
+                $dataEncerramentoObj = !empty($linha['data_encerramento']) ? new DateTime($linha['data_encerramento']) : null;
+                
+                $tickets[] = new Ticket(
+                    $linha['id'],
+                    $linha['uuid'],
+                    $linha['titulo'] ?? null,
+                    $linha['descricao'] ?? null,
+                    $linha['prioridade'],
+                    $linha['patrimonio'] ?? null,
+                    $linha['status'],
+                    $linha['id_categoria'] ?? null,
+                    $linha['id_usuario'] ?? null,
+                    $linha['id_responsavel'] ?? null,
+                    $dataAberturaObj,
+                    $dataEncerramentoObj
+                );
+            }
+            return $tickets;
+        } catch (PDOException $e) {
+            throw new RuntimeException("Erro ao buscar chamados por nome de chamado no banco", 0, $e);
+        }
+    }
 }
 
     // EXEMPLOS DE USO DO REPOSITÓRIO DE CHAMADOS
 
-    // BUSCA DE CHAMADOS POR RESPONSÁVEL ID
+    // BUSCAR CHAMADOS NÃO RESOLVIDOS
+    // $repository = new TicketRepository();
+    // $tickets = $repository->buscarTicketNaoResolvido();
+    // if ($tickets) {
+    //     foreach ($tickets as $ticket) {
+    //         echo "<br> ID: " . $ticket->getId() . ", Título: " . $ticket->getTitulo() . ", Status: " . $ticket->getStatus() . "\n";
+    //     }
+    // } else {
+    //     echo "Nenhum chamado encontrado não resolvido.\n";
+    // }
+
+    // BUSCA CHAMADOS POR NOME DE CHAMADO
+    // $repository = new TicketRepository();
+    // $tickets = $repository->buscarChamadosNomeChamado("");
+    // if ($tickets) {
+    //     foreach ($tickets as $ticket) {
+    //         echo "<br> ID: " . $ticket->getId() . ", Título: " . $ticket->getTitulo() . ", Status: " . $ticket->getStatus() . "\n";
+    //     }
+    // } else {
+    //     echo "Nenhum chamado encontrado com o nome especificado.\n";
+    // }
+
+    // BUSCAR CHAMADOS POR NOME DE USER
+    // $repository = new TicketRepository();
+    // $tickets = $repository->buscarChamadosNomeUser("r");
+    // echo "Chamados do usuário com nome 'r':\n";
+    // if ($tickets) {
+    //     foreach ($tickets as $ticket) {
+    //         echo "<br> ID: " . $ticket->getId() . ", Título: " . $ticket->getTitulo() . ", Status: " . $ticket->getStatus() . "\n";
+    //     }
+    // } else {
+    //     echo "Nenhum chamado encontrado para o usuário especificado.\n";
+    // }
+
+    // BUSCAR CHAMADOS POR RESPONSÁVEL ID
     // $repository = new TicketRepository();
     // $tickets = $repository->buscarTicketPorResponsavelId(2);
     // echo "Chamados do responsável com ID 12:\n";
@@ -578,7 +682,7 @@ class TicketRepository{
     //     echo "Nenhum chamado encontrado para o responsável especificado.\n";
     // }
 
-    // BUSCA DE CHAMADOS POR USER ID
+    // BUSCAR CHAMADOS POR USER ID
     // $repository = new TicketRepository();
     // $tickets = $repository->buscarTicketPorUserId(1);
     // echo "Chamados do usuário com ID 1:\n";
@@ -721,4 +825,5 @@ class TicketRepository{
     // } catch (Exception $e) {
     //     echo "\nErro ao encerrar chamado: " . $e->getMessage() . "\n";
     // }
+    
 ?>
