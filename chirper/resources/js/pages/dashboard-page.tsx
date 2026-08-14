@@ -516,6 +516,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                           <option value="pendente">Pendente</option>
                           <option value="concluido">Concluído</option>
                           <option value="cancelado">Cancelado</option>
+                          <option value="Não resolvido">Não Resolvido</option>
                         </select>
 
                         <select
