@@ -52,6 +52,8 @@ export function AnimatedTable({
 
     const [expandedTicketId, setExpandedTicketId] = useState<number | null>(null);
 
+    const [statusLocal, setStatusLocal] = useState<Record<number, string>>({});
+
     function toggleExpanded(ticketId: number) {
         setExpandedTicketId((current) => (current === ticketId ? null : ticketId));
     }
@@ -72,24 +74,20 @@ export function AnimatedTable({
 
         selectElement.blur();
 
+        // ADICIONE ESTA LINHA: Segura o status visualmente na tela na mesma hora!
+        setStatusLocal((prev) => ({ ...prev, [ticketId]: newStatus }));
+
         if (newStatus === 'pendente') {
-            setTimeout(() => {
-                alert(`Chamado #${ticketId} marcado como Pendente!`);
-            }, 0);
+            setTimeout(() => alert(`Chamado #${ticketId} marcado como Pendente!`), 0);
         }
-
         if (newStatus === 'concluido') {
-            setTimeout(() => {
-                alert(`Chamado #${ticketId} marcado como Concluído!`);
-            }, 0);
+            setTimeout(() => alert(`Chamado #${ticketId} marcado como Concluído!`), 0);
         }
-
         if (newStatus === 'cancelado') {
-            setTimeout(() => {
-                alert(`Chamado #${ticketId} marcado como Cancelado!`);
-            }, 0);
+            setTimeout(() => alert(`Chamado #${ticketId} marcado como Cancelado!`), 0);
         }
 
+        // Manda atualizar no banco
         onUpdateStatus?.(ticketId, newStatus);
     }
 
@@ -146,8 +144,8 @@ export function AnimatedTable({
                                             </td>
                                             <td className="px-3 py-3" onClick={(event) => event.stopPropagation()}>
                                                 <select
-                                                    value={row.status}
-                                                    // Desabilita se estiver carregando a alteração ou se o usuário NÃO for analista/adm
+                                                   value={statusLocal[row.id] || row.status} 
+    
                                                     disabled={
                                                         isUpdatingStatusId === row.id || 
                                                         (userRole !== 'adm' && userRole !== 'analista')
