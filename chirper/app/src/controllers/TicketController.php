@@ -40,24 +40,49 @@ class TicketController extends Controller {
 
     public function listarTicket(): void {
         try {
-            $dados = $this->services->listarTudo();
+            $tickets = $this->services->listarTudo();
+            $dadosFormatados = [];
+
+            if (!empty($tickets)) {
+                foreach ($tickets as $ticket) {
+                    $dadosFormatados[] = [
+                        // Enviamos tanto 'id' quanto 'id_chamado' para não ter erro no JavaScript
+                        'id' => $ticket->getId(), 
+                        'id_chamado' => $ticket->getId(), 
+                        
+                        'titulo' => $ticket->getTitulo(),
+                        'descricao' => $ticket->getDescricao(),
+                        'prioridade' => $ticket->getPrioridade(),
+                        'status' => $ticket->getStatus(),
+                        'patrimonio' => $ticket->getPatrimonio(),
+                        
+                        // O JavaScript precisa disso para cruzar com a rota de categorias
+                        'id_categoria' => $ticket->getIdCategoria(), 
+                        'categoria_id' => $ticket->getIdCategoria(),
+                        
+                        // IDs de relacionamento
+                        'id_responsavel' => $ticket->getIdResponsavel(),
+                        'tecnico_id' => $ticket->getIdResponsavel(),
+                        'id_usuario' => $ticket->getIdUsuario(),
+                        
+                        // Formatação segura de datas
+                        'data_abertura' => $ticket->getDataAbertura() ? $ticket->getDataAbertura()->format('Y-m-d H:i:s') : null,
+                    ];
+                }
+            }
             
             $this->response([
                 "success" => true,
-                "data" => $dados
+                "data" => $dadosFormatados
             ]);
 
         } catch (Throwable $e) {
-
             $this->response([
                 "success" => false,
                 "message" => $e->getMessage()
             ], 400);
-
         }
-    }
-
-    public function exibirTicket(int $id): void {
+    }    public function exibirTicket(int $id): void {
         try {
             $ticket = $this->services->exibirTicket($id);
             
@@ -324,55 +349,4 @@ class TicketController extends Controller {
 
 
 
-/*
-=========================================================================
-TESTES DO CONTROLLER (Filtros de Busca)
-=========================================================================
-*/
-
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
-$controller = new TicketController();
-
-
-// =========================================================================
-// 1. TESTE: BUSCAR TICKETS POR STATUS
-// =========================================================================
-// echo "<h3>1. Teste: Buscar Tickets por Status ('pendente')</h3>";
-// try {
-//     $controller->buscarTicketsStatus('pendente');
-//     echo "<br><br><b>Teste de status vazio (inexistente):</b><br>";
-//     $controller->buscarTicketsStatus('status_maluco');
-
-// } catch (\Exception $e) {
-//     echo "<b>Erro:</b> " . $e->getMessage() . "<br>";
-// }
-
-// =========================================================================
-// 2. TESTE: BUSCAR TICKETS POR DATA DE ABERTURA
-// =========================================================================
-
-// echo "<h3>2. Teste: Buscar Tickets por Data de Abertura</h3>";
-// try {
-//     $dataAberturaTeste = new \DateTime('2026-08-08'); 
-//     $controller->buscarTicketsDataAbertura($dataAberturaTeste);
-
-// } catch (\Exception $e) {
-//     echo "<b>Erro:</b> " . $e->getMessage() . "<br>";
-// }
-
-
-// =========================================================================
-// 3. TESTE: BUSCAR TICKETS POR DATA DE ENCERRAMENTO
-// =========================================================================
-// echo "<h3>3. Teste: Buscar Tickets por Data de Encerramento</h3>";
-// try {
-//     $dataEncerramentoTeste = new \DateTime('2026-08-11'); 
-    
-//     $controller->buscarTicketsDataEncerramento($dataEncerramentoTeste);
-
-// } catch (\Exception $e) {
-//     echo "<b>Erro:</b> " . $e->getMessage() . "<br>";
-// }
 ?>
