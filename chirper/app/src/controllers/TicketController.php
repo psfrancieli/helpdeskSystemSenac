@@ -40,49 +40,27 @@ class TicketController extends Controller {
 
     public function listarTicket(): void {
         try {
-            $tickets = $this->services->listarTudo();
-            $dadosFormatados = [];
-
-            if (!empty($tickets)) {
-                foreach ($tickets as $ticket) {
-                    $dadosFormatados[] = [
-                        // Enviamos tanto 'id' quanto 'id_chamado' para não ter erro no JavaScript
-                        'id' => $ticket->getId(), 
-                        'id_chamado' => $ticket->getId(), 
-                        
-                        'titulo' => $ticket->getTitulo(),
-                        'descricao' => $ticket->getDescricao(),
-                        'prioridade' => $ticket->getPrioridade(),
-                        'status' => $ticket->getStatus(),
-                        'patrimonio' => $ticket->getPatrimonio(),
-                        
-                        // O JavaScript precisa disso para cruzar com a rota de categorias
-                        'id_categoria' => $ticket->getIdCategoria(), 
-                        'categoria_id' => $ticket->getIdCategoria(),
-                        
-                        // IDs de relacionamento
-                        'id_responsavel' => $ticket->getIdResponsavel(),
-                        'tecnico_id' => $ticket->getIdResponsavel(),
-                        'id_usuario' => $ticket->getIdUsuario(),
-                        
-                        // Formatação segura de datas
-                        'data_abertura' => $ticket->getDataAbertura() ? $ticket->getDataAbertura()->format('Y-m-d H:i:s') : null,
-                    ];
-                }
-            }
+            // Caminho corrigido: sobe duas pastas (sai de controllers -> sai de src) e entra em Http
+            require_once __DIR__ . '/../../Http/Support/ChamadoActions.php'; 
+            
+            // Usamos a barra invertida (\) para garantir que o PHP encontre a classe
+            $actions = new \ChamadoActions();
+            $chamados = $actions->listarComTecnicoId();
             
             $this->response([
                 "success" => true,
-                "data" => $dadosFormatados
+                "data" => $chamados
             ]);
 
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             $this->response([
                 "success" => false,
-                "message" => $e->getMessage()
+                "message" => "Erro no servidor: " . $e->getMessage()
             ], 400);
         }
-    }    public function exibirTicket(int $id): void {
+    }
+
+    public function exibirTicket(int $id): void {
         try {
             $ticket = $this->services->exibirTicket($id);
             
