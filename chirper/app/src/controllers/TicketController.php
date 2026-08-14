@@ -197,6 +197,33 @@ class TicketController extends Controller {
         }
     }
 
+    public function atualizarStatus(int $id, array $dadosRequisicao): void {
+        try {
+            if (empty($dadosRequisicao['status'])) {
+                throw new InvalidArgumentException("O status é obrigatório.");
+            }
+
+            $this->services->atualizarStatus($id, $dadosRequisicao);
+
+            $this->response([
+                "success" => true,
+                "message" => "Status do ticket {$id} atualizado com sucesso."
+            ]);
+
+        } catch (InvalidArgumentException $e) {
+            $this->response([
+                "success" => false,
+                "message" => $e->getMessage()
+            ], 400);
+
+        } catch (\Throwable $e) {
+            $this->response([
+                "success" => false,
+                "message" => ($e->getMessage())
+            ], 400);
+        }
+    }
+
     public function buscarTicketsDataAbertura(\DateTime $data): void {
         try {
             $tickets = $this->services->buscaTicketsPorDataAbertura($data);
@@ -297,6 +324,20 @@ $controller = new TicketController();
 //     $dataEncerramentoTeste = new \DateTime('2026-08-11'); 
     
 //     $controller->buscarTicketsDataEncerramento($dataEncerramentoTeste);
+
+// } catch (\Exception $e) {
+//     echo "<b>Erro:</b> " . $e->getMessage() . "<br>";
+// }
+
+// =========================================================================
+// 4. TESTE: ATUALIZAR STATUS DO TICKET
+// =========================================================================
+// echo "<h3>4. Teste: Atualizar Status do Ticket</h3>";
+// try {
+//     $idTicket = 2; 
+//     $novoStatusTeste = ['status' => 'pendente']; 
+
+//     $controller->atualizarStatus($idTicket, $novoStatusTeste);
 
 // } catch (\Exception $e) {
 //     echo "<b>Erro:</b> " . $e->getMessage() . "<br>";

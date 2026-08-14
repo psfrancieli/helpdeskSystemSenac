@@ -324,6 +324,41 @@ class TicketRepository{
         }
     }
 
+    public function buscarTicketsPorCategoria(int $idCategoria): ? array {
+        try {
+            $sql = 'SELECT * FROM "CHAMADO" WHERE id_categoria = ?';
+            $stmt = Database::getConnection()->prepare($sql);
+            $stmt->execute([$idCategoria]);
+            $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if (empty($dados)) {
+                return null;
+            }
+            $tickets = [];
+            foreach ($dados as $linha) {
+                $dataAberturaObj = !empty($linha['data_abertura']) ? new DateTime($linha['data_abertura']) : null;
+                $dataEncerramentoObj = !empty($linha['data_encerramento']) ? new DateTime($linha['data_encerramento']) : null;
+                
+                $tickets[] = new Ticket(
+                    $linha['id'],
+                    $linha['uuid'],
+                    $linha['titulo'] ?? null,
+                    $linha['descricao'] ?? null,
+                    $linha['prioridade'],
+                    $linha['patrimonio'] ?? null,
+                    $linha['status'],
+                    $linha['id_categoria'] ?? null,
+                    $linha['id_usuario'] ?? null,
+                    $linha['id_responsavel'] ?? null,
+                    $dataAberturaObj,
+                    $dataEncerramentoObj
+                );
+            }
+            return $tickets;
+        } catch (PDOException $e) {
+            throw new RuntimeException("Erro ao buscar chamados por categoria no banco", 0, $e);
+        }
+    }
+
     public function contarChamadosResolvidosPorPeriodo(\DateTime $dataInicial, \DateTime $dataFinal): int {
         try {
             $sql = 'SELECT COUNT(*) AS total FROM "CHAMADO" WHERE status = ? AND data_encerramento::DATE BETWEEN ? AND ?';
@@ -339,6 +374,42 @@ class TicketRepository{
             return (int)($resultado['total'] ?? 0);
         } catch (PDOException $e) {
             throw new RuntimeException("Erro ao contar chamados resolvidos por período", 0, $e);
+        }
+    }
+
+    public function contarChamadosCancelados(\DateTime $dataInicial, \DateTime $dataFinal): int {
+        try {
+            $sql = 'SELECT COUNT(*) AS total FROM "CHAMADO" WHERE status = ? AND data_encerramento::DATE BETWEEN ? AND ?';
+            $stmt = Database::getConnection()->prepare($sql);
+            
+            $stmt->execute([
+                'cancelado', 
+                $dataInicial->format('Y-m-d'),
+                $dataFinal->format('Y-m-d') 
+            ]);
+            
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (int)($resultado['total'] ?? 0);
+        } catch (PDOException $e) {
+            throw new RuntimeException("Erro ao contar chamados cancelados por período", 0, $e);
+        }
+    }
+
+    public function contarChamadosCanceladosPorPeriodo(\DateTime $dataInicial, \DateTime $dataFinal): int {
+        try {
+            $sql = 'SELECT COUNT(*) AS total FROM "CHAMADO" WHERE status = ? AND data_encerramento::DATE BETWEEN ? AND ?';
+            $stmt = Database::getConnection()->prepare($sql);
+            
+            $stmt->execute([
+                'cancelado', 
+                $dataInicial->format('Y-m-d'),
+                $dataFinal->format('Y-m-d') 
+            ]);
+            
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (int)($resultado['total'] ?? 0);
+        } catch (PDOException $e) {
+            throw new RuntimeException("Erro ao contar chamados cancelados por período", 0, $e);
         }
     }
 
@@ -454,6 +525,41 @@ class TicketRepository{
             return $tickets;
         } catch (PDOException $e) {
             throw new RuntimeException("Erro ao buscar chamados por responsável no banco", 0, $e);
+        }
+    }
+
+    public function buscarChamadosNomeUser(string $nomeUsuario): ?array {
+        try {
+            $sql = 'SELECT * FROM "CHAMADO" c INNER JOIN "USUARIO" u ON c.id_usuario = u.id WHERE u.nome ILIKE ?';
+            $stmt = Database::getConnection()->prepare($sql);
+            $stmt->execute(['%' . $nomeUsuario . '%']);
+            $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if (empty($dados)) {
+                return null;
+            }
+            $tickets = [];
+            foreach ($dados as $linha) {
+                $dataAberturaObj = !empty($linha['data_abertura']) ? new DateTime($linha['data_abertura']) : null;
+                $dataEncerramentoObj = !empty($linha['data_encerramento']) ? new DateTime($linha['data_encerramento']) : null;
+                
+                $tickets[] = new Ticket(
+                    $linha['id'],
+                    $linha['uuid'],
+                    $linha['titulo'] ?? null,
+                    $linha['descricao'] ?? null,
+                    $linha['prioridade'],
+                    $linha['patrimonio'] ?? null,
+                    $linha['status'],
+                    $linha['id_categoria'] ?? null,
+                    $linha['id_usuario'] ?? null,
+                    $linha['id_responsavel'] ?? null,
+                    $dataAberturaObj,
+                    $dataEncerramentoObj
+                );
+            }
+            return $tickets;
+        } catch (PDOException $e) {
+            throw new RuntimeException("Erro ao buscar chamados por nome de usuário no banco", 0, $e);
         }
     }
 }
