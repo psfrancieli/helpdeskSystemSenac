@@ -40,10 +40,8 @@ class TicketController extends Controller {
 
     public function listarTicket(): void {
         try {
-            // Caminho corrigido: sobe duas pastas (sai de controllers -> sai de src) e entra em Http
             require_once __DIR__ . '/../../Http/Support/ChamadoActions.php'; 
             
-            // Usamos a barra invertida (\) para garantir que o PHP encontre a classe
             $actions = new \ChamadoActions();
             $chamados = $actions->listarComTecnicoId();
             
