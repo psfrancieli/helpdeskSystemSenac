@@ -252,3 +252,118 @@ html[data-theme='light'] .brand-glow {
 html[data-theme='light'] .bubble {
     background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.65), rgba(66, 137, 255, 0.14));
 }
+
+
+html[data-theme='light'] .bg-stone-500\/15 { background-color: rgba(139, 150, 161, 0.15) !important; }
+html[data-theme='light'] .from-stone-700\/60 { --tw-gradient-from: rgba(90, 105, 120, 0.25) !important; }
+html[data-theme='light'] .to-stone-600\/40 { --tw-gradient-to: rgba(90, 105, 120, 0.10) !important; }
+html[data-theme='light'] .divide-stone-500\/10 > :not([hidden]) ~ :not([hidden]) { border-color: rgba(126, 139, 151, 0.10) !important; }
+html[data-theme='light'] .divide-stone-700\/60 > :not([hidden]) ~ :not([hidden]) { border-color: rgba(90, 105, 120, 0.22) !important; }
+
+
+html[data-theme='light'] .hover\:bg-amber-500:hover { background-color: var(--theme-primary) !important; }
+html[data-theme='light'] .hover\:bg-amber-600\/45:hover { background-color: rgba(66, 137, 255, 0.45) !important; }
+html[data-theme='light'] .hover\:bg-stone-700:hover { background-color: #e2e6ea !important; }
+html[data-theme='light'] .hover\:bg-stone-700\/30:hover { background-color: rgba(90, 105, 120, 0.12) !important; }
+html[data-theme='light'] .hover\:bg-stone-700\/45:hover { background-color: rgba(90, 105, 120, 0.17) !important; }
+html[data-theme='light'] .hover\:bg-stone-700\/60:hover { background-color: rgba(90, 105, 120, 0.22) !important; }
+html[data-theme='light'] .hover\:bg-stone-800\/45:hover { background-color: rgba(90, 105, 120, 0.10) !important; }
+html[data-theme='light'] .hover\:border-amber-500\/50:hover { border-color: rgba(66, 137, 255, 0.50) !important; }
+html[data-theme='light'] .hover\:border-stone-500\/40:hover { border-color: rgba(126, 139, 151, 0.40) !important; }
+html[data-theme='light'] .hover\:text-amber-200:hover { color: #2e78ea !important; }
+html[data-theme='light'] .hover\:text-amber-300:hover { color: #2878ef !important; }
+html[data-theme='light'] .focus\:border-amber-500\/60:focus { border-color: rgba(66, 137, 255, 0.60) !important; }
+
+
+html[data-theme='light'] .bg-emerald-500\/10 { background-color: rgba(21, 128, 61, 0.08) !important; }
+html[data-theme='light'] .bg-emerald-500\/15 { background-color: rgba(21, 128, 61, 0.12) !important; }
+html[data-theme='light'] .border-emerald-300\/30 { border-color: rgba(21, 128, 61, 0.30) !important; }
+html[data-theme='light'] .border-emerald-500\/30 { border-color: rgba(21, 128, 61, 0.30) !important; }
+html[data-theme='light'] .text-emerald-100,
+html[data-theme='light'] .text-emerald-200,
+html[data-theme='light'] .text-emerald-300 { color: #15803d !important; }
+
+html[data-theme='light'] .bg-red-500\/10 { background-color: rgba(190, 18, 60, 0.08) !important; }
+html[data-theme='light'] .bg-rose-500\/15 { background-color: rgba(190, 18, 60, 0.12) !important; }
+html[data-theme='light'] .border-red-500\/30 { border-color: rgba(190, 18, 60, 0.30) !important; }
+html[data-theme='light'] .border-rose-300\/30 { border-color: rgba(190, 18, 60, 0.30) !important; }
+html[data-theme='light'] .text-red-100,
+html[data-theme='light'] .text-rose-200,
+html[data-theme='light'] .text-rose-300 { color: #be123c !important; }
+
+/* =========================================================
+   TEMA CLARO — foco dos campos
+   O tema escuro não é afetado por estas regras.
+   ========================================================= */
+
+html[data-theme='light'] input:focus,
+html[data-theme='light'] input:focus-visible,
+html[data-theme='light'] textarea:focus,
+html[data-theme='light'] textarea:focus-visible,
+html[data-theme='light'] select:focus,
+html[data-theme='light'] select:focus-visible {
+    outline: none !important;
+    border-color: #4289ff !important;
+
+    /* Remove o ring laranja do Tailwind */
+    --tw-ring-color: rgba(66, 137, 255, 0.35) !important;
+    --tw-ring-shadow: 0 0 0 1px rgba(66, 137, 255, 0.35) !important;
+    --tw-shadow: none !important;
+
+    box-shadow: 0 0 0 1px #4289ff !important;
+}
+
+/* Qualquer classe de borda/foco laranja do Tailwind perde
+   prioridade SOMENTE no tema claro. */
+html[data-theme='light'] input:focus.border-amber-500,
+html[data-theme='light'] input:focus.border-amber-400,
+html[data-theme='light'] input:focus-visible.border-amber-500,
+html[data-theme='light'] input:focus-visible.border-amber-400,
+html[data-theme='light'] textarea:focus.border-amber-500,
+html[data-theme='light'] textarea:focus.border-amber-400,
+html[data-theme='light'] textarea:focus-visible.border-amber-500,
+html[data-theme='light'] textarea:focus-visible.border-amber-400 {
+    border-color: #4289ff !important;
+}
+
+/* =========================================================
+   TEMA CLARO — texto dos botões
+   ========================================================= */
+
+html[data-theme='light'] button.bg-amber-400,
+html[data-theme='light'] button.bg-amber-500,
+html[data-theme='light'] button.bg-amber-600,
+html[data-theme='light'] button[class*="bg-amber"],
+html[data-theme='light'] [role="button"].bg-amber-400,
+html[data-theme='light'] [role="button"].bg-amber-500,
+html[data-theme='light'] [role="button"].bg-amber-600 {
+    color: #ffffff !important;
+}
+
+html[data-theme='light'] button.bg-amber-400 *,
+html[data-theme='light'] button.bg-amber-500 *,
+html[data-theme='light'] button.bg-amber-600 *,
+html[data-theme='light'] button[class*="bg-amber"] *,
+html[data-theme='light'] [role="button"].bg-amber-400 *,
+html[data-theme='light'] [role="button"].bg-amber-500 *,
+html[data-theme='light'] [role="button"].bg-amber-600 * {
+    color: #ffffff !important;
+}
+
+/* =========================================================
+   TEMA ESCURO — foco laranja
+   Mantém a identidade laranja original.
+   ========================================================= */
+
+html:not([data-theme='light']) input:focus,
+html:not([data-theme='light']) input:focus-visible,
+html:not([data-theme='light']) textarea:focus,
+html:not([data-theme='light']) textarea:focus-visible,
+html:not([data-theme='light']) select:focus,
+html:not([data-theme='light']) select:focus-visible {
+    outline: none !important;
+    border-color: #f59e0b !important;
+    --tw-ring-color: rgba(245, 158, 11, 0.50) !important;
+    --tw-ring-shadow: 0 0 0 1px rgba(245, 158, 11, 0.50) !important;
+    box-shadow: 0 0 0 1px #f59e0b !important;
+}

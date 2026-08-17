@@ -110,7 +110,7 @@ export function DashboardHeader({ user, onLogout }: DashboardHeaderProps) {
                 <Link
                     to="/dashboard/perfil"
                     aria-label="Meu perfil"
-                    className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-stone-600 bg-stone-900/55 text-stone-200 transition-all hover:border-amber-500/50 hover:text-white"
+                    className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-transparent text-stone-200 transition-all hover:text-white"
                 >
                     <Avatar>
                     <AvatarFallback>
