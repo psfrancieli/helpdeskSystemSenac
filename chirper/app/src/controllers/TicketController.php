@@ -304,10 +304,10 @@ TESTES DO CONTROLLER (Descomente apenas UM por vez)
 =========================================================================
 */
 
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+// ini_set('display_errors', 1);
+// error_reporting(E_ALL);
 
-$controller = new TicketController();
+// $controller = new TicketController();
 
 // =========================================================================
 // 1. TESTE: BUSCAR TICKETS POR STATUS
