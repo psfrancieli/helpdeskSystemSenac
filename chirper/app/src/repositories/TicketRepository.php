@@ -634,196 +634,359 @@ class TicketRepository{
     }
 }
 
-    // EXEMPLOS DE USO DO REPOSITÓRIO DE CHAMADOS
+// =========================================================================
+// BLOCO DE TESTES
+// =========================================================================
 
-    // BUSCAR CHAMADOS NÃO RESOLVIDOS
-    // $repository = new TicketRepository();
-    // $tickets = $repository->buscarTicketNaoResolvido();
-    // if ($tickets) {
-    //     foreach ($tickets as $ticket) {
-    //         echo "<br> ID: " . $ticket->getId() . ", Título: " . $ticket->getTitulo() . ", Status: " . $ticket->getStatus() . "\n";
-    //     }
-    // } else {
-    //     echo "Nenhum chamado encontrado não resolvido.\n";
-    // }
+// ini_set('display_errors', 1);
+// error_reporting(E_ALL);
 
-    // BUSCA CHAMADOS POR NOME DE CHAMADO
-    // $repository = new TicketRepository();
-    // $tickets = $repository->buscarChamadosNomeChamado("");
-    // if ($tickets) {
-    //     foreach ($tickets as $ticket) {
-    //         echo "<br> ID: " . $ticket->getId() . ", Título: " . $ticket->getTitulo() . ", Status: " . $ticket->getStatus() . "\n";
-    //     }
-    // } else {
-    //     echo "Nenhum chamado encontrado com o nome especificado.\n";
-    // }
+// echo "<h1>Testes do TicketRepository</h1>";
 
-    // BUSCAR CHAMADOS POR NOME DE USER
-    // $repository = new TicketRepository();
-    // $tickets = $repository->buscarChamadosNomeUser("r");
-    // echo "Chamados do usuário com nome 'r':\n";
-    // if ($tickets) {
-    //     foreach ($tickets as $ticket) {
-    //         echo "<br> ID: " . $ticket->getId() . ", Título: " . $ticket->getTitulo() . ", Status: " . $ticket->getStatus() . "\n";
-    //     }
-    // } else {
-    //     echo "Nenhum chamado encontrado para o usuário especificado.\n";
-    // }
+// // AQUI ESTAVA A CAGADA: Faltava instanciar a própria classe do repositório!
+// $repository = new \src\repositories\TicketRepository();
 
-    // BUSCAR CHAMADOS POR RESPONSÁVEL ID
-    // $repository = new TicketRepository();
-    // $tickets = $repository->buscarTicketPorResponsavelId(2);
-    // echo "Chamados do responsável com ID 12:\n";
-    // if ($tickets) {
-    //     foreach ($tickets as $ticket) {
-    //         echo "<br>" . "ID: " . $ticket->getId() . ", Título: " . $ticket->getTitulo() . ", Status: " . $ticket->getStatus() . "<br>";
-    //     }
-    // } else {
-    //     echo "Nenhum chamado encontrado para o responsável especificado.\n";
-    // }
+// =========================================================================
+// 1. TESTE: BUSCAR CHAMADOS NÃO RESOLVIDOS
+// =========================================================================
+// echo "<h3>1. Buscar Chamados Não Resolvidos</h3>";
+// try {
+//     $ticketsNaoResolvidos = $repository->buscarTicketNaoResolvido();
+//     echo "Sucesso! Foram encontrados " . (is_array($ticketsNaoResolvidos) ? count($ticketsNaoResolvidos) : 0) . " chamados não resolvidos.<br>";
+//     echo "<pre>";
+//     print_r($ticketsNaoResolvidos);
+//     echo "</pre>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao buscar chamados não resolvidos:</b> " . $e->getMessage() . "<br>";
+// }
 
-    // BUSCAR CHAMADOS POR USER ID
-    // $repository = new TicketRepository();
-    // $tickets = $repository->buscarTicketPorUserId(1);
-    // echo "Chamados do usuário com ID 1:\n";
-    // if ($tickets) {
-    //     foreach ($tickets as $ticket) {
-    //         echo "<br>" . "ID: " . $ticket->getId() . ", Título: " . $ticket->getTitulo() . ", Status: " . $ticket->getStatus() . "<br>";
-    //     }
-    // } else {
-    //     echo "Nenhum chamado encontrado para o usuário especificado.\n";
-    // }
+// =========================================================================
+// 2. TESTE: BUSCA CHAMADOS POR NOME DO CHAMADO (TÍTULO)
+// =========================================================================
+// echo "<h3>2. Busca Chamados por Nome do Chamado</h3>";
+// try {
+//     $nomeChamado = "Computador"; // Substitua pelo texto que deseja buscar
+//     $ticketsNomeChamado = $repository->buscarChamadosNomeChamado($nomeChamado);
+//     echo "Sucesso! Foram encontrados " . (is_array($ticketsNomeChamado) ? count($ticketsNomeChamado) : 0) . " chamados com o termo '{$nomeChamado}'.<br>";
+//     echo "<pre>";
+//     print_r($ticketsNomeChamado);
+//     echo "</pre>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro na busca por nome de chamado:</b> " . $e->getMessage() . "<br>";
+// }
 
-    // CONTAR CHAMADOS PENDENTES POR PERÍODO
-    // $repository = new TicketRepository();
-    // $dataInicial = new DateTime('2026-07-01');
-    // $dataFinal = new DateTime('2026-09-30');
-    // $indicadores = $repository->relatorioPorCategoriaPorPeriodo($dataInicial, $dataFinal);
-    // foreach ($indicadores as $linha) {
-    //     echo "Categoria: " . $linha['categoria'] . " | ";
-    //     echo "Quantidade: " . $linha['quantidade'] . " | ";
-    //     echo "Porcentagem: " . $linha['porcentagem'] . "%<br>";
-    // }
+// =========================================================================
+// 3. TESTE: BUSCAR CHAMADOS POR NOME DE USUÁRIO
+// =========================================================================
+// echo "<h3>3. Buscar Chamados por Nome de Usuário</h3>";
+// try {
+//     $nomeUser = "r"; // Substitua pelo nome desejado
+//     $ticketsNomeUser = $repository->buscarChamadosNomeUser($nomeUser);
+//     echo "Sucesso! Foram encontrados " . (is_array($ticketsNomeUser) ? count($ticketsNomeUser) : 0) . " chamados criados por usuários contendo '{$nomeUser}'.<br>";
+//     echo "<pre>";
+//     print_r($ticketsNomeUser);
+//     echo "</pre>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro na busca por nome de usuário:</b> " . $e->getMessage() . "<br>";
+// }
 
-    // CONTAR CHAMADOS PENDENTES POR PERÍODO
-    // $repository = new TicketRepository();
-    // $dataInicial = new DateTime('2026-07-01');
-    // $dataFinal = new DateTime('2026-09-30');
-    // $quantidadePendentes = $repository->contarChamadosPendentesPorPeriodo($dataInicial, $dataFinal);
-    // echo "Quantidade de chamados pendentes entre " . $dataInicial->format('Y-m-d') . " e " . $dataFinal->format('Y-m-d') . ": " . "Quantidade: " . $quantidadePendentes . "\n";
+// =========================================================================
+// 4. TESTE: BUSCAR CHAMADOS POR RESPONSÁVEL ID
+// =========================================================================
+// echo "<h3>4. Buscar Chamados por Responsável ID</h3>";
+// try {
+//     $idResponsavel = 2; // ID do técnico
+//     $ticketsResponsavel = $repository->buscarTicketPorResponsavelId($idResponsavel);
+//     echo "Sucesso! Foram encontrados " . (is_array($ticketsResponsavel) ? count($ticketsResponsavel) : 0) . " chamados atribuídos ao técnico ID {$idResponsavel}.<br>";
+//     echo "<pre>";
+//     print_r($ticketsResponsavel);
+//     echo "</pre>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro na busca por responsável:</b> " . $e->getMessage() . "<br>";
+// }
 
-    // CONTAR CHAMADOS RESOLVIDOS POR PERÍODO
-    // $repository = new TicketRepository();
-    // $dataInicial = new DateTime('2026-07-01');
-    // $dataFinal = new DateTime('2026-09-30');
-    // $quantidadeResolvidos = $repository->contarChamadosResolvidosPorPeriodo($dataInicial, $dataFinal);
-    // echo "Quantidade de chamados resolvidos entre " . $dataInicial->format('Y-m-d') . " e " . $dataFinal->format('Y-m-d') . ": " . "Quantidade" . $quantidadeResolvidos . "\n";
+// =========================================================================
+// 5. TESTE: BUSCAR CHAMADOS POR USER ID (CRIADOR)
+// =========================================================================
+// echo "<h3>5. Buscar Chamados por User ID</h3>";
+// try {
+//     $idUsuario = 1; // ID do usuário que abriu o chamado
+//     $ticketsUsuario = $repository->buscarTicketPorUserId($idUsuario);
+//     echo "Sucesso! Foram encontrados " . (is_array($ticketsUsuario) ? count($ticketsUsuario) : 0) . " chamados criados pelo usuário ID {$idUsuario}.<br>";
+//     echo "<pre>";
+//     print_r($ticketsUsuario);
+//     echo "</pre>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro na busca por ID do usuário:</b> " . $e->getMessage() . "<br>";
+// }
 
-    // BUSCAR CHAMADOS POR STATUS
-    // $repository = new TicketRepository();
-    // $tickets = $repository->buscarTicketsPorStatus("pendente");
-    // echo "Chamados com status 'pendente':\n";
-    // if ($tickets) {
-    //     foreach ($tickets as $ticket) {
-    //         echo "<br>" . "ID: " . $ticket->getId() . ", Título: " . $ticket->getTitulo() . ", Status: " . $ticket->getStatus() . "<br>";
-    //     }
-    // } else {
-    //     echo "Nenhum chamado encontrado com o status especificado.\n";
-    // }
+// =========================================================================
+// 6. TESTE: CONTAR CHAMADOS PENDENTES POR PERÍODO
+// =========================================================================
+// echo "<h3>6. Contar Chamados por Período</h3>";
+// try {
+//     $dataInicial = new \DateTime('2026-07-01');
+//     $dataFinal = new \DateTime('2026-09-30');
+//     $quantidadePeriodo = $repository->contarChamadosPorPeriodo($dataInicial, $dataFinal);
+//     echo "Sucesso! Total de chamados abertos entre " . $dataInicial->format('Y-m-d') . " e " . $dataFinal->format('Y-m-d') . ": <b>{$quantidadePeriodo}</b>.<br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao contar chamados por período:</b> " . $e->getMessage() . "<br>";
+// }
 
-    // ATUALIZAR O STATUS DO CHAMADO
-    // $repository = new TicketRepository();
-    // $repository->atualizarStatusTicket(317, "pendente");
+// =========================================================================
+// 7. TESTE: CONTAR CHAMADOS RESOLVIDOS
+// =========================================================================
+// echo "<h3>7. Contar Chamados Resolvidos</h3>";
+// try {
+//     $quantidadeResolvidos = $repository->contarChamadosResolvidos();
+//     echo "Sucesso! Total de chamados resolvidos no banco: <b>{$quantidadeResolvidos}</b>.<br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao contar chamados resolvidos:</b> " . $e->getMessage() . "<br>";
+// }
 
-    // RELATÓRIO DE CHAMADOS POR PERÍODO
-    // $repositorio = new TicketRepository();
-    // $dataInicial = new DateTime('2026-06-01');
-    // $dataFinal = new DateTime('2026-06-30');
-    // $quantidadeChamados = $repositorio->contarChamadosPorPeriodo($dataInicial, $dataFinal);
-    // echo "Quantidade de chamados entre " . $dataInicial->format('Y-m-d') . " e " . $dataFinal->format('Y-m-d') . ": " .  "quantidade: " . $quantidadeChamados . "\n";
+// =========================================================================
+// 8. TESTE: BUSCAR CHAMADOS POR STATUS
+// =========================================================================
+// echo "<h3>8. Buscar Chamados por Status</h3>";
+// try {
+//     $statusBusca = "pendente";
+//     $ticketsStatus = $repository->buscarTicketsPorStatus($statusBusca);
+//     echo "Sucesso! Foram encontrados " . (is_array($ticketsStatus) ? count($ticketsStatus) : 0) . " chamados com o status '{$statusBusca}'.<br>";
+//     echo "<pre>";
+//     print_r($ticketsStatus);
+//     echo "</pre>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro na busca por status:</b> " . $e->getMessage() . "<br>";
+// }
 
-    // RELATÓRIO DE CHAMADOS POR CATEGORIA
-    // $repositorio = new TicketRepository();
-    // $indicadores = $repositorio->relatorioPorCategoria();
-    // foreach ($indicadores as $linha) {
-    //     echo "Categoria: " . $linha['categoria'] . " | ";
-    //     echo "Quantidade: " . $linha['quantidade'] . " | ";
-    //     echo "Porcentagem: " . $linha['porcentagem'] . "%<br>";
-    //  }
-
-    // TAXA DE RESOLUÇÃO DE CHAMADOS
-    // $repository = new TicketRepository();
-    // $totalChamados = $repository->contarChamados();
-    // $chamadosResolvidos = $repository->contarChamadosResolvidos();
-    // $taxaResolucao = $repository->calcularTaxaResolucao($totalChamados, $chamadosResolvidos);
-    // echo "Total de chamados: $totalChamados\n";
-    // echo "Chamados resolvidos: $chamadosResolvidos\n";
-    // echo "Taxa de resolução: $taxaResolucao%\n";
-
-    // BUSCA DE UM CHAMADO POR DATA DE ENCERRAMENTO
-    // $ticket = new TicketRepository();
-    // $ticketEncontrado = $ticket->buscaPorDataEncerramento(new DateTime('2026-08-06'));
-    // var_dump($ticketEncontrado);
-
-    // BUSCA DE UM CHAMADO POR DATA DE ABERTURA
-    // $ticket = new TicketRepository();
-    // $ticketEncontrado = $ticket->buscaPorDataAbertura(new DateTime('2026-06-08'));
-    // var_dump($ticketEncontrado);
+// =========================================================================
+// 9. TESTE: ATUALIZAR O STATUS DO CHAMADO
+// =========================================================================
+// echo "<h3>9. Atualizar o Status do Chamado</h3>";
+// try {
+//     $idChamado = 317; // Coloque um ID válido
+//     $novoStatus = "pendente"; // pendente, concluido, cancelado
     
-    // BUSCA DE UM CHAMADO POR ID
-    // $ticket = new TicketRepository();
-    // echo $ticket->encontrarTicketPorId(317)->getStatus();
+//     // Na repository o método retorna void (não retorna o objeto de volta)
+//     $repository->atualizarStatusTicket($idChamado, $novoStatus);
+//     echo "Sucesso! Status do chamado {$idChamado} atualizado para '{$novoStatus}' direto no banco.<br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao atualizar status:</b> " . $e->getMessage() . "<br>";
+// }
 
-    // BUSCA DE TODOS OS CHAMADOS
-    // $repositorio = new TicketRepository();
-    // $json = $repositorio->EncontrarTodosTickets();
-    // header('Content-Type: application/json; charset=utf-8');
-    // echo $json;
+// =========================================================================
+// 10. TESTE: BUSCA DE UM CHAMADO POR DATA DE ENCERRAMENTO
+// =========================================================================
+// echo "<h3>10. Busca de um Chamado por Data de Encerramento</h3>";
+// try {
+//     $dataEncerramento = new \DateTime('2026-08-06');
+//     $ticketsDataEncerramento = $repository->buscaPorDataEncerramento($dataEncerramento);
+//     echo "Sucesso! Foram encontrados " . (is_array($ticketsDataEncerramento) ? count($ticketsDataEncerramento) : 0) . " chamados encerrados na data " . $dataEncerramento->format('Y-m-d') . ".<br>";
+//     echo "<pre>";
+//     print_r($ticketsDataEncerramento);
+//     echo "</pre>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro na busca por data de encerramento:</b> " . $e->getMessage() . "<br>";
+// }
 
-    // CRIAR UM NOVO CHAMADO
-    // $repository = new TicketRepository();
-    // $dataAbertura = new DateTime(); 
-    // $novoTicket = new Ticket(                                                       
-    //     null,                                 
-    //     null, // '550e8400-e29b-41d4-a716-446655440000',                       
-    //     "Computador não liga",               
-    //     "Quebrou tudo.",    
-    //     null,                              
-    //     "PAT-98765",                       
-    //     "pendente",                            
-    //     1,                                    
-    //     1,                                    
-    //     2,                                   
-    //     $dataAbertura,                     
-    //     null                                 
-    // );
-    // try {
-    //     $repository->criarTicket($novoTicket);
-    //     echo "\nDeu certo! O ticket foi criado no DB.\n";
-    // } catch (Exception $e) {
-    //     echo "\nDeu ruim na hora de salvar no banco: " . $e->getMessage() . "\n";
-    // }
+// =========================================================================
+// 11. TESTE: ENCONTRAR TICKET POR ID
+// =========================================================================
+// echo "<h3>11. Encontrar Ticket por ID</h3>";
+// try {
+//     $idBuscar = 1; // Substitua por um ID que exista
+//     $ticket = $repository->encontrarTicketPorId($idBuscar);
+//     echo "Sucesso! Ticket ID {$idBuscar} encontrado:<br><pre>";
+//     print_r($ticket);
+//     echo "</pre>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao encontrar ticket:</b> " . $e->getMessage() . "<br>";
+// }
 
-    // ATUALIZAÇÃO DA PRIORIDADE DE UM CHAMADO
-    // $repository = new TicketRepository();
-    // $idChamado = 317;
-    // $novaPrioridade = "baixa";
-    // try {
-    //     $repository->atualizarPrioridadeTicket($idChamado, $novaPrioridade);
-    //     echo "\nPrioridade do chamado atualizada com sucesso.\n";
-    // } catch (Exception $e) {
-    //     echo "\nErro ao atualizar prioridade do chamado: " . $e->getMessage() . "\n";
-    // }
+// // =========================================================================
+// // 12. TESTE: CRIAR TICKET
+// // =========================================================================
+// echo "<h3>12. Criar Ticket</h3>";
+// try {
+//     $novoTicket = new \src\models\Ticket(
+//         null, null, "Erro na catraca", "Catraca travada", "alta", "PAT-123", "pendente", 1, 1, null, new \DateTime(), null
+//     );
+//     $repository->criarTicket($novoTicket);
+//     echo "Sucesso! Novo ticket inserido no banco.<br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao criar ticket:</b> " . $e->getMessage() . "<br>";
+// }
 
-    // ENCERRAMENTO DE UM CHAMADO
-    // $repository = new TicketRepository();
-    // $idChamado = 317;
-    // $novoStatus = "concluido";
-    // try {
-    //     $repository->encerrarTicket($idChamado, $novoStatus);
-    //     echo "\nChamado encerrado com sucesso.\n";
-    // } catch (Exception $e) {
-    //     echo "\nErro ao encerrar chamado: " . $e->getMessage() . "\n";
-    // }
-    
+// // =========================================================================
+// // 13. TESTE: ATUALIZAR PRIORIDADE DO TICKET
+// // =========================================================================
+// echo "<h3>13. Atualizar Prioridade</h3>";
+// try {
+//     $idAtualizar = 1; 
+//     $repository->atualizarPrioridadeTicket($idAtualizar, 'baixa');
+//     echo "Sucesso! Prioridade do chamado {$idAtualizar} alterada para 'baixa'.<br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao atualizar prioridade:</b> " . $e->getMessage() . "<br>";
+// }
+
+// // =========================================================================
+// // 14. TESTE: ENCERRAR TICKET
+// // =========================================================================
+// echo "<h3>14. Encerrar Ticket</h3>";
+// try {
+//     $idEncerrar = 1; 
+//     $repository->encerrarTicket($idEncerrar, 'concluido');
+//     echo "Sucesso! Chamado {$idEncerrar} foi encerrado com a data de hoje.<br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao encerrar ticket:</b> " . $e->getMessage() . "<br>";
+// }
+
+// // =========================================================================
+// // 15. TESTE: ATRIBUIR RESPONSÁVEL AO TICKET
+// // =========================================================================
+// echo "<h3>15. Atribuir Responsável</h3>";
+// try {
+//     $idChamadoResp = 1;
+//     $idTecnico = 2;
+//     $repository->atribuirResponsavelTicket($idChamadoResp, $idTecnico);
+//     echo "Sucesso! Técnico {$idTecnico} atribuído ao chamado {$idChamadoResp}.<br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao atribuir responsável:</b> " . $e->getMessage() . "<br>";
+// }
+
+// // =========================================================================
+// // 16. TESTE: LISTAR TODOS OS CHAMADOS
+// // =========================================================================
+// echo "<h3>16. Listar Todos</h3>";
+// try {
+//     $todos = $repository->listarTodos();
+//     echo "Sucesso! Foram encontrados " . count($todos) . " chamados no total (com JOINs).<br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao listar todos:</b> " . $e->getMessage() . "<br>";
+// }
+
+// // =========================================================================
+// // 17. TESTE: BUSCAR POR DATA DE ABERTURA
+// // =========================================================================
+// echo "<h3>17. Buscar por Data de Abertura</h3>";
+// try {
+//     $dataAbertura = new \DateTime(); // Hoje
+//     $ticketsAbertura = $repository->buscaPorDataAbertura($dataAbertura);
+//     echo "Sucesso! Foram encontrados " . (is_array($ticketsAbertura) ? count($ticketsAbertura) : 0) . " chamados abertos em " . $dataAbertura->format('Y-m-d') . ".<br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro na busca por data de abertura:</b> " . $e->getMessage() . "<br>";
+// }
+
+// // =========================================================================
+// // 18. TESTE: CONTAR CHAMADOS TOTAIS
+// // =========================================================================
+// echo "<h3>18. Contar Chamados Totais</h3>";
+// try {
+//     $total = $repository->contarChamados();
+//     echo "Sucesso! Total de registros na tabela: <b>{$total}</b>.<br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao contar totais:</b> " . $e->getMessage() . "<br>";
+// }
+
+// // =========================================================================
+// // 19. TESTE: CONTAR CHAMADOS PENDENTES (GERAL)
+// // =========================================================================
+// echo "<h3>19. Contar Chamados Pendentes</h3>";
+// try {
+//     $totalPendentes = $repository->contarChamadosPendentes();
+//     echo "Sucesso! Total de chamados pendentes gerais: <b>{$totalPendentes}</b>.<br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao contar pendentes:</b> " . $e->getMessage() . "<br>";
+// }
+
+// // =========================================================================
+// // 20. TESTE: CALCULAR TAXA DE RESOLUÇÃO
+// // =========================================================================
+// echo "<h3>20. Calcular Taxa de Resolução</h3>";
+// try {
+//     $totalGeral = $repository->contarChamados();
+//     $totalResolvidos = $repository->contarChamadosResolvidos();
+//     $taxa = $repository->calcularTaxaResolucao($totalGeral, $totalResolvidos);
+//     echo "Sucesso! A taxa atual de resolução é de <b>{$taxa}%</b>.<br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao calcular taxa:</b> " . $e->getMessage() . "<br>";
+// }
+
+// // =========================================================================
+// // 21. TESTE: RELATÓRIO POR CATEGORIA (GERAL)
+// // =========================================================================
+// echo "<h3>21. Relatório por Categoria</h3>";
+// try {
+//     $relatorioCat = $repository->relatorioPorCategoria();
+//     echo "Sucesso! Relatório gerado com " . count($relatorioCat) . " categorias.<br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro no relatório de categorias:</b> " . $e->getMessage() . "<br>";
+// }
+
+// // =========================================================================
+// // 22. TESTE: BUSCAR TICKETS POR CATEGORIA (ID)
+// // =========================================================================
+// echo "<h3>22. Buscar Tickets por Categoria ID</h3>";
+// try {
+//     $idCat = 1;
+//     $ticketsCat = $repository->buscarTicketsPorCategoria($idCat);
+//     echo "Sucesso! Encontrados " . (is_array($ticketsCat) ? count($ticketsCat) : 0) . " chamados da categoria {$idCat}.<br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao buscar por categoria:</b> " . $e->getMessage() . "<br>";
+// }
+
+// // =========================================================================
+// // 23. TESTE: CONTAR RESOLVIDOS POR PERÍODO
+// // =========================================================================
+// echo "<h3>23. Contar Resolvidos por Período</h3>";
+// try {
+//     $qtdResolvidos = $repository->contarChamadosResolvidosPorPeriodo(new \DateTime('2020-01-01'), new \DateTime('2030-01-01'));
+//     echo "Sucesso! Resolvidos no período: <b>{$qtdResolvidos}</b>.<br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao contar resolvidos período:</b> " . $e->getMessage() . "<br>";
+// }
+
+// // =========================================================================
+// // 24. TESTE: CONTAR CANCELADOS (FUNÇÃO DUPLICADA NO REPOSITÓRIO 1)
+// // =========================================================================
+// echo "<h3>24. Contar Cancelados</h3>";
+// try {
+//     $qtdCancelados1 = $repository->contarChamadosCancelados(new \DateTime('2020-01-01'), new \DateTime('2030-01-01'));
+//     echo "Sucesso! Cancelados no período (Módulo 1): <b>{$qtdCancelados1}</b>.<br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao contar cancelados:</b> " . $e->getMessage() . "<br>";
+// }
+
+// // =========================================================================
+// // 25. TESTE: CONTAR CANCELADOS POR PERÍODO (FUNÇÃO DUPLICADA NO REPOSITÓRIO 2)
+// // =========================================================================
+// echo "<h3>25. Contar Cancelados por Período</h3>";
+// try {
+//     $qtdCancelados2 = $repository->contarChamadosCanceladosPorPeriodo(new \DateTime('2020-01-01'), new \DateTime('2030-01-01'));
+//     echo "Sucesso! Cancelados no período (Módulo 2): <b>{$qtdCancelados2}</b>.<br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao contar cancelados período:</b> " . $e->getMessage() . "<br>";
+// }
+
+// // =========================================================================
+// // 26. TESTE: CONTAR PENDENTES POR PERÍODO
+// // =========================================================================
+// echo "<h3>26. Contar Pendentes por Período</h3>";
+// try {
+//     $qtdPendentesPeriodo = $repository->contarChamadosPendentesPorPeriodo(new \DateTime('2020-01-01'), new \DateTime('2030-01-01'));
+//     echo "Sucesso! Pendentes no período: <b>{$qtdPendentesPeriodo}</b>.<br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao contar pendentes período:</b> " . $e->getMessage() . "<br>";
+// }
+
+// // =========================================================================
+// // 27. TESTE: RELATÓRIO CATEGORIA POR PERÍODO
+// // =========================================================================
+// echo "<h3>27. Relatório Categoria por Período</h3>";
+// try {
+//     $relatorioCatPeriodo = $repository->relatorioPorCategoriaPorPeriodo(new \DateTime('2020-01-01'), new \DateTime('2030-01-01'));
+//     echo "Sucesso! Relatório de categorias do período gerado com " . count($relatorioCatPeriodo) . " resultados.<br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro no relatório categoria/período:</b> " . $e->getMessage() . "<br>";
+// }
 ?>

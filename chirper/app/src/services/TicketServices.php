@@ -328,18 +328,40 @@ class TicketServices {
         }
         return $dadosLimpos;
     }
+
+    public function calcularTaxaResolucao(int $totalChamados, int $chamadosResolvidos): float {
+        return $this->repository->calcularTaxaResolucao($totalChamados, $chamadosResolvidos);
+    }
+
+    public function relatorioPorCategoria(): array {
+        $relatorio = $this->repository->relatorioPorCategoria();
+        return $relatorio ?: [];
+    }
+
+    public function contarChamadosResolvidosPorPeriodo(\DateTime $dataInicial, \DateTime $dataFinal): int {
+        return $this->repository->contarChamadosResolvidosPorPeriodo($dataInicial, $dataFinal);
+    }
+
+    public function contarChamadosPendentesPorPeriodo(\DateTime $dataInicial, \DateTime $dataFinal): int {
+        return $this->repository->contarChamadosPendentesPorPeriodo($dataInicial, $dataFinal);
+    }
+
+    public function relatorioPorCategoriaPorPeriodo(\DateTime $dataInicial, \DateTime $dataFinal): array {
+        $relatorio = $this->repository->relatorioPorCategoriaPorPeriodo($dataInicial, $dataFinal);
+        return $relatorio ?: [];
+    }
 }
 
 // =========================================================================
 // BLOCO DE TESTES
 // =========================================================================
 
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+// ini_set('display_errors', 1);
+// error_reporting(E_ALL);
 
-echo "<h1>Testes do TicketServices</h1>";
+// echo "<h1>Testes do TicketServices</h1>";
 
-$service = new TicketServices();
+// $service = new TicketServices();
 
 // // =========================================================================
 // // 1. TESTE: LISTAR TUDO
@@ -670,5 +692,81 @@ $idTeste = 82;
 //     echo "</pre>";
 // } catch (\Exception $e) {
 //     echo "<b>Erro ao buscar tickets por nome de usuário:</b> " . $e->getMessage() . "<br>";
+// }
+
+// =========================================================================
+// 23. TESTE: CALCULAR TAXA DE RESOLUÇÃO
+// =========================================================================
+// echo "<h3>23. Calcular Taxa de Resolução</h3>";
+// try {
+//     $totalGeral = $service->contarChamados();
+//     $totalResolvidos = $service->contarChamadosResolvidos();
+//     $taxa = $service->calcularTaxaResolucao($totalGeral, $totalResolvidos);
+//     echo "Sucesso! Análise de resolução da Service:<br>";
+//     echo "Total de chamados: <b>{$totalGeral}</b><br>";
+//     echo "Chamados resolvidos: <b>{$totalResolvidos}</b><br>";
+//     echo "Taxa de resolução: <b>{$taxa}%</b><br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao calcular taxa de resolução:</b> " . $e->getMessage() . "<br>";
+// }
+
+// =========================================================================
+// 24. TESTE: RELATÓRIO POR CATEGORIA (GERAL)
+// =========================================================================
+// echo "<h3>24. Relatório de Chamados por Categoria</h3>";
+// try {
+//     $indicadores = $service->relatorioPorCategoria();
+//     echo "Sucesso! Indicadores gerais por categoria:<br><br>";
+//     foreach ($indicadores as $linha) {
+//         echo "Categoria: <b>" . $linha['categoria'] . "</b> | ";
+//         echo "Quantidade: " . $linha['quantidade'] . " | ";
+//         echo "Porcentagem: " . $linha['porcentagem'] . "%<br>";
+//     }
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao gerar relatório por categoria:</b> " . $e->getMessage() . "<br>";
+// }
+
+// =========================================================================
+// 25. TESTE: CONTAR CHAMADOS RESOLVIDOS POR PERÍODO
+// =========================================================================
+// echo "<h3>25. Contar Chamados Resolvidos por Período</h3>";
+// try {
+//     $dataInicial = new \DateTime('2026-07-01');
+//     $dataFinal = new \DateTime('2026-09-30');
+//     $quantidadeResolvidos = $service->contarChamadosResolvidosPorPeriodo($dataInicial, $dataFinal);
+//     echo "Sucesso! Quantidade de chamados resolvidos entre " . $dataInicial->format('Y-m-d') . " e " . $dataFinal->format('Y-m-d') . ": <b>{$quantidadeResolvidos}</b><br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao contar resolvidos por período:</b> " . $e->getMessage() . "<br>";
+// }
+
+// =========================================================================
+// 26. TESTE: CONTAR CHAMADOS PENDENTES POR PERÍODO
+// =========================================================================
+// echo "<h3>26. Contar Chamados Pendentes por Período</h3>";
+// try {
+//     $dataInicial = new \DateTime('2026-07-01');
+//     $dataFinal = new \DateTime('2026-09-30');
+//     $quantidadePendentes = $service->contarChamadosPendentesPorPeriodo($dataInicial, $dataFinal);
+//     echo "Sucesso! Quantidade de chamados pendentes entre " . $dataInicial->format('Y-m-d') . " e " . $dataFinal->format('Y-m-d') . ": <b>{$quantidadePendentes}</b><br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao contar pendentes por período:</b> " . $e->getMessage() . "<br>";
+// }
+
+// =========================================================================
+// 27. TESTE: RELATÓRIO DE CATEGORIA POR PERÍODO
+// =========================================================================
+// echo "<h3>27. Relatório de Categoria por Período</h3>";
+// try {
+//     $dataInicial = new \DateTime('2026-07-01');
+//     $dataFinal = new \DateTime('2026-09-30');
+//     $indicadores = $service->relatorioPorCategoriaPorPeriodo($dataInicial, $dataFinal);
+//     echo "Sucesso! Indicadores gerados entre " . $dataInicial->format('Y-m-d') . " e " . $dataFinal->format('Y-m-d') . ":<br><br>";
+//     foreach ($indicadores as $linha) {
+//         echo "Categoria: <b>" . $linha['categoria'] . "</b> | ";
+//         echo "Quantidade: " . $linha['quantidade'] . " | ";
+//         echo "Porcentagem: " . $linha['porcentagem'] . "%<br>";
+//     }
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao gerar relatório de categoria por período:</b> " . $e->getMessage() . "<br>";
 // }
 ?>
