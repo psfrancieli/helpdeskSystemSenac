@@ -200,6 +200,33 @@ class TicketController extends Controller {
         }
     }
 
+    public function atualizarStatus(int $id, array $dadosRequisicao): void {
+        try {
+            if (empty($dadosRequisicao['status'])) {
+                throw new InvalidArgumentException("O status é obrigatório.");
+            }
+
+            $this->services->atualizarStatus($id, $dadosRequisicao);
+
+            $this->response([
+                "success" => true,
+                "message" => "Status do ticket {$id} atualizado com sucesso."
+            ]);
+
+        } catch (InvalidArgumentException $e) {
+            $this->response([
+                "success" => false,
+                "message" => $e->getMessage()
+            ], 400);
+
+        } catch (\Throwable $e) {
+            $this->response([
+                "success" => false,
+                "message" => ($e->getMessage())
+            ], 400);
+        }
+    }
+
     public function buscarTicketsDataAbertura(\DateTime $data): void {
         try {
             $tickets = $this->services->buscaTicketsPorDataAbertura($data);
@@ -252,47 +279,6 @@ class TicketController extends Controller {
         }
     }
 
-    public function atualizarStatus(int $id, string $status, ?array $currentUser = null): void {
-        try {
-            if (!in_array($status, ['pendente', 'concluido', 'cancelado'], true)) {
-                throw new InvalidArgumentException("Status inválido. Use: pendente, concluido ou cancelado.");
-            }
- 
-            if ($currentUser !== null && ($currentUser['nivel'] ?? '') === 'tecnico') {
-                $ticketAtual = $this->services->exibirTicket($id);
- 
-                if ((int) $ticketAtual->getIdResponsavel() !== (int) $currentUser['id']) {
-                    throw new RuntimeException("Técnico só pode alterar status de chamados atribuídos a si.", 403);
-                }
-            }
- 
-            $ticketAtualizado = $this->services->atualizarStatus($id, $status);
- 
-            $this->response([
-                "success" => true,
-                "data" => $ticketAtualizado,
-            ]);
- 
-        } catch (InvalidArgumentException $e) {
-            $this->response([
-                "success" => false,
-                "message" => $e->getMessage()
-            ], 400);
- 
-        } catch (RuntimeException $e) {
-            $this->response([
-                "success" => false,
-                "message" => $e->getMessage()
-            ], 403);
- 
-        } catch (\Throwable $e) {
-            $this->response([
-                "success" => false,
-                "message" => $e->getMessage()
-            ], 400);
-        }
-    }
-
    public function atribuirTecnico(int $chamadoId, int $tecnicoId): void
 {
     try {
@@ -326,5 +312,21 @@ class TicketController extends Controller {
 
 
 
+// } catch (\Exception $e) {
+//     echo "<b>Erro:</b> " . $e->getMessage() . "<br>";
+// }
 
+// =========================================================================
+// 4. TESTE: ATUALIZAR STATUS DO TICKET
+// =========================================================================
+// echo "<h3>4. Teste: Atualizar Status do Ticket</h3>";
+// try {
+//     $idTicket = 2; 
+//     $novoStatusTeste = ['status' => 'pendente']; 
+
+//     $controller->atualizarStatus($idTicket, $novoStatusTeste);
+
+// } catch (\Exception $e) {
+//     echo "<b>Erro:</b> " . $e->getMessage() . "<br>";
+// }
 ?>

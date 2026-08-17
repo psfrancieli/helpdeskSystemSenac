@@ -199,8 +199,10 @@ $router->get('/api/tecnicos', function (): void {
             apiJsonResponse([
                 'success' => false,
                 'message' => 'Acesso negado para listar técnicos.',
-            ], 403);
-        }
+                ], 403);
+                
+                }
+                
  
         $service = new UserServices();
         $usuarios = $service->encontrarTodosUsuarios(new User(
@@ -400,6 +402,24 @@ $router->get('/api/categorias', function (): void {
             'message' => 'Erro ao listar categorias.',
         ], 500);
     }
+});
+$router->get('/api/categorias', function (): void {
+	try {
+		apiRequireAuthUser();
+
+		$stmt = Database::getConnection()->query('SELECT id, nome FROM "CATEGORIA" ORDER BY nome ASC');
+		$categorias = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+		apiJsonResponse([
+			'success' => true,
+			'data' => $categorias,
+		]);
+	} catch (Throwable $e) {
+		apiJsonResponse([
+			'success' => false,
+			'message' => 'Erro ao listar categorias.',
+		], 500);
+	}
 });
 $router->post('/api/login', function (): void {
     try {

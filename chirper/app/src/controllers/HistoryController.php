@@ -3,33 +3,97 @@
 date_default_timezone_set('America/Sao_Paulo');
 require_once __DIR__ . '/../models/History.php';
 require_once __DIR__ . '/../repositories/HistoryRepository.php';
+require_once __DIR__ . '/../services/HistoryService.php';
+require_once __DIR__ . '/Controller.php';
 
-class HistoryController{
+class HistoryController extends Controller
+{
 
-    public static function create(array $data) {
+    public function create(array $data)
+    {
 
-        $history = new History(
-            $data['data'],
-            $data['description'],
-            $data['id_chamado'],
-            $data['id_usuario_tecnico']
+        try {
+            $history = new History(
+                $data['data'],
+                $data['description'],
+                $data['id_chamado'],
+                $data['id_usuario_tecnico']
             );
 
-        $history->setDescricao($data['description']);
-        $history->setData($data['data']);
-        $history->setChamado($data['id_chamado']);
-        $history->setTecnico($data['id_usuario_tecnico']);
+            HistoryService::create($history);
 
-        HistoryRepository::create($history);
+            $this->response([
+                "success" => true,
+                "message" => "Historico cadastrado com sucesso."
+            ], 201);
+        } catch (PDOException $e) {
+            $this->response([
+                "success" => false,
+                "message" => $e->getMessage()
+            ], 400);
+        }
     }
 
 
-    public static function getId(int $id) {
-        if (empty($id)) {
-            throw new InvalidArgumentException("historico não existe");
+    public function getId(int $id)
+    {
+        try {
+            if (empty($id)) {
+                throw new InvalidArgumentException("historico não existe");
+            }
+
+            $data = HistoryService::getById($id);
+
+            $history = [
+                "descricao" => $data->getDescricao(),
+                "data" => $data->getData()->format("Y-m-d H:i:s"),
+                "id_chamado" => $data->getChamado(),
+                "id_usuario_tecnico" => $data->getTecnico()
+            ];
+
+            $this->response([
+                "success" => true,
+                "data" => $history
+            ], 200);
+
+            exit;
+        } catch (Throwable $e) {
+            $this->response([
+                "success" => false,
+                "message" => $e->getMessage()
+            ], 400);
         }
-        return HistoryRepository::getById($id);
+    }
+    public function getByTicketId(int $id)
+{
+    try {
+        if (empty($id)) {
+            throw new InvalidArgumentException("Histórico não existe");
+        }
+
+        $dados = HistoryService::getByTicketId($id);
+
+        $historicos = [];
+
+        foreach ($dados as $historico) {
+            $historicos[] = [
+                "data" => $historico->getData()->format("Y-m-d H:i:s"),
+                "descricao" => $historico->getDescricao(),
+                "id_chamado" => $historico->getChamado(),
+                "id_usuario_tecnico" => $historico->getTecnico()
+            ];
+        }
+
+        $this->response([
+            "success" => true,
+            "data" => $historicos
+        ], 200);
+
+    } catch (Throwable $e) {
+        $this->response([
+            "success" => false,
+            "message" => $e->getMessage()
+        ], 400);
     }
 }
-
-?>
+}
