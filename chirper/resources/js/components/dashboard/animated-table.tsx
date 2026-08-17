@@ -148,7 +148,7 @@ export function AnimatedTable({
     
                                                     disabled={
                                                         isUpdatingStatusId === row.id || 
-                                                        (userRole !== 'adm' && userRole !== 'analista')
+                                                        (userRole !== 'tecnico' && userRole !== 'analista')
                                                     }
                                                     onChange={(event) => handleStatusChange(row.id, event)}
                                                     className="w-full min-w-36 rounded-xl border border-stone-700 bg-stone-950 px-3 py-2 text-stone-100 capitalize disabled:cursor-not-allowed disabled:opacity-60"
@@ -156,7 +156,7 @@ export function AnimatedTable({
                                                     <option value="pendente">Pendente</option>
                                                     
                                                     {/* Mostra as outras opções apenas se o usuário for autorizado */}
-                                                    {(userRole === 'adm' || userRole === 'analista') && (
+                                                    {(userRole === 'tecnico' || userRole === 'analista') && (
                                                         <>
                                                             <option value="concluido">Concluído</option>
                                                             <option value="cancelado">Cancelado</option>
