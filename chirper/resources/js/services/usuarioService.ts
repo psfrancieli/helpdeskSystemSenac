@@ -31,3 +31,11 @@ export async function fetchUsuarios(): Promise<HelpdeskUser[]> {
         telefone: usuario.telefone ?? '',
     }));
 }
+
+export async function alterarNivelUsuario(id: number, nivel: UserRole): Promise<void> {
+    await apiClient.post('/api/usuarios/alterar-nivel', { id, nivel });
+}
+
+export async function resetarSenhaUsuario(id: number): Promise<void> {
+    await apiClient.post('/api/usuarios/resetar-senha', { id });
+}

@@ -12,25 +12,14 @@ import { LoadingOctopus } from "../components/mascot/loading-octopus";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
-import {
-  categories,
-  metrics,
-  statuses,
-  users,
-} from "../data/mock";
+import { metrics } from "../data/mock";
 import { useCategorias } from "../hooks/useCategorias";
 import { useUsuarios } from "../hooks/useUsuarios";
 import { useChamados } from "../hooks/useChamados";
 import { useTecnicos } from "../hooks/useTecnicos";
 import { assignTechnicianToChamado, createChamado } from "../services/chamadoService";
-import { createUsuario, updateMeuTelefone  } from "../services/usuarioService";
-import type {
-  CreateApiUserInput,
-  CreateChamadoInput,
-  DashboardSection,
-  UserRole,
-  TicketPriority,
-} from "../types/helpdesk";
+import { alterarNivelUsuario, createUsuario, resetarSenhaUsuario, updateMeuTelefone } from "../services/usuarioService";
+import type { CreateApiUserInput, CreateChamadoInput, DashboardSection, UserRole, TicketPriority } from "../types/helpdesk";
 
 interface DashboardPageProps {
   onLogout: () => void;
@@ -143,6 +132,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
     usuarios,
     isLoading: isUsuariosLoading,
     error: usuariosError,
+    reloadUsuarios,
   } = useUsuarios();
   const {
     chamados,
@@ -180,6 +170,26 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
   const [profileSubmitError, setProfileSubmitError] = useState<string | null>(null);
   const [profileSubmitSuccess, setProfileSubmitSuccess] = useState<string | null>(null);
   const [isEditingPhone, setIsEditingPhone] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [selectedNivel, setSelectedNivel] = useState<UserRole>("usuario");
+  const [isSubmittingNivel, setIsSubmittingNivel] = useState(false);
+  const [nivelError, setNivelError] = useState<string | null>(null);
+  const [nivelSuccess, setNivelSuccess] = useState<string | null>(null);
+  const [isResettingSenha, setIsResettingSenha] = useState(false);
+  const [resetSenhaError, setResetSenhaError] = useState<string | null>(null);
+  const [resetSenhaSuccess, setResetSenhaSuccess] = useState<string | null>(null);
+
+  const viewingUser = selectedUserId !== null ? usuarios.find((usuario) => usuario.id === selectedUserId) ?? null : null;
+
+  useEffect(() => {
+    if (viewingUser) {
+      setSelectedNivel(viewingUser.nivel);
+    }
+    setNivelError(null);
+    setNivelSuccess(null);
+    setResetSenhaError(null);
+    setResetSenhaSuccess(null);
+  }, [viewingUser]);
 
   useEffect(() => {
     setProfilePhone(authUser.telefone.replace(/\D/g, ""));
@@ -378,6 +388,44 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
     }
   }
 
+  async function handleAlterarNivel(event: FormEvent<HTMLFormElement>) {
+  event.preventDefault();
+  if (!viewingUser) return;
+
+  setIsSubmittingNivel(true);
+  setNivelError(null);
+  setNivelSuccess(null);
+
+  try {
+    await alterarNivelUsuario(viewingUser.id, selectedNivel);
+    setNivelSuccess("Nível atualizado com sucesso.");
+    reloadUsuarios();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Erro ao atualizar nível";
+    setNivelError(message);
+  } finally {
+    setIsSubmittingNivel(false);
+  }
+}
+
+async function handleResetarSenha() {
+  if (!viewingUser) return;
+
+  setIsResettingSenha(true);
+  setResetSenhaError(null);
+  setResetSenhaSuccess(null);
+
+  try {
+    await resetarSenhaUsuario(viewingUser.id);
+    setResetSenhaSuccess("Senha redefinida para a senha padrão.");
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Erro ao redefinir senha";
+    setResetSenhaError(message);
+  } finally {
+    setIsResettingSenha(false);
+  }
+}
+
   return (
     <main className="min-h-screen p-4 md:p-6">
       <div className="mx-auto flex max-w-7xl gap-4 xl:gap-6">
@@ -440,7 +488,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                   )}
                 </div>
               ) : null}
-              {canAccessCurrentSection && section === "usuarios" ? (
+              {canAccessCurrentSection && section === "usuarios" && selectedUserId === null ? (
                 isUsuariosLoading ? (
                   <SkeletonGrid />
                 ) : usuariosError ? (
@@ -456,23 +504,128 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                 ) : (
                   <Card>
                     <CardContent className="space-y-3">
-                    {usuariosOrdenados.map((usuario) => (
-                      <div
-                        key={usuario.id}
-                        className="flex items-center justify-between gap-3 rounded-xl border border-stone-700/70 bg-stone-800/45 p-3"
-                      >
-                        <div>
-                          <p className="font-medium text-white">{usuario.nome}</p>
-                          <p className="text-sm text-stone-300">{usuario.email}</p>
+                      {usuariosOrdenados.map((usuario) => (
+                        <div
+                          key={usuario.id}
+                          onClick={() => setSelectedUserId(usuario.id)}
+                          className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-stone-700/70 bg-stone-800/45 p-3 transition-colors hover:border-amber-500/40"
+                        >
+                          <div>
+                            <p className="font-medium text-white">{usuario.nome}</p>
+                            <p className="text-sm text-stone-300">{usuario.email}</p>
+                          </div>
+                          <Badge variant={usuario.ativo ? "success" : "warning"}>
+                            {usuario.nivel}
+                          </Badge>
                         </div>
-                        <Badge variant={usuario.ativo ? "success" : "warning"}>
-                          {usuario.nivel}
-                        </Badge>
-                      </div>
-                    ))}
+                      ))}
                     </CardContent>
                   </Card>
                 )
+              ) : null}
+              {canAccessCurrentSection && section === "usuarios" && selectedUserId !== null ? (
+                <Card>
+                  <CardContent className="space-y-4 py-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-lg font-semibold text-stone-100">Detalhes do Usuário</p>
+                        <p className="text-sm text-stone-400">Visualize e gerencie as informações do usuário.</p>
+                      </div>
+                      <Button variant="ghost" onClick={() => setSelectedUserId(null)}>
+                        ⮌  Voltar
+                      </Button>
+                    </div>
+
+                    {!viewingUser ? (
+                      isUsuariosLoading ? (
+                        <SkeletonGrid />
+                      ) : (
+                        <EmptyState
+                          title="Usuário não encontrado"
+                          description="Não foi possível localizar esse usuário na lista."
+                        />
+                      )
+                    ) : (
+                      <>
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div className="space-y-2">
+                            <span className="text-sm text-stone-200">Nome</span>
+                            <div className="w-full rounded-xl border border-stone-700 bg-stone-900/60 px-3 py-2 text-stone-300">
+                              {viewingUser.nome}
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <span className="text-sm text-stone-200">Email</span>
+                            <div className="w-full rounded-xl border border-stone-700 bg-stone-900/60 px-3 py-2 text-stone-300">
+                              {viewingUser.email}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <span className="text-sm text-stone-200">Telefone</span>
+                          <div className="w-full rounded-xl border border-stone-700 bg-stone-900/60 px-3 py-2 text-stone-300">
+                            {viewingUser.telefone || "Não informado"}
+                          </div>
+                        </div>
+
+                        <div className="space-y-2 border-t border-stone-700/60 pt-4">
+                          <span className="text-sm text-stone-200">Alterar cargo</span>
+
+                          {nivelError ? (
+                            <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+                              {nivelError}
+                            </div>
+                          ) : null}
+
+                          {nivelSuccess ? (
+                            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
+                              {nivelSuccess}
+                            </div>
+                          ) : null}
+
+                          <form className="flex flex-wrap items-center gap-2" onSubmit={handleAlterarNivel}>
+                            <select
+                              value={selectedNivel}
+                              onChange={(event) => setSelectedNivel(event.target.value as UserRole)}
+                              className="rounded-xl border border-stone-700 bg-stone-950 px-3 py-2 text-stone-100"
+                            >
+                              <option value="usuario">Usuário</option>
+                              <option value="tecnico">Técnico</option>
+                              <option value="analista">Analista</option>
+                              <option value="adm">Administrador</option>
+                            </select>
+
+                            <Button type="submit" disabled={isSubmittingNivel || selectedNivel === viewingUser.nivel}>
+                              {isSubmittingNivel ? "Salvando..." : "Salvar cargo"}
+                            </Button>
+                          </form>
+                        </div>
+
+                        <div className="space-y-2 border-t border-stone-700/60 pt-4">
+                          <span className="text-sm text-stone-200">Senha</span>
+
+                          {resetSenhaError ? (
+                            <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+                              {resetSenhaError}
+                            </div>
+                          ) : null}
+
+                          {resetSenhaSuccess ? (
+                            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
+                              {resetSenhaSuccess}
+                            </div>
+                          ) : null}
+
+                          <Button type="button" variant="ghost" disabled={isResettingSenha} onClick={handleResetarSenha}>
+                            {isResettingSenha ? "Redefinindo..." : "Redefinir para senha padrão"}
+                          </Button>
+                        </div>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
               ) : null}
               {canAccessCurrentSection && section === "chamados" ? (
                 isChamadosLoading ? (
@@ -562,25 +715,6 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                   </div>
                 )
               ) : null}
-              {/* {canAccessCurrentSection && section === "status" ? (
-                <Card>
-                  <CardContent className="space-y-3 py-4">
-                    {statuses.map((status) => (
-                      <div
-                        key={status.id}
-                        className="flex items-center justify-between rounded-xl bg-stone-800/45 p-3"
-                      >
-                        <p className="capitalize text-stone-100">
-                          {status.nome}
-                        </p>
-                        <Badge variant={status.ativo ? "success" : "warning"}>
-                          {status.ativo ? "Ativo" : "Inativo"}
-                        </Badge>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              ) : null} */}
               {canAccessCurrentSection && section === "historico" ? (
                 <EmptyState
                   title="Histórico em preparação"
