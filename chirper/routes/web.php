@@ -1,5 +1,6 @@
 <?php
 
+require_once __DIR__ . '/../app/src/controllers/HistoryController.php';
 require_once __DIR__ . '/../app/src/repositories/UserRepository.php';
 require_once __DIR__ . '/../app/src/utils/PasswordUtils.php';
 require_once __DIR__ . '/../app/src/services/UserServices.php';
@@ -129,6 +130,33 @@ if (!function_exists('apiSerializeUsuario')) {
 		];
 	}
 }
+
+$router->get('/api/historico', function (): void {
+    try {
+        apiRequireAuthUser();
+
+        $idChamado = isset($_GET['id_chamado'])
+            ? (int) $_GET['id_chamado']
+            : 0;
+
+        if ($idChamado <= 0) {
+            apiJsonResponse([
+                'success' => false,
+                'message' => 'ID do chamado inválido.'
+            ], 400);
+        }
+
+        $controller = new HistoryController();
+
+        $controller->getByTicketId($idChamado);
+
+    } catch (Throwable $e) {
+        apiJsonResponse([
+            'success' => false,
+            'message' => 'Erro ao buscar histórico.'
+        ], 500);
+    }
+});
 
 $router->get('/api/chamados', function (): void {
 	try {
