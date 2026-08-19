@@ -73,6 +73,8 @@ interface UseNotificationsResult {
     error: string | null;
     markAsRead: (id: string) => void;
     markAllAsRead: () => void;
+    deleteNotifications: (ids: string[]) => void;
+    deleteAllNotifications: () => void;
     refresh: () => void;
 }
 export function useNotifications(user: HelpdeskUser | null): UseNotificationsResult {
@@ -264,7 +266,39 @@ export function useNotifications(user: HelpdeskUser | null): UseNotificationsRes
         });
     }, []);
 
+    const deleteNotifications = useCallback((ids: string[]) => {
+        const currentUser = userRef.current;
+        if (!currentUser || ids.length === 0) return;
+
+        const idsToRemove = new Set(ids);
+        setNotifications((current) => {
+            const updated = current.filter((item) => !idsToRemove.has(item.id));
+            saveFeed(currentUser.id, updated);
+            return updated;
+        });
+    }, []);
+
+    const deleteAllNotifications = useCallback(() => {
+        const currentUser = userRef.current;
+        if (!currentUser) return;
+
+        setNotifications(() => {
+            saveFeed(currentUser.id, []);
+            return [];
+        });
+    }, []);
+
     const unreadCount = notifications.filter((item) => !item.read).length;
 
-    return { notifications, unreadCount, isLoading, error, markAsRead, markAllAsRead, refresh: poll };
+    return {
+        notifications,
+        unreadCount,
+        isLoading,
+        error,
+        markAsRead,
+        markAllAsRead,
+        deleteNotifications,
+        deleteAllNotifications,
+        refresh: poll,
+    };
 }

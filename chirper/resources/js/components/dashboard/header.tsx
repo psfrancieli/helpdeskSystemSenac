@@ -21,7 +21,16 @@ export function DashboardHeader({ user, onLogout }: DashboardHeaderProps) {
     const { theme, toggleTheme } = useTheme();
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const { notifications, unreadCount, isLoading, error, markAsRead, markAllAsRead } = useNotifications(user);
+    const {
+        notifications,
+        unreadCount,
+        isLoading,
+        error,
+        markAsRead,
+        markAllAsRead,
+        deleteNotifications,
+        deleteAllNotifications,
+    } = useNotifications(user);
 
     useEffect(() => {
         if (!isNotificationsOpen) return;
@@ -102,6 +111,8 @@ export function DashboardHeader({ user, onLogout }: DashboardHeaderProps) {
                             error={error}
                             onToggleRead={markAsRead}
                             onMarkAllRead={markAllAsRead}
+                            onDeleteSelected={deleteNotifications}
+                            onDeleteAll={deleteAllNotifications}
                             />
                         )}
                     </AnimatePresence>

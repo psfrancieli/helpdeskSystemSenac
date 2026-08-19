@@ -135,6 +135,9 @@ html[data-theme='light'] aside.glass-panel {
 
 
 html[data-theme='light'] .text-white { color: #27313b !important; }
+html[data-theme='light'] .notifications-delete-button { background-color: #e11d48 !important; color: #ffffff !important; }
+html[data-theme='light'] .notifications-delete-button:hover { background-color: #f43f5e !important; color: #ffffff !important; }
+html[data-theme='light'] .notifications-delete-button:disabled { background-color: #e11d48 !important; color: #ffffff !important; }
 html[data-theme='light'] .text-stone-100 { color: #34404b !important; }
 html[data-theme='light'] .text-stone-200 { color: #46525e !important; }
 html[data-theme='light'] .text-stone-300 { color: #5f6b77 !important; }
