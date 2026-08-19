@@ -5,6 +5,7 @@ require_once __DIR__ . '/../models/History.php';
 require_once __DIR__ . '/../repositories/HistoryRepository.php';
 require_once __DIR__ . '/../services/HistoryService.php';
 require_once __DIR__ . '/Controller.php';
+require_once __DIR__ . '/../utils/token_jwt.php';
 
 class HistoryController extends Controller
 {
@@ -90,6 +91,53 @@ class HistoryController extends Controller
         ], 200);
 
     } catch (Throwable $e) {
+        $this->response([
+            "success" => false,
+            "message" => $e->getMessage()
+        ], 400);
+    }
+}
+
+public function getByTicketIdV2(): void
+{
+    try {
+        validateTokenJWT();
+
+        // Pega o ID do chamado da URL
+        $id = isset($_GET['id_chamado'])
+            ? (int) $_GET['id_chamado']
+            : 0;
+
+        if ($id <= 0) {
+            $this->response([
+                "success" => false,
+                "message" => "ID do chamado inválido."
+            ], 400);
+
+            return;
+        }
+
+        // Busca o histórico
+        $dados = HistoryService::getByTicketId($id);
+
+        $historicos = [];
+
+        foreach ($dados as $historico) {
+            $historicos[] = [
+                "data" => $historico->getData()->format("Y-m-d H:i:s"),
+                "descricao" => $historico->getDescricao(),
+                "id_chamado" => $historico->getChamado(),
+                "id_usuario_tecnico" => $historico->getTecnico()
+            ];
+        }
+
+        $this->response([
+            "success" => true,
+            "data" => $historicos
+        ], 200);
+
+    } catch (Throwable $e) {
+
         $this->response([
             "success" => false,
             "message" => $e->getMessage()
