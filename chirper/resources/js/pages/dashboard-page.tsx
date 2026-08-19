@@ -26,10 +26,10 @@ interface DashboardPageProps {
 }
 
 const sectionVisibilityByRole: Record<UserRole, DashboardSection[]> = {
-  usuario: ["overview", "chamados", "historico", "criarChamado", "perfil"],
-  tecnico: ["overview", "chamados", "historico", "criarChamado", "perfil"],
-  analista: ["overview", "usuarios", "chamados", "historico", "criarChamado", "criarUsuario", "perfil"],
-  adm: ["overview", "usuarios", "chamados", "historico", "criarChamado", "criarUsuario", "perfil"],
+  usuario: ["overview", "chamados", "criarChamado", "perfil"],
+  tecnico: ["overview", "chamados", "criarChamado", "perfil"],
+  analista: ["overview", "usuarios", "chamados", "criarChamado", "criarUsuario", "perfil"],
+  adm: ["overview", "usuarios", "chamados", "criarChamado", "criarUsuario", "perfil", "relatorio"],
 };
 
 function normalizeSection(sectionParam?: string): DashboardSection {
@@ -38,10 +38,10 @@ function normalizeSection(sectionParam?: string): DashboardSection {
     "overview",
     "usuarios",
     "chamados",
-    "historico",
     "criarChamado",
     "criarUsuario",
-    "perfil"
+    "perfil",
+    "relatorio"
   ]);
 
   if (!sectionParam || !accepted.has(sectionParam as DashboardSection)) {
@@ -769,12 +769,12 @@ async function handleResetarSenha() {
                   </div>
                 )
               ) : null}
-              {canAccessCurrentSection && section === "historico" ? (
+              {/* {canAccessCurrentSection && section === "historico" ? (
                 <EmptyState
                   title="Histórico em preparação"
                   description="O polvo está organizando o timeline de interações para este módulo."
                 />
-              ) : null}
+              ) : null} */}
               {canAccessCurrentSection && section === "criarChamado" ? (
                 <Card>
                   <CardContent className="space-y-4 py-4">
