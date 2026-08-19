@@ -128,7 +128,7 @@ export function NotificationsPanel({
                                             onClick={() => onToggleRead(item.id)}
                                             className={cn(
                                                 'flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-stone-700/30',
-                                                !item.read && 'bg-amber-500/[0.04]',
+                                                !item.read,
                                             )}
                                         >
                                             <div className={cn('flex size-9 shrink-0 items-center justify-center rounded-full', style.className)}>
