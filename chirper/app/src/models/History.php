@@ -9,16 +9,16 @@ class History{
     
     public function __construct(?DateTime $data = null , string $descricao = '', int $id_chamado, int $id_usuario_tecnico)
     {
-        $this->data = $data ?? new DateTime();
-        $this->descricao = $descricao;
-        $this->id_chamado = $id_chamado;
-        $this->id_usuario_tecnico = $id_usuario_tecnico;
+        $this->setData($data ?? new DateTime());
+        $this->setDescricao($descricao);
+        $this->setChamado($id_chamado);
+        $this->setTecnico($id_usuario_tecnico);
     }
 
-    public function getChamado(): string{
+    public function getChamado(): int{
         return $this->id_chamado;
     }
-    public function getTecnico(): string{
+    public function getTecnico(): int{
         return $this->id_usuario_tecnico;
     }
     public function getData(): DateTime{
@@ -46,6 +46,7 @@ class History{
         if (empty($id_usuario_tecnico)) {
             throw new InvalidArgumentException('Tecnico inexistente');
         }
+        $this->id_usuario_tecnico = $id_usuario_tecnico;
     }
     
     public function setDescricao(string $descricao): void {

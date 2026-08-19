@@ -195,6 +195,42 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
     setProfilePhone(authUser.telefone.replace(/\D/g, ""));
   }, [authUser.telefone]);
 
+const [isUpdatingStatusId, setIsUpdatingStatusId] = useState<number | null>(null);
+
+const handleUpdateStatus = async (ticketId: number, novoStatus: string) => {
+    setIsUpdatingStatusId(ticketId); 
+
+    try {
+        const resposta = await fetch('/api/chamados/atualizar-status', {
+            method: 'POST', 
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            credentials: 'include', 
+            
+            body: JSON.stringify({
+                id_chamado: ticketId,
+                status: novoStatus
+            })
+        });
+
+        const dados = await resposta.json();
+
+        if (!dados.success) {
+            throw new Error(dados.message || 'Erro desconhecido ao atualizar.');
+        }
+
+        console.log("Status atualizado:", dados.data);
+
+    } catch (erro: any) {
+        console.error("Erro na atualização:", erro);
+        alert(erro.message || "Erro ao atualizar o status do chamado.");
+    } finally {
+        setIsUpdatingStatusId(null); 
+    }
+};
+
   useEffect(() => {
     setTicketForm(createInitialTicketForm(authUser.id));
   }, [authUser.id]);
@@ -280,11 +316,21 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
       });
 
       setAssignmentFeedback("Técnico atribuído com sucesso.");
+
+      setTimeout(() => {
+        setAssignmentFeedback(null);
+      }, 3500);
+
       reloadChamados();
       reloadTecnicos();
     } catch (error) {
       const message = error instanceof Error ? error.message : "Erro ao atribuir técnico";
       setAssignmentError(message);
+
+      setTimeout(() => {
+        setAssignmentFeedback(null);
+      }, 3000);
+
     } finally {
       setIsAssigningTicketId(null);
     }
@@ -307,10 +353,16 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
 
       setTicketForm(createInitialTicketForm(authUser.id));
       setTicketSubmitSuccess("Chamado enviado com sucesso.");
+      setTimeout(() => {
+        setTicketSubmitSuccess(null);
+      }, 3000);
       reloadChamados();
     } catch (error) {
       const message = error instanceof Error ? error.message : "Erro ao criar chamado";
       setTicketSubmitError(message);
+      setTimeout(() => {
+        setTicketSubmitSuccess(null);
+      }, 3500);
     } finally {
       setIsSubmittingTicket(false);
     }
@@ -482,6 +534,8 @@ async function handleResetarSenha() {
                           techniciansLoading={isTecnicosLoading}
                           onAssignTechnician={handleAssignTechnician}
                           userRole={authUser.nivel}
+                          isUpdatingStatusId={isUpdatingStatusId}
+                          onUpdateStatus={handleUpdateStatus}
                         />
                       )}
                     </>

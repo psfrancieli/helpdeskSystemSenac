@@ -113,9 +113,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                                         <Checkbox checked={remember} onCheckedChange={(checked) => setRemember(Boolean(checked))} />
                                         Lembrar acesso
                                     </label>
-                                    <button type="button" className="text-amber-200 transition-colors hover:text-white">
-                                        Esqueci minha senha
-                                    </button>
+                                    
                                 </div>
                                 <AnimatePresence mode="wait">
                                     <motion.button
