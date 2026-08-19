@@ -32,6 +32,11 @@ export function useTecnicos(): UseTecnicosResult {
                 if (!cancelled) {
                     const message = err instanceof Error ? err.message : 'Erro ao carregar técnicos';
                     setError(message);
+                    setTimeout(() => {
+                        if (!cancelled) {
+                            setError(null); 
+                        }
+                    }, 3500);
                 }
             })
             .finally(() => {

@@ -13,7 +13,7 @@ export default function AnimatedButton() {
         className="relative flex items-center justify-center px-5 py-3 bg-amber-600 rounded-xl leading-none text-white font-semibold tracking-wider text-lg shadow-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-slate-900"
         style={{ cursor: "pointer" }}
       >
-        <span className="relative">Concluir</span>
+        <span className="relative">Concluir</span>  
       </motion.button>
     </div>
   );
