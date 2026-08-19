@@ -54,6 +54,14 @@ export interface HelpdeskTicket {
     status: TicketStatus;
 }
 
+export interface HelpdeskTicketHistory {
+    id: number;
+    ticketId: number;
+    data: string;
+    tecnico: string;
+    comentario: string;
+}
+
 export interface CreateChamadoInput {
     titulo: string;
     descricao: string;
