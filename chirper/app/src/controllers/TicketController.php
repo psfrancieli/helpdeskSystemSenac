@@ -604,14 +604,14 @@ $controller = new TicketController();
 // =========================================================================
 // 20. TESTE: ATRIBUIR TÉCNICO
 // =========================================================================
-echo "<h3>20. Teste: Atribuir Técnico</h3>";
-try {
-    $idChamado = 1;
-    $dadosTecnico = ['id_responsavel' => 2]; 
-    $controller->atribuirTecnico($idChamado, $dadosTecnico);
-} catch (\Exception $e) {
-    echo "<b>Erro:</b> " . $e->getMessage() . "<br>";
-}
+// echo "<h3>20. Teste: Atribuir Técnico</h3>";
+// try {
+//     $idChamado = 1;
+//     $dadosTecnico = ['id_responsavel' => 2]; 
+//     $controller->atribuirTecnico($idChamado, $dadosTecnico);
+// } catch (\Exception $e) {
+//     echo "<b>Erro:</b> " . $e->getMessage() . "<br>";
+// }
 
 // =========================================================================
 // 21. TESTE: CHAMADOS ABERTOS POR PERÍODO
