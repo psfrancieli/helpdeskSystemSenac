@@ -250,6 +250,15 @@ class TicketRepository{
         $taxa = ($chamadosResolvidos / $totalChamados) * 100;
         return round($taxa, 2);
     }
+    
+    public function calcularTaxaResolucaoPeriodo(\DateTime $dataInicial, \DateTime $dataFim): float {
+        
+        $totalChamados = $this->contarChamadosPorPeriodo($dataInicial, $dataFim);
+        
+        $chamadosResolvidos = $this->contarChamadosResolvidosPorPeriodo($dataInicial, $dataFim);
+        
+        return $this->calcularTaxaResolucao($totalChamados, $chamadosResolvidos);
+    }
 
     public function relatorioPorCategoria(): array {
         try {
@@ -632,19 +641,51 @@ class TicketRepository{
             throw new RuntimeException("Erro ao buscar chamados por nome de chamado no banco", 0, $e);
         }
     }
+
+    public function calcularTempoMedioResolucaoPorPeriodo(\DateTime $dataInicial, \DateTime $dataFinal): string {
+        try {
+            $sql = '
+                SELECT AVG(EXTRACT(EPOCH FROM (data_encerramento - data_abertura))) AS media_segundos 
+                FROM "CHAMADO" 
+                WHERE status = ? AND data_encerramento::DATE BETWEEN ? AND ?
+            ';
+            
+            $stmt = Database::getConnection()->prepare($sql);
+            $stmt->execute([
+                'concluido',
+                $dataInicial->format('Y-m-d'),
+                $dataFinal->format('Y-m-d')
+            ]);
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+            $segundos = (int)($resultado['media_segundos'] ?? 0);
+            if ($segundos === 0) {
+                return "0 min";
+            }
+            $horas = floor($segundos / 3600);
+            $minutos = floor(($segundos % 3600) / 60);
+
+            if ($horas > 0) {
+                return "{$horas}h {$minutos}min";
+            }
+            return "{$minutos}min";
+
+        } catch (PDOException $e) {
+            throw new RuntimeException("Erro ao calcular tempo médio de resolução", 0, $e);
+        }
+    }
 }
 
+// resolução
 // =========================================================================
 // BLOCO DE TESTES
 // =========================================================================
 
-// ini_set('display_errors', 1);
-// error_reporting(E_ALL);
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 
 // echo "<h1>Testes do TicketRepository</h1>";
 
-// // AQUI ESTAVA A CAGADA: Faltava instanciar a própria classe do repositório!
-// $repository = new \src\repositories\TicketRepository();
+$repository = new \src\repositories\TicketRepository();
 
 // =========================================================================
 // 1. TESTE: BUSCAR CHAMADOS NÃO RESOLVIDOS
@@ -958,7 +999,7 @@ class TicketRepository{
 // }
 
 // // =========================================================================
-// // 25. TESTE: CONTAR CANCELADOS POR PERÍODO (FUNÇÃO DUPLICADA NO REPOSITÓRIO 2)
+// // 25. TESTE: CONTAR CANCELADOS POR PERÍODO
 // // =========================================================================
 // echo "<h3>25. Contar Cancelados por Período</h3>";
 // try {
@@ -988,5 +1029,16 @@ class TicketRepository{
 //     echo "Sucesso! Relatório de categorias do período gerado com " . count($relatorioCatPeriodo) . " resultados.<br>";
 // } catch (\Exception $e) {
 //     echo "<b>Erro no relatório categoria/período:</b> " . $e->getMessage() . "<br>";
+// }
+
+// // =========================================================================
+// // 27. TESTE: CHAMADOS ABERTOS POR PERÍODO
+// // =========================================================================
+// echo "<h3>27. Chamados por Período</h3>";
+// try {
+//     $qtdAbertosPeriodo = $repository->contarChamadosPorPeriodo(new \DateTime('2026-08-08'), new \DateTime('2026-08-13'));
+//     echo "Sucesso! Abertos <b>{$qtdAbertosPeriodo}</b>.<br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao contar abertos período:</b> " . $e->getMessage() . "<br>";
 // }
 ?>

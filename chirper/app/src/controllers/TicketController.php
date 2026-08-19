@@ -296,6 +296,50 @@ class TicketController extends Controller {
             $this->response(["success" => false, "message" => $e->getMessage()], 400);
         }
     }
+
+    public function buscarChamadosAbertosPeriodo(string $dataInicio, string $dataFim): void {
+        try {
+            $inicio = new \DateTime($dataInicio);
+            $fim = new \DateTime($dataFim);
+            $dados = $this->services->chamadosAbertosPorPeriodo($inicio, $fim);
+            
+            $this->response(["success" => true, "data" => $dados]);
+        } catch (\Throwable $e) {
+            $this->response(["success" => false, "message" => "Formato de data inválido ou erro: " . $e->getMessage()], 400);
+        }
+    }
+
+    public function taxaResolucaoPeriodo(string $dataInicio, string $dataFim): void {
+        try {
+            $inicio = new \DateTime($dataInicio);
+            $fim = new \DateTime($dataFim);
+            $taxa = $this->services->calcularTaxaResolucaoPeriodo($inicio, $fim);
+            
+            $this->response([
+                "success" => true, 
+                "data" => [$taxa]
+            ]);
+        } catch (\Throwable $e) {
+            $this->response(["success" => false, "message" => "Formato de data inválido ou erro: " . $e->getMessage()], 400);
+        }
+    }
+
+    public function dashboardPorPeriodo(string $dataInicio, string $dataFim): void {
+        try {
+            $inicio = new \DateTime($dataInicio);
+            $fim = new \DateTime($dataFim);
+            $dados = $this->services->relatorioDashboardPorPeriodo($inicio, $fim);
+            $this->response([
+                "success" => true, 
+                "data" => $dados
+            ]);
+        } catch (\Throwable $e) {
+            $this->response([
+                "success" => false, 
+                "message" => "Erro ao gerar dashboard: " . $e->getMessage()
+            ], 400);
+        }
+    }
 }
 
 /*
@@ -304,10 +348,10 @@ TESTES DO CONTROLLER (Descomente apenas UM por vez)
 =========================================================================
 */
 
-// ini_set('display_errors', 1);
-// error_reporting(E_ALL);
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 
-// $controller = new TicketController();
+$controller = new TicketController();
 
 // =========================================================================
 // 1. TESTE: BUSCAR TICKETS POR STATUS
@@ -532,6 +576,43 @@ TESTES DO CONTROLLER (Descomente apenas UM por vez)
 //     $idChamado = 1;
 //     $dadosTecnico = ['id_responsavel' => 2]; 
 //     $controller->atribuirTecnico($idChamado, $dadosTecnico);
+// } catch (\Exception $e) {
+//     echo "<b>Erro:</b> " . $e->getMessage() . "<br>";
+// }
+
+// =========================================================================
+// 21. TESTE: CHAMADOS ABERTOS POR PERÍODO
+// =========================================================================
+// echo "<h3>21. Teste: Buscar Chamados Abertos por Período</h3>";
+// try {
+//     $dataInicio = '2026-07-01';
+//     $dataFim = '2026-09-30';
+//     $controller->buscarChamadosAbertosPeriodo($dataInicio, $dataFim);
+// } catch (\Exception $e) {
+//     echo "<b>Erro:</b> " . $e->getMessage() . "<br>";
+// }
+
+// =========================================================================
+// 22. TESTE: CALCULAR TAXA DE RESOLUÇÃO POR PERÍODO
+// =========================================================================
+// echo "<h3>22. Teste: Calcular Taxa de Resolução por Período</h3>";
+// try {
+//     $dataInicio = '2026-07-01';
+//     $dataFim = '2026-09-30';
+//     $controller->taxaResolucaoPeriodo($dataInicio, $dataFim);
+// } catch (\Exception $e) {
+//     echo "<b>Erro:</b> " . $e->getMessage() . "<br>";
+// }
+
+// =========================================================================
+// 28. TESTE: DASHBOARD GERAL POR PERÍODO (AGRUPADO)
+// =========================================================================
+// echo "<h3>28. Teste: Dashboard Geral por Período</h3>";
+// try {
+//     $dataInicio = '2026-07-01';
+//     $dataFim = '2026-12-31'; 
+    
+//     $controller->dashboardPorPeriodo($dataInicio, $dataFim);
 // } catch (\Exception $e) {
 //     echo "<b>Erro:</b> " . $e->getMessage() . "<br>";
 // }

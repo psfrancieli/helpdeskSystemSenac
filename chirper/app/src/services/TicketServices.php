@@ -350,18 +350,43 @@ class TicketServices {
         $relatorio = $this->repository->relatorioPorCategoriaPorPeriodo($dataInicial, $dataFinal);
         return $relatorio ?: [];
     }
+
+   public function chamadosAbertosPorPeriodo(\DateTime $dataInicio, \DateTime $dataFim): int {
+        return $this->repository->contarChamadosPorPeriodo($dataInicio, $dataFim);
+    }
+
+    public function calcularTaxaResolucaoPeriodo(\DateTime $dataInicial, \DateTime $dataFim): float {
+        return $this->repository->calcularTaxaResolucaoPeriodo($dataInicial, $dataFim);
+    }
+
+    // Função para juntar as funções para o relatorio
+    public function relatorioDashboardPorPeriodo(\DateTime $dataInicial, \DateTime $dataFinal): array {
+        $abertos = $this->repository->contarChamadosPorPeriodo($dataInicial, $dataFinal);
+        $resolvidos = $this->repository->contarChamadosResolvidosPorPeriodo($dataInicial, $dataFinal);
+        $pendentes = $this->repository->contarChamadosPendentesPorPeriodo($dataInicial, $dataFinal);
+        $taxaResolucao = $this->repository->calcularTaxaResolucaoPeriodo($dataInicial, $dataFinal);
+        $tempoResolucao = $this->repository->calcularTempoMedioResolucaoPorPeriodo($dataInicial, $dataFinal);
+        
+        return [
+            "chamados_abertos" => $abertos,
+            "chamados_resolvidos" => $resolvidos,
+            "chamados_pendentes" => $pendentes,
+            "taxa_resolucao" => $taxaResolucao . "%",
+            "tempo_medio_resolucao" => $tempoResolucao
+        ];
+    }
 }
 
 // =========================================================================
 // BLOCO DE TESTES
 // =========================================================================
 
-// ini_set('display_errors', 1);
-// error_reporting(E_ALL);
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 
 // echo "<h1>Testes do TicketServices</h1>";
 
-// $service = new TicketServices();
+$service = new TicketServices();
 
 // // =========================================================================
 // // 1. TESTE: LISTAR TUDO
