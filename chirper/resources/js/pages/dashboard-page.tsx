@@ -18,6 +18,8 @@ import {
   statuses,
   users,
 } from "../data/mock";
+import { useCategorias } from "../hooks/useCategorias";
+import { useUsuarios } from "../hooks/useUsuarios";
 import { useChamados } from "../hooks/useChamados";
 import { useTecnicos } from "../hooks/useTecnicos";
 import { assignTechnicianToChamado, createChamado } from "../services/chamadoService";
@@ -66,7 +68,7 @@ function createInitialTicketForm(userId: number): CreateChamadoInput {
     descricao: "",
     prioridade: "media",
     patrimonio: "",
-    id_categoria: categories[0]?.id ?? 1,
+    id_categoria: 0,
     id_usuario: userId,
     id_responsavel: null,
     status: "pendente",
@@ -138,6 +140,11 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
   const canAccessCurrentSection = allowedSections.includes(section);
   const [loading, setLoading] = useState(true);
   const {
+    usuarios,
+    isLoading: isUsuariosLoading,
+    error: usuariosError,
+  } = useUsuarios();
+  const {
     chamados,
     isLoading: isChamadosLoading,
     error: chamadosError,
@@ -149,6 +156,10 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
     error: tecnicosError,
     reloadTecnicos,
   } = useTecnicos();
+  const {
+    categorias,
+    isLoading: isCategoriasLoading,
+  } = useCategorias();
   const [ticketForm, setTicketForm] = useState<CreateChamadoInput>(createInitialTicketForm(authUser.id));
   const [isSubmittingTicket, setIsSubmittingTicket] = useState(false);
   const [ticketSubmitError, setTicketSubmitError] = useState<string | null>(null);
@@ -174,6 +185,42 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
     setProfilePhone(authUser.telefone.replace(/\D/g, ""));
   }, [authUser.telefone]);
 
+const [isUpdatingStatusId, setIsUpdatingStatusId] = useState<number | null>(null);
+
+const handleUpdateStatus = async (ticketId: number, novoStatus: string) => {
+    setIsUpdatingStatusId(ticketId); 
+
+    try {
+        const resposta = await fetch('/api/chamados/atualizar-status', {
+            method: 'POST', 
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            credentials: 'include', 
+            
+            body: JSON.stringify({
+                id_chamado: ticketId,
+                status: novoStatus
+            })
+        });
+
+        const dados = await resposta.json();
+
+        if (!dados.success) {
+            throw new Error(dados.message || 'Erro desconhecido ao atualizar.');
+        }
+
+        console.log("Status atualizado:", dados.data);
+
+    } catch (erro: any) {
+        console.error("Erro na atualização:", erro);
+        alert(erro.message || "Erro ao atualizar o status do chamado.");
+    } finally {
+        setIsUpdatingStatusId(null); 
+    }
+};
+
   useEffect(() => {
     setTicketForm(createInitialTicketForm(authUser.id));
   }, [authUser.id]);
@@ -183,6 +230,11 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
 
     return () => clearTimeout(timeout);
   }, []);
+  useEffect(() => {
+    if (categorias.length > 0 && ticketForm.id_categoria === 0) {
+      setTicketForm((current) => ({ ...current, id_categoria: categorias[0].id }));
+    }
+  }, [categorias, ticketForm.id_categoria]);
 
   const chamadosByRole = useMemo(() => {
     if (authUser.nivel === "tecnico") {
@@ -203,7 +255,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
   const dashboardMetrics = [
     {
       ...metrics[0],
-      value: `${users.filter((user) => user.ativo).length}`,
+      value: `${usuarios.filter((user) => user.ativo).length}`,
     },
     {
       ...metrics[1],
@@ -238,6 +290,10 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
     });
   }, [chamadosByRole, searchChamado, categoryFilter, statusFilter, priorityFilter]);
 
+  const usuariosOrdenados = useMemo(() => {
+    return [...usuarios].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+  }, [usuarios]);
+
   async function handleAssignTechnician(ticketId: number, technicianId: number) {
     setIsAssigningTicketId(ticketId);
     setAssignmentFeedback(null);
@@ -250,11 +306,21 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
       });
 
       setAssignmentFeedback("Técnico atribuído com sucesso.");
+
+      setTimeout(() => {
+        setAssignmentFeedback(null);
+      }, 3500);
+
       reloadChamados();
       reloadTecnicos();
     } catch (error) {
       const message = error instanceof Error ? error.message : "Erro ao atribuir técnico";
       setAssignmentError(message);
+
+      setTimeout(() => {
+        setAssignmentFeedback(null);
+      }, 3000);
+
     } finally {
       setIsAssigningTicketId(null);
     }
@@ -277,10 +343,16 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
 
       setTicketForm(createInitialTicketForm(authUser.id));
       setTicketSubmitSuccess("Chamado enviado com sucesso.");
+      setTimeout(() => {
+        setTicketSubmitSuccess(null);
+      }, 3000);
       reloadChamados();
     } catch (error) {
       const message = error instanceof Error ? error.message : "Erro ao criar chamado";
       setTicketSubmitError(message);
+      setTimeout(() => {
+        setTicketSubmitSuccess(null);
+      }, 3500);
     } finally {
       setIsSubmittingTicket(false);
     }
@@ -414,6 +486,8 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                           techniciansLoading={isTecnicosLoading}
                           onAssignTechnician={handleAssignTechnician}
                           userRole={authUser.nivel}
+                          isUpdatingStatusId={isUpdatingStatusId}
+                          onUpdateStatus={handleUpdateStatus}
                         />
                       )}
                     </>
@@ -421,24 +495,38 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                 </div>
               ) : null}
               {canAccessCurrentSection && section === "usuarios" ? (
-                <Card>
-                  <CardContent className="space-y-3">
-                    {users.map((user) => (
+                isUsuariosLoading ? (
+                  <SkeletonGrid />
+                ) : usuariosError ? (
+                  <EmptyState
+                    title="Erro ao carregar usuários"
+                    description="Não foi possível conectar com o servidor. Verifique se o backend está rodando."
+                  />
+                ) : usuarios.length === 0 ? (
+                  <EmptyState
+                    title="Nenhum usuário encontrado"
+                    description="Ainda não há usuários cadastrados no sistema."
+                  />
+                ) : (
+                  <Card>
+                    <CardContent className="space-y-3">
+                    {usuariosOrdenados.map((usuario) => (
                       <div
-                        key={user.id}
+                        key={usuario.id}
                         className="flex items-center justify-between gap-3 rounded-xl border border-stone-700/70 bg-stone-800/45 p-3"
                       >
                         <div>
-                          <p className="font-medium text-white">{user.nome}</p>
-                          <p className="text-sm text-stone-300">{user.email}</p>
+                          <p className="font-medium text-white">{usuario.nome}</p>
+                          <p className="text-sm text-stone-300">{usuario.email}</p>
                         </div>
-                        <Badge variant={user.ativo ? "success" : "warning"}>
-                          {user.nivel}
+                        <Badge variant={usuario.ativo ? "success" : "warning"}>
+                          {usuario.nivel}
                         </Badge>
                       </div>
                     ))}
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                )
               ) : null}
               {canAccessCurrentSection && section === "chamados" ? (
                 isChamadosLoading ? (
@@ -632,13 +720,20 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                               id_categoria: Number(event.target.value),
                             }))
                           }
+                          disabled={isCategoriasLoading || categorias.length === 0}
                           className="w-full rounded-xl border border-stone-700 bg-stone-950 px-3 py-2 text-stone-100"
                         >
-                          {categories.map((category) => (
-                            <option key={category.id} value={category.id}>
-                              {category.nome}
-                            </option>
-                          ))}
+                          {isCategoriasLoading ? (
+                            <option value={0}>Carregando categorias...</option>
+                          ) : categorias.length === 0 ? (
+                            <option value={0}>Nenhuma categoria disponível</option>
+                          ) : (
+                            categorias.map((category) => (
+                              <option key={category.id} value={category.id}>
+                                {category.nome}
+                              </option>
+                            ))
+                          )}
                         </select>
                       </label>
 

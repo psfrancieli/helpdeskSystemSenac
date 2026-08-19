@@ -258,6 +258,28 @@ class UserController extends Controller
         }
     }
 
+    public function setDefaultPassword(int $id)
+{
+    try {
+        if ($id <= 0) {
+            throw new InvalidArgumentException("ID inválido.");
+        }
+
+        $result = $this->service->setDefaultPassword($id);
+        
+        $this->response([
+            "success" => $result,
+            "message" => "Senha padrão definida com sucesso."
+        ], 200);
+
+    } catch (Throwable $e) {
+        $this->response([
+            "success" => false,
+            "message" => $e->getMessage()
+        ], 400);
+    }
+}
+
     public function alterarNivel(User $usuarioLogado, int $id): void
     {
         try {

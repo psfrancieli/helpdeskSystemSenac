@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react';
 
-import { fetchTecnicos } from '../services/tecnicoService';
+import { fetchUsuarios } from '../services/usuarioService';
 import type { HelpdeskUser } from '../types/helpdesk';
 
-interface UseTecnicosResult {
-    tecnicos: HelpdeskUser[];
+interface UseUsuariosResult {
+    usuarios: HelpdeskUser[];
     isLoading: boolean;
     error: string | null;
-    reloadTecnicos: () => void;
+    reloadUsuarios: () => void;
 }
 
-export function useTecnicos(): UseTecnicosResult {
-    const [tecnicos, setTecnicos] = useState<HelpdeskUser[]>([]);
+export function useUsuarios(): UseUsuariosResult {
+    const [usuarios, setUsuarios] = useState<HelpdeskUser[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [refreshIndex, setRefreshIndex] = useState(0);
@@ -22,21 +22,16 @@ export function useTecnicos(): UseTecnicosResult {
         setIsLoading(true);
         setError(null);
 
-        fetchTecnicos()
+        fetchUsuarios()
             .then((data) => {
                 if (!cancelled) {
-                    setTecnicos(data);
+                    setUsuarios(data);
                 }
             })
             .catch((err: unknown) => {
                 if (!cancelled) {
-                    const message = err instanceof Error ? err.message : 'Erro ao carregar técnicos';
+                    const message = err instanceof Error ? err.message : 'Erro ao carregar usuários';
                     setError(message);
-                    setTimeout(() => {
-                        if (!cancelled) {
-                            setError(null); 
-                        }
-                    }, 3500);
                 }
             })
             .finally(() => {
@@ -51,9 +46,9 @@ export function useTecnicos(): UseTecnicosResult {
     }, [refreshIndex]);
 
     return {
-        tecnicos,
+        usuarios,
         isLoading,
         error,
-        reloadTecnicos: () => setRefreshIndex((value) => value + 1),
+        reloadUsuarios: () => setRefreshIndex((value) => value + 1),
     };
 }

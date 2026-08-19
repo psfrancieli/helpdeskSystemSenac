@@ -23,13 +23,33 @@ export function useChamados(): UseChamadosResult {
         setError(null);
 
         fetchChamados()
-            .then((data) => {
-                if (!cancelled) setChamados(data);
+            
+            .then((data: any) => {
+                if (!cancelled && Array.isArray(data)) {
+                    
+                    const chamadosFormatados: HelpdeskTicket[] = data.map((item) => ({
+                        ...item,
+                        id: Number(item.id || item.id_chamado),
+                        
+                        tecnicoId: item.tecnico_id ? Number(item.tecnico_id) : (item.id_responsavel ? Number(item.id_responsavel) : null),
+                        
+                        categoria: item.categoria || item.nome_categoria || (item.id_categoria ? `Cat. ID ${item.id_categoria}` : 'Sem categoria'),
+                        
+                        responsavel: item.responsavel || item.nome_responsavel || (item.id_responsavel ? `Técnico ID ${item.id_responsavel}` : 'A definir'),
+                    }));
+
+                    setChamados(chamadosFormatados);
+                }
             })
             .catch((err: unknown) => {
                 if (!cancelled) {
                     const message = err instanceof Error ? err.message : 'Erro ao carregar chamados';
                     setError(message);
+                    setTimeout(() => {
+                        if (!cancelled) {
+                            setError(null); 
+                        }
+                    }, 3500);
                 }
             })
             .finally(() => {

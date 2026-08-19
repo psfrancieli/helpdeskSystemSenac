@@ -75,23 +75,6 @@ interface UseNotificationsResult {
     markAllAsRead: () => void;
     refresh: () => void;
 }
-
-/**
- * Deriva uma central de notificações 100% funcional a partir do endpoint
- * já existente `/api/chamados` (que por sua vez lê direto da tabela CHAMADO).
- *
- * Não existe tabela/rota de notificações no backend, então este hook faz o
- * trabalho no front: a cada poll ele compara o estado atual dos chamados com
- * o snapshot anterior (guardado por usuário) e gera eventos reais quando
- * detecta:
- *  - um chamado novo (visível para analista/adm)
- *  - atribuição de um técnico a um chamado (visível só para o técnico designado)
- *  - resolução ou cancelamento de um chamado (visível para quem abriu, o
- *    responsável e a equipe de analista/adm)
- *  - mudança de prioridade (visível para analista/adm)
- *
- * O feed é persistido em localStorage por usuário para sobreviver a reloads.
- */
 export function useNotifications(user: HelpdeskUser | null): UseNotificationsResult {
     const [notifications, setNotifications] = useState<HelpdeskNotification[]>([]);
     const [isLoading, setIsLoading] = useState(true);

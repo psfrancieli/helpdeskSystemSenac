@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react';
 
-import { fetchTecnicos } from '../services/tecnicoService';
-import type { HelpdeskUser } from '../types/helpdesk';
+import { fetchCategorias } from '../services/categoriaService';
+import type { HelpdeskCategory } from '../types/helpdesk';
 
-interface UseTecnicosResult {
-    tecnicos: HelpdeskUser[];
+interface UseCategoriasResult {
+    categorias: HelpdeskCategory[];
     isLoading: boolean;
     error: string | null;
-    reloadTecnicos: () => void;
+    reloadCategorias: () => void;
 }
 
-export function useTecnicos(): UseTecnicosResult {
-    const [tecnicos, setTecnicos] = useState<HelpdeskUser[]>([]);
+export function useCategorias(): UseCategoriasResult {
+    const [categorias, setCategorias] = useState<HelpdeskCategory[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [refreshIndex, setRefreshIndex] = useState(0);
@@ -22,21 +22,16 @@ export function useTecnicos(): UseTecnicosResult {
         setIsLoading(true);
         setError(null);
 
-        fetchTecnicos()
+        fetchCategorias()
             .then((data) => {
                 if (!cancelled) {
-                    setTecnicos(data);
+                    setCategorias(data);
                 }
             })
             .catch((err: unknown) => {
                 if (!cancelled) {
-                    const message = err instanceof Error ? err.message : 'Erro ao carregar técnicos';
+                    const message = err instanceof Error ? err.message : 'Erro ao carregar categorias';
                     setError(message);
-                    setTimeout(() => {
-                        if (!cancelled) {
-                            setError(null); 
-                        }
-                    }, 3500);
                 }
             })
             .finally(() => {
@@ -51,9 +46,9 @@ export function useTecnicos(): UseTecnicosResult {
     }, [refreshIndex]);
 
     return {
-        tecnicos,
+        categorias,
         isLoading,
         error,
-        reloadTecnicos: () => setRefreshIndex((value) => value + 1),
+        reloadCategorias: () => setRefreshIndex((value) => value + 1),
     };
 }

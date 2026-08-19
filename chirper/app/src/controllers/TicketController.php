@@ -40,20 +40,23 @@ class TicketController extends Controller {
 
     public function listarTicket(): void {
         try {
-            $dados = $this->services->listarTudo();
+            // Caminho corrigido: sobe duas pastas (sai de controllers -> sai de src) e entra em Http
+            require_once __DIR__ . '/../../Http/Support/ChamadoActions.php'; 
+            
+            // Usamos a barra invertida (\) para garantir que o PHP encontre a classe
+            $actions = new \ChamadoActions();
+            $chamados = $actions->listarComTecnicoId();
             
             $this->response([
                 "success" => true,
-                "data" => $dados
+                "data" => $chamados
             ]);
 
-        } catch (Throwable $e) {
-
+        } catch (\Throwable $e) {
             $this->response([
                 "success" => false,
-                "message" => $e->getMessage()
+                "message" => "Erro no servidor: " . $e->getMessage()
             ], 400);
-
         }
     }
 
@@ -197,6 +200,33 @@ class TicketController extends Controller {
         }
     }
 
+    public function atualizarStatus(int $id, array $dadosRequisicao): void {
+        try {
+            if (empty($dadosRequisicao['status'])) {
+                throw new InvalidArgumentException("O status é obrigatório.");
+            }
+
+            $this->services->atualizarStatus($id, $dadosRequisicao);
+
+            $this->response([
+                "success" => true,
+                "message" => "Status do ticket {$id} atualizado com sucesso."
+            ]);
+
+        } catch (InvalidArgumentException $e) {
+            $this->response([
+                "success" => false,
+                "message" => $e->getMessage()
+            ], 400);
+
+        } catch (\Throwable $e) {
+            $this->response([
+                "success" => false,
+                "message" => ($e->getMessage())
+            ], 400);
+        }
+    }
+
     public function buscarTicketsDataAbertura(\DateTime $data): void {
         try {
             $tickets = $this->services->buscaTicketsPorDataAbertura($data);
@@ -248,55 +278,53 @@ class TicketController extends Controller {
             ], 400);
         }
     }
+
+   public function atribuirTecnico(int $chamadoId, int $tecnicoId): void
+{
+    try {
+
+        $this->services->atribuirTecnico(
+            $chamadoId,
+            $tecnicoId
+        );
+
+        $this->response([
+            'success' => true,
+            'message' => 'Técnico atribuído ao chamado com sucesso.',
+            'data' => [
+                'id_chamado' => $chamadoId,
+                'tecnico_id' => $tecnicoId
+            ]
+        ]);
+
+    } catch (\Throwable $e) {
+
+        $this->response([
+            'success' => false,
+            'message' => $e->getMessage()
+        ], 400);
+    }
+}
 }
 
-/*
-=========================================================================
-TESTES DO CONTROLLER (Filtros de Busca)
-=========================================================================
-*/
-
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
-$controller = new TicketController();
 
 
-// =========================================================================
-// 1. TESTE: BUSCAR TICKETS POR STATUS
-// =========================================================================
-// echo "<h3>1. Teste: Buscar Tickets por Status ('pendente')</h3>";
-// try {
-//     $controller->buscarTicketsStatus('pendente');
-//     echo "<br><br><b>Teste de status vazio (inexistente):</b><br>";
-//     $controller->buscarTicketsStatus('status_maluco');
+
+
 
 // } catch (\Exception $e) {
 //     echo "<b>Erro:</b> " . $e->getMessage() . "<br>";
 // }
 
 // =========================================================================
-// 2. TESTE: BUSCAR TICKETS POR DATA DE ABERTURA
+// 4. TESTE: ATUALIZAR STATUS DO TICKET
 // =========================================================================
-
-// echo "<h3>2. Teste: Buscar Tickets por Data de Abertura</h3>";
+// echo "<h3>4. Teste: Atualizar Status do Ticket</h3>";
 // try {
-//     $dataAberturaTeste = new \DateTime('2026-08-08'); 
-//     $controller->buscarTicketsDataAbertura($dataAberturaTeste);
+//     $idTicket = 2; 
+//     $novoStatusTeste = ['status' => 'pendente']; 
 
-// } catch (\Exception $e) {
-//     echo "<b>Erro:</b> " . $e->getMessage() . "<br>";
-// }
-
-
-// =========================================================================
-// 3. TESTE: BUSCAR TICKETS POR DATA DE ENCERRAMENTO
-// =========================================================================
-// echo "<h3>3. Teste: Buscar Tickets por Data de Encerramento</h3>";
-// try {
-//     $dataEncerramentoTeste = new \DateTime('2026-08-11'); 
-    
-//     $controller->buscarTicketsDataEncerramento($dataEncerramentoTeste);
+//     $controller->atualizarStatus($idTicket, $novoStatusTeste);
 
 // } catch (\Exception $e) {
 //     echo "<b>Erro:</b> " . $e->getMessage() . "<br>";

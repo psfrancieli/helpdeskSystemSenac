@@ -11,6 +11,7 @@ class ChamadoActions
                 c.id,
                 c.uuid,
                 c.titulo,
+                c.descricao,
                 c.patrimonio,
                 c.prioridade,
                 c.data_abertura,
