@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { KeyRound } from "lucide-react";
 import { NavLink, useParams } from "react-router-dom";
 import { useAuth } from "../context/auth-context";
 import { AnimatedTable } from "../components/dashboard/animated-table";
@@ -189,7 +190,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
     setNivelSuccess(null);
     setResetSenhaError(null);
     setResetSenhaSuccess(null);
-  }, [viewingUser]);
+  }, [selectedUserId]);
 
   useEffect(() => {
     setProfilePhone(authUser.telefone.replace(/\D/g, ""));
@@ -441,42 +442,41 @@ const handleUpdateStatus = async (ticketId: number, novoStatus: string) => {
   }
 
   async function handleAlterarNivel(event: FormEvent<HTMLFormElement>) {
-  event.preventDefault();
-  if (!viewingUser) return;
+    event.preventDefault();
+    if (!viewingUser) return;
 
-  setIsSubmittingNivel(true);
-  setNivelError(null);
-  setNivelSuccess(null);
+    setIsSubmittingNivel(true);
+    setNivelError(null);
 
-  try {
-    await alterarNivelUsuario(viewingUser.id, selectedNivel);
-    setNivelSuccess("Nível atualizado com sucesso.");
-    reloadUsuarios();
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Erro ao atualizar nível";
-    setNivelError(message);
-  } finally {
-    setIsSubmittingNivel(false);
+    try {
+      await alterarNivelUsuario(viewingUser.id, selectedNivel);
+      reloadUsuarios();
+      setNivelSuccess("Nível atualizado com sucesso.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Erro ao atualizar nível";
+      setNivelError(message);
+    } finally {
+      setIsSubmittingNivel(false);
+    }
   }
-}
 
-async function handleResetarSenha() {
-  if (!viewingUser) return;
+  async function handleResetarSenha() {
+    if (!viewingUser) return;
 
-  setIsResettingSenha(true);
-  setResetSenhaError(null);
-  setResetSenhaSuccess(null);
+    setIsResettingSenha(true);
+    setResetSenhaError(null);
+    setResetSenhaSuccess(null);
 
-  try {
-    await resetarSenhaUsuario(viewingUser.id);
-    setResetSenhaSuccess("Senha redefinida para a senha padrão.");
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Erro ao redefinir senha";
-    setResetSenhaError(message);
-  } finally {
-    setIsResettingSenha(false);
+    try {
+      await resetarSenhaUsuario(viewingUser.id);
+      setResetSenhaSuccess("Senha redefinida para a senha padrão.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Erro ao redefinir senha";
+      setResetSenhaError(message);
+    } finally {
+      setIsResettingSenha(false);
+    }
   }
-}
 
   return (
     <main className="min-h-screen p-4 md:p-6">
@@ -580,10 +580,19 @@ async function handleResetarSenha() {
               {canAccessCurrentSection && section === "usuarios" && selectedUserId !== null ? (
                 <Card>
                   <CardContent className="space-y-4 py-4">
+                    {/* <div className="flex items-center justify-between gap-3"> */}
                     <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-lg font-semibold text-stone-100">Detalhes do Usuário</p>
-                        <p className="text-sm text-stone-400">Visualize e gerencie as informações do usuário.</p>
+                      <div className="flex items-center gap-4">
+                        <div className="flex size-14 items-center justify-center rounded-2xl border border-amber-500/30 bg-amber-600/15 text-lg font-semibold text-amber-200">
+                          {viewingUser?.nome
+                            .split(" ")
+                            .map((n) => n[0])
+                            .slice(0, 2)
+                            .join("") ?? "?"}
+                        </div>
+                        <div>
+                          <p className="text-xl font-semibold text-stone-100">{viewingUser?.nome ?? "Carregando..."}</p>
+                        </div>
                       </div>
                       <Button variant="ghost" onClick={() => setSelectedUserId(null)}>
                         ⮌  Voltar
@@ -603,24 +612,17 @@ async function handleResetarSenha() {
                       <>
                         <div className="grid gap-4 md:grid-cols-2">
                           <div className="space-y-2">
-                            <span className="text-sm text-stone-200">Nome</span>
-                            <div className="w-full rounded-xl border border-stone-700 bg-stone-900/60 px-3 py-2 text-stone-300">
-                              {viewingUser.nome}
-                            </div>
-                          </div>
-
-                          <div className="space-y-2">
                             <span className="text-sm text-stone-200">Email</span>
                             <div className="w-full rounded-xl border border-stone-700 bg-stone-900/60 px-3 py-2 text-stone-300">
                               {viewingUser.email}
                             </div>
                           </div>
-                        </div>
 
-                        <div className="space-y-2">
-                          <span className="text-sm text-stone-200">Telefone</span>
-                          <div className="w-full rounded-xl border border-stone-700 bg-stone-900/60 px-3 py-2 text-stone-300">
-                            {viewingUser.telefone || "Não informado"}
+                          <div className="space-y-2">
+                            <span className="text-sm text-stone-200">Telefone</span>
+                            <div className="w-full rounded-xl border border-stone-700 bg-stone-900/60 px-3 py-2 text-stone-300">
+                              {viewingUser.telefone || "Não informado"}
+                            </div>
                           </div>
                         </div>
 
@@ -659,7 +661,9 @@ async function handleResetarSenha() {
 
                         <div className="space-y-2 border-t border-stone-700/60 pt-4">
                           <span className="text-sm text-stone-200">Senha</span>
-
+                            <p className="text-xs text-stone-400">
+                              Atenção: esta ação é não é reversível e redefine a senha do usuário para o valor padrão do sistema.
+                            </p>
                           {resetSenhaError ? (
                             <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
                               {resetSenhaError}
@@ -672,9 +676,18 @@ async function handleResetarSenha() {
                             </div>
                           ) : null}
 
-                          <Button type="button" variant="ghost" disabled={isResettingSenha} onClick={handleResetarSenha}>
-                            {isResettingSenha ? "Redefinindo..." : "Redefinir para senha padrão"}
-                          </Button>
+                          <div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              disabled={isResettingSenha}
+                              onClick={handleResetarSenha}
+                              className="border border-stone-500/50 hover:border-amber-500/60"
+                            >
+                              <KeyRound className="size-4" />
+                              {isResettingSenha ? "Redefinindo..." : "Redefinir para senha padrão"}
+                            </Button>
+                          </div>
                         </div>
                       </>
                     )}
