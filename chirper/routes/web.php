@@ -200,8 +200,7 @@ $router->get('/api/tecnicos', function (): void {
                 'success' => false,
                 'message' => 'Acesso negado para listar técnicos.',
                 ], 403);
-                
-                }
+        }
                 
  
         $service = new UserServices();

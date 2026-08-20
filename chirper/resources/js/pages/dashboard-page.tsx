@@ -253,6 +253,11 @@ const handleUpdateStatus = async (ticketId: number, novoStatus: string) => {
       return chamados.filter((item) => (item.responsavel ?? "").trim().toLocaleLowerCase("pt-BR") === currentName);
     }
 
+    if (authUser.nivel === "usuario") {
+      const currentName = authUser.nome.trim().toLocaleLowerCase("pt-BR");
+      return chamados.filter((item) => item.solicitante.trim().toLocaleLowerCase("pt-BR") === currentName);
+    }
+
     if (authUser.nivel === "analista") {
       return chamados.filter((item) => {
         const normalizedStatus = item.status.trim().toLocaleLowerCase("pt-BR");
