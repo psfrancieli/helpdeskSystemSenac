@@ -5,6 +5,7 @@ import { createRoot } from 'react-dom/client';
 import { HashRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 
 import { AuthProvider, useAuth } from './context/auth-context';
+import { ThemeProvider } from './context/theme-context';
 import { DashboardPage } from '@/pages/dashboard-page';
 import { LoginPage } from '@/pages/login-page';
 
@@ -52,9 +53,11 @@ function AppShell() {
 function App() {
     return (
         <HashRouter>
-            <AuthProvider>
-                <AppShell />
-            </AuthProvider>
+            <ThemeProvider>
+                <AuthProvider>
+                    <AppShell />
+                </AuthProvider>
+            </ThemeProvider>
         </HashRouter>
     );
 }

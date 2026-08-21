@@ -1,6 +1,6 @@
 import { AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
-import { Bell, LogOut, Search } from 'lucide-react';
+import { Bell, LogOut, Search, Moon, Sun } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { NotificationsPanel } from '@/components/dashboard/notifications-panel';
 import { useNotifications } from '@/hooks/useNotifications';
 import type { HelpdeskUser } from '@/types/helpdesk';
+import { useTheme } from '@/context/theme-context';
 
 interface DashboardHeaderProps {
     user: HelpdeskUser;
@@ -17,6 +18,7 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ user, onLogout }: DashboardHeaderProps) {
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+    const { theme, toggleTheme } = useTheme();
     const containerRef = useRef<HTMLDivElement>(null);
 
     const { notifications, unreadCount, isLoading, error, markAsRead, markAllAsRead } = useNotifications(user);
@@ -52,6 +54,16 @@ export function DashboardHeader({ user, onLogout }: DashboardHeaderProps) {
                 <h1 className="text-2xl font-semibold text-white">{user.nome}</h1>
             </div>
             <div className="flex flex-1 items-center justify-end gap-3">
+                <button
+                    type="button"
+                    onClick={toggleTheme}
+                    aria-label={theme === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'}
+                    title={theme === 'dark' ? 'Tema claro' : 'Tema escuro'}
+                    className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-stone-600 bg-stone-900/55 text-stone-200 transition-all hover:border-amber-500/50 hover:text-white"
+                >
+                    {theme === 'dark' ? <Sun className="size-5" /> : <Moon className="size-5" />}
+                </button>
+
                 <div className="relative min-w-48 max-w-sm flex-1">
                     <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
                     <Input
@@ -98,7 +110,7 @@ export function DashboardHeader({ user, onLogout }: DashboardHeaderProps) {
                 <Link
                     to="/dashboard/perfil"
                     aria-label="Meu perfil"
-                    className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-stone-600 bg-stone-900/55 text-stone-200 transition-all hover:border-amber-500/50 hover:text-white"
+                    className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-transparent text-stone-200 transition-all hover:text-white"
                 >
                     <Avatar>
                     <AvatarFallback>
