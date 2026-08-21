@@ -457,6 +457,9 @@ const handleUpdateStatus = async (ticketId: number, novoStatus: string) => {
       await alterarNivelUsuario(viewingUser.id, selectedNivel);
       reloadUsuarios();
       setNivelSuccess("Nível atualizado com sucesso.");
+      setTimeout(() => {
+        setAssignmentFeedback(null);
+      }, 3500);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Erro ao atualizar nível";
       setNivelError(message);
@@ -475,6 +478,9 @@ const handleUpdateStatus = async (ticketId: number, novoStatus: string) => {
     try {
       await resetarSenhaUsuario(viewingUser.id);
       setResetSenhaSuccess("Senha redefinida para a senha padrão.");
+      setTimeout(() => {
+        setAssignmentFeedback(null);
+      }, 3500);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Erro ao redefinir senha";
       setResetSenhaError(message);
