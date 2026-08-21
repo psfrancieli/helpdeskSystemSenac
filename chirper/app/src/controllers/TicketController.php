@@ -39,12 +39,7 @@ class TicketController extends Controller {
     // =========================================================================
 
     public function listarTicket(): void {
-<<<<<<< HEAD
         try {
-=======
-        try{
-        // Caminho corrigido: sobe duas pastas (sai de controllers -> sai de src) e entra em Http
->>>>>>> 99e9fb68c041ce3cfb6feab08191267c5a103d71
             require_once __DIR__ . '/../../Http/Support/ChamadoActions.php'; 
             
             $actions = new \ChamadoActions();
