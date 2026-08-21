@@ -195,6 +195,21 @@ public function encontrarPorEmail(string $email): ?User{
 
 
 }
+public function login(string $email, string $senha): ?User{
+        $userRepository = new UserRepository();
+        $emailNormalizado = EmailUtils::normalizar($email);
+        if(!EmailUtils::validar($emailNormalizado)){
+            throw new InvalidArgumentException("Email inválido.");
+        }
+        $usuario = $userRepository->encontrarPorEmail($emailNormalizado);
+        if (!$usuario){ throw new InvalidArgumentException("Login invalido");}
+        if (!PasswordUtils::verificar($senha, $usuario->getSenha())){
+            throw new InvalidArgumentException("Usuario ou senha invalido!");
+        }
+        $usuario->alterarSenha("");
+        return $usuario;
+    }
+ 
 
 public function setDefaultPassword(int $id)
 {
