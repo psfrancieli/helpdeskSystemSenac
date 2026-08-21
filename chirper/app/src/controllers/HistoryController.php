@@ -139,7 +139,7 @@ class HistoryController extends Controller
             $this->response([
                 "success" => false,
                 "message" => $e->getMessage()
-            ], 400);
+            ], 500);
         }
     }
 }
