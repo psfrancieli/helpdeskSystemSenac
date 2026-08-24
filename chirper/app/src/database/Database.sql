@@ -35,19 +35,19 @@ CREATE INDEX "USUARIO_index_1"
 ON "USUARIO" ("email");
  
 CREATE TABLE IF NOT EXISTS "CHAMADO" (
-    "id" SERIAL NOT NULL,
-    "uuid" UUID NOT NULL UNIQUE,
-    "titulo" VARCHAR(255) NOT NULL,
-    "descricao" TEXT NOT NULL,
-    "prioridade" prioridade_chamado NOT NULL,
-    "data_abertura" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "data_encerramento" TIMESTAMP,
-    "patrimonio" VARCHAR(20) NOT NULL,
-    "id_categoria" INTEGER NOT NULL,
-    "id_usuario" INTEGER NOT NULL,
-    "id_responsavel" INTEGER,
-    "status" status_pedido DEFAULT 'pendente' NOT NULL,
-    PRIMARY KEY("id")
+	"id" SERIAL NOT NULL,
+	"uuid" UUID NOT NULL UNIQUE,
+	"titulo" VARCHAR(255) NOT NULL,
+	"descricao" TEXT NOT NULL,
+	"prioridade" prioridade_chamado NOT NULL,
+	"data_abertura" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	"data_encerramento" TIMESTAMP,
+	"patrimonio" VARCHAR(20) NOT NULL,
+	"id_categoria" INTEGER NOT NULL,
+	"id_usuario" INTEGER NOT NULL,
+	"id_responsavel" INTEGER,
+	"status" status_pedido DEFAULT 'pendente' NOT NULL,
+	PRIMARY KEY("id")
 );
  
 CREATE INDEX "CHAMADO_index_0"
@@ -78,7 +78,6 @@ CREATE INDEX "HISTORICO_index_0"
 ON "HISTORICO" ("id_usuario_tecnico");
 CREATE INDEX "HISTORICO_index_1"
 ON "HISTORICO" ("data");
- 
  
  
 ALTER TABLE "CHAMADO"
