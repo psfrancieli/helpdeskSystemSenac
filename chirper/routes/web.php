@@ -1,5 +1,9 @@
 <?php
- 
+
+use src\repositories\TicketRepository;
+use src\services\TicketServices;
+
+require_once __DIR__ . '/../app/src/controllers/TicketController.php';
 require_once __DIR__ . '/../app/src/repositories/UserRepository.php';
 require_once __DIR__ . '/../app/src/utils/PasswordUtils.php';
 require_once __DIR__ . '/../app/src/services/UserServices.php';
@@ -654,4 +658,18 @@ $router->post('/api/logout', function (): void {
 });
  
  
- 
+// ---------------------Gerar relatorios ------------------------
+$router->post('/api/gerarRelatorio/metricasPeriodo', function(): void {
+    $ticketController = new TicketController();
+    $ticketController->metricasPorPeriodo();
+});
+
+$router->post('/api/gerarRelatorio/dashboardMetrica', function(): void {
+    $ticketController = new TicketController();
+    $ticketController->dashboardPorPeriodo();
+});
+
+$router->post('/api/gerarRelatorio/metricaCategoria', function(): void {
+    $ticketController = new TicketController();
+    $ticketController->relatorioCategoriaPorPeriodo();
+});

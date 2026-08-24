@@ -99,7 +99,6 @@ export interface RelatorioGestaoAdministrativa {
     };
 
     tempos: {
-        medioAtendimento: string;
         medioResolucao: string;
     };
 
