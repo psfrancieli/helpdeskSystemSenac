@@ -1021,7 +1021,7 @@ const handleUpdateStatus = async (ticketId: number, novoStatus: string) => {
                           <option value="usuario">Usuário</option>
                           <option value="tecnico">Técnico</option>
                           <option value="analista">Analista</option>
-                          <option value="adm">Administrador</option>
+                          {authUser.nivel === "adm" ? <option value="adm">Administrador</option> : null}
                         </select>
                       </label>
 

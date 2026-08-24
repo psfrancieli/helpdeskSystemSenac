@@ -57,6 +57,11 @@ class UserServices{
             throw new InvalidArgumentException("Cargo inválido");
         }
 
+        // Verifica se o usuário logado é um analista e está tentando criar um administrador
+        if ($usuarioLogado->getNivel() === 'analista' && $dados['nivel'] === 'adm') {
+            throw new DomainException("Analistas não podem criar administradores.");
+        }
+
         if($userRepository->encontrarPorEmail($dados['email'])){
             throw new Exception("Esse email ja existe!");
         }
