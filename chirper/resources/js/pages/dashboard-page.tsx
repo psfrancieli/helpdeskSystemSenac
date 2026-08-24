@@ -13,6 +13,7 @@ import { LoadingOctopus } from "../components/mascot/loading-octopus";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
+import { RelatoriosPage } from './relatorios-page';
 import { metrics } from "../data/mock";
 import { useCategorias } from "../hooks/useCategorias";
 import { useUsuarios } from "../hooks/useUsuarios";
@@ -30,7 +31,7 @@ const sectionVisibilityByRole: Record<UserRole, DashboardSection[]> = {
   usuario: ["overview", "chamados", "criarChamado", "perfil"],
   tecnico: ["overview", "chamados", "criarChamado", "perfil"],
   analista: ["overview", "usuarios", "chamados", "criarChamado", "criarUsuario", "perfil"],
-  adm: ["overview", "usuarios", "chamados", "criarChamado", "criarUsuario", "perfil", "relatorio"],
+  adm: ["overview", "usuarios", "chamados", "criarChamado", "criarUsuario", "perfil" , "relatorios"],
 };
 
 function normalizeSection(sectionParam?: string): DashboardSection {
@@ -42,7 +43,7 @@ function normalizeSection(sectionParam?: string): DashboardSection {
     "criarChamado",
     "criarUsuario",
     "perfil",
-    "relatorio"
+    "relatorios"
   ]);
 
   if (!sectionParam || !accepted.has(sectionParam as DashboardSection)) {
@@ -591,7 +592,6 @@ const handleUpdateStatus = async (ticketId: number, novoStatus: string) => {
               {canAccessCurrentSection && section === "usuarios" && selectedUserId !== null ? (
                 <Card>
                   <CardContent className="space-y-4 py-4">
-                    {/* <div className="flex items-center justify-between gap-3"> */}
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-4">
                         <div className="flex size-14 items-center justify-center rounded-2xl border border-amber-500/30 bg-amber-600/15 text-lg font-semibold text-amber-200">
@@ -793,12 +793,6 @@ const handleUpdateStatus = async (ticketId: number, novoStatus: string) => {
                   </div>
                 )
               ) : null}
-              {/* {canAccessCurrentSection && section === "historico" ? (
-                <EmptyState
-                  title="Histórico em preparação"
-                  description="O polvo está organizando o timeline de interações para este módulo."
-                />
-              ) : null} */}
               {canAccessCurrentSection && section === "criarChamado" ? (
                 <Card>
                   <CardContent className="space-y-4 py-4">
@@ -1126,9 +1120,13 @@ const handleUpdateStatus = async (ticketId: number, novoStatus: string) => {
                 </Card>
               ) : null}          
             </motion.div>
+            {canAccessCurrentSection && section === "relatorios" ? (
+        <RelatoriosPage />
+    ) : null}
           </AnimatePresence>
         </section>
       </div>
+      
       {/* <FloatingAssistant /> */}
       <nav className="glass-panel fixed bottom-3 left-1/2 z-40 flex -translate-x-1/2 gap-2 rounded-2xl p-2 lg:hidden">
         {[

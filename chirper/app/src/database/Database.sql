@@ -1,15 +1,16 @@
-CREATE TYPE IF NOT EXISTS nivel_usuario AS ENUM(
+CREATE TYPE  nivel_usuario AS ENUM(
   'adm',
   'analista',
   'tecnico',
   'usuario'
 );
-CREATE TYPE IF NOT EXISTS status_pedido AS ENUM(
+CREATE TYPE  status_pedido AS ENUM(
   'pendente',
   'cancelado',
-  'concluido'
+  'concluido',
+  'não resolvido'
 );
-CREATE TYPE IF NOT EXISTS prioridade_chamado AS ENUM(
+CREATE TYPE  prioridade_chamado AS ENUM(
   'baixa',
   'media',
   'alta',
@@ -42,10 +43,10 @@ CREATE TABLE IF NOT EXISTS "CHAMADO" (
 	"data_abertura" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	"data_encerramento" TIMESTAMP,
 	"patrimonio" VARCHAR(20) NOT NULL,
-	"id_categoria" INTEGER,
+	"id_categoria" INTEGER NOT NULL,
 	"id_usuario" INTEGER NOT NULL,
 	"id_responsavel" INTEGER,
-	"stauts" status_pedido DEFAULT 'pendente' NOT NULL,
+	"status" status_pedido DEFAULT 'pendente' NOT NULL,
 	PRIMARY KEY("id")
 );
 
@@ -77,19 +78,11 @@ CREATE INDEX "HISTORICO_index_0"
 ON "HISTORICO" ("id_usuario_tecnico");
 CREATE INDEX "HISTORICO_index_1"
 ON "HISTORICO" ("data");
-CREATE TABLE IF NOT EXISTS "STATUS" (
-	"id" SERIAL NOT NULL,
-	"nome" status_pedido NOT NULL DEFAULT 'pendente',
-	"ativo" BOOLEAN NOT NULL,
-	PRIMARY KEY("id")
-);
+
  
  
 ALTER TABLE "CHAMADO"
 ADD FOREIGN KEY("id_categoria") REFERENCES "CATEGORIA"("id")
-ON UPDATE CASCADE ON DELETE RESTRICT;
-ALTER TABLE "CHAMADO"
-ADD FOREIGN KEY("id_status") REFERENCES "STATUS"("id")
 ON UPDATE CASCADE ON DELETE RESTRICT;
 ALTER TABLE "CHAMADO"
 ADD FOREIGN KEY("id_usuario") REFERENCES "USUARIO"("id")
