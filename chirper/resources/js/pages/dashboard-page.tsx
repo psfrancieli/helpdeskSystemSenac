@@ -68,11 +68,12 @@ function createInitialTicketForm(userId: number): CreateChamadoInput {
   };
 }
 
+// VALORES INICIAS DO USUÁRIO
 function createInitialUserForm(): CreateApiUserInput {
   return {
     nome: "",
     email: "",
-    senha: "",
+    senha: "Help123@",
     cpf: "",
     telefone: "",
     nivel: "usuario",
@@ -967,6 +968,7 @@ const handleUpdateStatus = async (ticketId: number, novoStatus: string) => {
                           <input
                             type="password"
                             value={userForm.senha}
+                            defaultValue="Help123@"
                             onChange={(event) =>
                               setUserForm((current) => ({ ...current, senha: event.target.value }))
                             }
