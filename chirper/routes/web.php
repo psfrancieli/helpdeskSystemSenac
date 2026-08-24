@@ -7,12 +7,8 @@ require_once __DIR__ . '/../app/src/models/User.php';
 require_once __DIR__ . '/../app/src/utils/CpfUtils.php';
 require_once __DIR__ . '/../app/src/utils/PhoneUtils.php';
 require_once __DIR__ . '/../app/Http/Support/ChamadoActions.php';
-<<<<<<< HEAD
 require_once __DIR__ . '/../app/src/controllers/UserController.php';
 
-=======
- 
->>>>>>> 9c15cbd7ade5ddd185ddc4841d71e79bc7fc85b3
 if (!function_exists('apiJsonResponse')) {
     function apiJsonResponse(array $payload, int $status = 200): void
     {
@@ -352,171 +348,7 @@ $router->post('/api/usuarios/alterar-nivel', function (): void {
 		if ($id <= 0 || $nivel === '') {
 			apiJsonResponse([
 				'success' => false,
-<<<<<<< HEAD
-				'message' => 'id_chamado e tecnico_id são obrigatórios.',
-			], 400);
-		}
-
-		$actions = new ChamadoActions();
-		$chamado = $actions->atribuirTecnico($chamadoId, $tecnicoId);
-
-		apiJsonResponse([
-			'success' => true,
-			'data' => $chamado,
-		]);
-	} catch (InvalidArgumentException $e) {
-		apiJsonResponse([
-			'success' => false,
-			'message' => $e->getMessage(),
-		], 400);
-	} catch (RuntimeException $e) {
-		apiJsonResponse([
-			'success' => false,
-			'message' => $e->getMessage(),
-		], 404);
-	} catch (Throwable $e) {
-		apiJsonResponse([
-			'success' => false,
-			'message' => 'Erro ao atribuir técnico.',
-		], 500);
-	}
-});
-
-$router->post('/api/chamados/atualizar-status', function (): void {
-	try {
-		$currentUser = apiRequireAuthUser();
-
-		if (!apiUserCan($currentUser, ['tecnico', 'analista', 'adm'])) {
-			apiJsonResponse([
-				'success' => false,
-				'message' => 'Acesso negado para atualização de status.',
-			], 403);
-		}
-
-		$payload = apiReadJsonBody();
-		$chamadoId = isset($payload['id_chamado']) ? (int) $payload['id_chamado'] : 0;
-		$status = isset($payload['status']) ? (string) $payload['status'] : '';
-
-		if ($chamadoId <= 0 || $status === '') {
-			apiJsonResponse([
-				'success' => false,
-				'message' => 'id_chamado e status são obrigatórios.',
-			], 400);
-		}
-
-		$actions = new ChamadoActions();
-		$currentChamado = $actions->detalhar($chamadoId);
-
-		if (($currentUser['nivel'] ?? '') === 'tecnico' && (int) ($currentChamado['tecnico_id'] ?? 0) !== (int) ($currentUser['id'] ?? 0)) {
-			apiJsonResponse([
-				'success' => false,
-				'message' => 'Técnico só pode alterar status de chamados atribuídos a si.',
-			], 403);
-		}
-
-		$chamadoAtualizado = $actions->atualizarStatus($chamadoId, $status);
-
-		apiJsonResponse([
-			'success' => true,
-			'data' => $chamadoAtualizado,
-		]);
-	} catch (InvalidArgumentException $e) {
-		apiJsonResponse([
-			'success' => false,
-			'message' => $e->getMessage(),
-		], 400);
-	} catch (RuntimeException $e) {
-		apiJsonResponse([
-			'success' => false,
-			'message' => $e->getMessage(),
-		], 404);
-	} catch (Throwable $e) {
-		apiJsonResponse([
-			'success' => false,
-			'message' => 'Erro ao atualizar status do chamado.',
-		], 500);
-	}
-});
-
-$router->post('/api/login', function (): void {
-	try {
-		$payload = apiReadJsonBody();
-		$email = isset($payload['email']) ? trim((string) $payload['email']) : '';
-		$senha = isset($payload['senha']) ? (string) $payload['senha'] : '';
-
-		if ($email === '' || $senha === '') {
-			apiJsonResponse([
-				'success' => false,
-				'message' => 'Email e senha são obrigatórios.',
-			], 400);
-		}
-
-		$repository = new UserRepository();
-		$user = $repository->encontrarPorEmail($email);
-
-		if ($user === null || !$user->getAtivo() || !PasswordUtils::verificar($senha, $user->getSenha())) {
-			apiJsonResponse([
-				'success' => false,
-				'message' => 'Credenciais inválidas.',
-			], 401);
-		}
-
-		session_regenerate_id(true);
-
-		$_SESSION['auth_user'] = [
-			'id' => $user->getId(),
-			'nome' => $user->getNome(),
-			'email' => $user->getEmail(),
-			'nivel' => $user->getNivel(),
-			'ativo' => $user->getAtivo(),
-			'telefone' => $user->getTelefone(),
-		];
-
-		apiJsonResponse([
-			'success' => true,
-			'data' => apiCurrentAuthUser(),
-		]);
-	} catch (Throwable $e) {
-		apiJsonResponse([
-			'success' => false,
-			// 'message' => 'Erro ao autenticar usuário.',
-			'message' => $e->getMessage(),
-		], 500);
-	}
-});
-
-
-
-$router->get('/api/me', function (): void {
-	$currentUser = apiCurrentAuthUser();
-
-	if ($currentUser === null) {
-		apiJsonResponse([
-			'success' => false,
-			'message' => 'Não autenticado.',
-		], 401);
-	}
-
-	apiJsonResponse([
-		'success' => true,
-		'data' => $currentUser,
-	]);
-});
-
-$router->post('/api/me', function (): void {
-	try {
-		$currentUser = apiRequireAuthUser();
-
-		$payload = apiReadJsonBody();
-		$telefoneRaw = isset($payload['telefone']) ? (string) $payload['telefone'] : '';
-
-		if ($telefoneRaw === '') {
-			apiJsonResponse([
-				'success' => false,
-				'message' => 'Telefone é obrigatório.',
-=======
 				'message' => 'id e nivel são obrigatórios.',
->>>>>>> 9c15cbd7ade5ddd185ddc4841d71e79bc7fc85b3
 			], 400);
 		}
 
@@ -668,24 +500,6 @@ $router->get('/api/categorias', function (): void {
         ], 500);
     }
 });
-$router->get('/api/categorias', function (): void {
-	try {
-		apiRequireAuthUser();
-
-		$stmt = Database::getConnection()->query('SELECT id, nome FROM "CATEGORIA" ORDER BY nome ASC');
-		$categorias = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-		apiJsonResponse([
-			'success' => true,
-			'data' => $categorias,
-		]);
-	} catch (Throwable $e) {
-		apiJsonResponse([
-			'success' => false,
-			'message' => 'Erro ao listar categorias.',
-		], 500);
-	}
-});
 $router->post('/api/login', function (): void {
     try {
         $payload = apiReadJsonBody();
@@ -727,13 +541,10 @@ $router->post('/api/login', function (): void {
     } catch (Throwable $e) {
         apiJsonResponse([
             'success' => false,
-            // 'message' => 'Erro ao autenticar usuário.',
             'message' => $e->getMessage(),
         ], 500);
     }
 });
-<<<<<<< HEAD
-
 
 // -----------------------------------------------------------------------------------
 $router->post('/api/v2/login', function():void{
@@ -741,43 +552,35 @@ $router->post('/api/v2/login', function():void{
 	$controller->login();
 });
 
-
 $router->get('/api/v2/listarusuario', function():void{
 	$controller = new UserController();
 	$controller->encontrarTodosV2();
 });
-
 
 $router->post('/api/v2/listarPorCpf', function():void{
 	$controller = new UserController();
 	$controller->encontrarPorCpfV2();
 });
 
-
 $router->post('/api/v2/cadastrarUsuario', function():void{
-	
 	$controller = new UserController();
 	$controller->cadastrarUsuarioV2();
 });
-
 
 $router->delete('/api/v2/deletarUsuario', function():void{
 	$controller = new UserController();
 	$controller->deletarUsuarioV2();
 });
 
-
 $router->patch('/api/v2/resetarSenha', function():void{
 	$controller = new UserController();
 	$controller->resetarSenhaV2();
 });
 
-
 $router->patch('/api/v2/atualizarTelefone' , function():void{
 	$controller = new UserController();
 	$controller->atualizarTelefoneV2();
 });
-
 
 $router->patch('/api/v2/ativarUsuario', function():void{
 	$controller = new UserController();
@@ -788,8 +591,7 @@ $router->patch('/api/v2/alterarNivel' , function(): void{
 	$controller = new UserController();
 	$controller->alterarNivelV2();
 });
-=======
- 
+
 $router->get('/api/me', function (): void {
     $currentUser = apiCurrentAuthUser();
  
@@ -878,7 +680,3 @@ $router->post('/api/logout', function (): void {
         'data' => null,
     ]);
 });
- 
- 
- 
->>>>>>> 9c15cbd7ade5ddd185ddc4841d71e79bc7fc85b3

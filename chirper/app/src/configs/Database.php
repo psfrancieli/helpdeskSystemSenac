@@ -12,7 +12,21 @@ class Database
 
         try {
 
-            // $env = parse_ini_file(__DIR__ . '/../../../../.env');
+            // Local dev fallback: php -S doesn't read .env, so load it manually
+            // when the PG* vars aren't already present in the OS environment.
+            if (getenv('PGUSER') === false || getenv('PGPASSWORD') === false) {
+                $envPath = __DIR__ . '/../../../../.env';
+                if (is_file($envPath)) {
+                    $envVars = parse_ini_file($envPath);
+                    if (is_array($envVars)) {
+                        foreach ($envVars as $key => $value) {
+                            if (getenv($key) === false) {
+                                putenv("$key=$value");
+                            }
+                        }
+                    }
+                }
+            }
 
             $host = "ep-green-night-acel3qx9-pooler.sa-east-1.aws.neon.tech";
             $dbname = "neondb";

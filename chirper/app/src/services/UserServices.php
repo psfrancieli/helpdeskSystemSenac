@@ -208,30 +208,6 @@ public function login(string $email, string $senha): ?User{
         $usuario->setCpf("");
         return $usuario;
     }
-<<<<<<< HEAD
- 
-=======
-    $usuario =  $userRepository->encontrarPorEmail($emailNormalizado);
-    return $usuario;
-
-
-}
-public function login(string $email, string $senha): ?User{
-        $userRepository = new UserRepository();
-        $emailNormalizado = EmailUtils::normalizar($email);
-        if(!EmailUtils::validar($emailNormalizado)){
-            throw new InvalidArgumentException("Email inválido.");
-        }
-        $usuario = $userRepository->encontrarPorEmail($emailNormalizado);
-        if (!$usuario){ throw new InvalidArgumentException("Login invalido");}
-        if (!PasswordUtils::verificar($senha, $usuario->getSenha())){
-            throw new InvalidArgumentException("Usuario ou senha invalido!");
-        }
-        $usuario->alterarSenha("");
-        return $usuario;
-    }
- 
-
 public function setDefaultPassword(int $id)
 {
     $DefaultPassword = "123456";
@@ -241,10 +217,6 @@ public function setDefaultPassword(int $id)
     $userRepository = new UserRepository();
 
     return $userRepository->alterarSenha($hash, $id);
-
 }
-
->>>>>>> 9c15cbd7ade5ddd185ddc4841d71e79bc7fc85b3
-
 
 }
