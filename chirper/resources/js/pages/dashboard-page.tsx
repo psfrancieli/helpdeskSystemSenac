@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { KeyRound } from "lucide-react";
 import { NavLink, useParams } from "react-router-dom";
 import { useAuth } from "../context/auth-context";
 import { AnimatedTable } from "../components/dashboard/animated-table";
@@ -12,33 +13,25 @@ import { LoadingOctopus } from "../components/mascot/loading-octopus";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
-import {
-  categories,
-  metrics,
-  statuses,
-  users,
-} from "../data/mock";
+import { RelatoriosPage } from './relatorios-page';
+import { metrics } from "../data/mock";
+import { useCategorias } from "../hooks/useCategorias";
+import { useUsuarios } from "../hooks/useUsuarios";
 import { useChamados } from "../hooks/useChamados";
 import { useTecnicos } from "../hooks/useTecnicos";
 import { assignTechnicianToChamado, createChamado } from "../services/chamadoService";
-import { createUsuario, updateMeuTelefone  } from "../services/usuarioService";
-import type {
-  CreateApiUserInput,
-  CreateChamadoInput,
-  DashboardSection,
-  UserRole,
-  TicketPriority,
-} from "../types/helpdesk";
+import { alterarNivelUsuario, createUsuario, resetarSenhaUsuario, updateMeuTelefone } from "../services/usuarioService";
+import type { CreateApiUserInput, CreateChamadoInput, DashboardSection, UserRole, TicketPriority } from "../types/helpdesk";
 
 interface DashboardPageProps {
   onLogout: () => void;
 }
 
 const sectionVisibilityByRole: Record<UserRole, DashboardSection[]> = {
-  usuario: ["overview", "chamados", "historico", "criarChamado", "perfil"],
-  tecnico: ["overview", "chamados", "historico", "criarChamado", "perfil"],
-  analista: ["overview", "usuarios", "chamados", "historico", "criarChamado", "criarUsuario", "perfil"],
-  adm: ["overview", "usuarios", "chamados", "historico", "criarChamado", "criarUsuario", "perfil"],
+  usuario: ["overview", "chamados", "criarChamado", "perfil"],
+  tecnico: ["overview", "chamados", "criarChamado", "perfil"],
+  analista: ["overview", "usuarios", "chamados", "criarChamado", "criarUsuario", "perfil"],
+  adm: ["overview", "usuarios", "chamados", "criarChamado", "criarUsuario", "perfil" , "relatorios"],
 };
 
 function normalizeSection(sectionParam?: string): DashboardSection {
@@ -47,10 +40,10 @@ function normalizeSection(sectionParam?: string): DashboardSection {
     "overview",
     "usuarios",
     "chamados",
-    "historico",
     "criarChamado",
     "criarUsuario",
-    "perfil"
+    "perfil",
+    "relatorios"
   ]);
 
   if (!sectionParam || !accepted.has(sectionParam as DashboardSection)) {
@@ -66,7 +59,7 @@ function createInitialTicketForm(userId: number): CreateChamadoInput {
     descricao: "",
     prioridade: "media",
     patrimonio: "",
-    id_categoria: categories[0]?.id ?? 1,
+    id_categoria: 0,
     id_usuario: userId,
     id_responsavel: null,
     status: "pendente",
@@ -75,11 +68,12 @@ function createInitialTicketForm(userId: number): CreateChamadoInput {
   };
 }
 
+// VALORES INICIAS DO USUÁRIO
 function createInitialUserForm(): CreateApiUserInput {
   return {
     nome: "",
     email: "",
-    senha: "",
+    senha: "Help123@",
     cpf: "",
     telefone: "",
     nivel: "usuario",
@@ -138,6 +132,12 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
   const canAccessCurrentSection = allowedSections.includes(section);
   const [loading, setLoading] = useState(true);
   const {
+    usuarios,
+    isLoading: isUsuariosLoading,
+    error: usuariosError,
+    reloadUsuarios,
+  } = useUsuarios();
+  const {
     chamados,
     isLoading: isChamadosLoading,
     error: chamadosError,
@@ -149,6 +149,10 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
     error: tecnicosError,
     reloadTecnicos,
   } = useTecnicos();
+  const {
+    categorias,
+    isLoading: isCategoriasLoading,
+  } = useCategorias();
   const [ticketForm, setTicketForm] = useState<CreateChamadoInput>(createInitialTicketForm(authUser.id));
   const [isSubmittingTicket, setIsSubmittingTicket] = useState(false);
   const [ticketSubmitError, setTicketSubmitError] = useState<string | null>(null);
@@ -169,10 +173,66 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
   const [profileSubmitError, setProfileSubmitError] = useState<string | null>(null);
   const [profileSubmitSuccess, setProfileSubmitSuccess] = useState<string | null>(null);
   const [isEditingPhone, setIsEditingPhone] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [selectedNivel, setSelectedNivel] = useState<UserRole>("usuario");
+  const [isSubmittingNivel, setIsSubmittingNivel] = useState(false);
+  const [nivelError, setNivelError] = useState<string | null>(null);
+  const [nivelSuccess, setNivelSuccess] = useState<string | null>(null);
+  const [isResettingSenha, setIsResettingSenha] = useState(false);
+  const [resetSenhaError, setResetSenhaError] = useState<string | null>(null);
+  const [resetSenhaSuccess, setResetSenhaSuccess] = useState<string | null>(null);
+
+  const viewingUser = selectedUserId !== null ? usuarios.find((usuario) => usuario.id === selectedUserId) ?? null : null;
+
+  useEffect(() => {
+    if (viewingUser) {
+      setSelectedNivel(viewingUser.nivel);
+    }
+    setNivelError(null);
+    setNivelSuccess(null);
+    setResetSenhaError(null);
+    setResetSenhaSuccess(null);
+  }, [selectedUserId]);
 
   useEffect(() => {
     setProfilePhone(authUser.telefone.replace(/\D/g, ""));
   }, [authUser.telefone]);
+
+const [isUpdatingStatusId, setIsUpdatingStatusId] = useState<number | null>(null);
+
+const handleUpdateStatus = async (ticketId: number, novoStatus: string) => {
+    setIsUpdatingStatusId(ticketId); 
+
+    try {
+        const resposta = await fetch('/api/chamados/atualizar-status', {
+            method: 'POST', 
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            credentials: 'include', 
+            
+            body: JSON.stringify({
+                id_chamado: ticketId,
+                status: novoStatus
+            })
+        });
+
+        const dados = await resposta.json();
+
+        if (!dados.success) {
+            throw new Error(dados.message || 'Erro desconhecido ao atualizar.');
+        }
+
+        console.log("Status atualizado:", dados.data);
+
+    } catch (erro: any) {
+        console.error("Erro na atualização:", erro);
+        alert(erro.message || "Erro ao atualizar o status do chamado.");
+    } finally {
+        setIsUpdatingStatusId(null); 
+    }
+};
 
   useEffect(() => {
     setTicketForm(createInitialTicketForm(authUser.id));
@@ -183,11 +243,21 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
 
     return () => clearTimeout(timeout);
   }, []);
+  useEffect(() => {
+    if (categorias.length > 0 && ticketForm.id_categoria === 0) {
+      setTicketForm((current) => ({ ...current, id_categoria: categorias[0].id }));
+    }
+  }, [categorias, ticketForm.id_categoria]);
 
   const chamadosByRole = useMemo(() => {
     if (authUser.nivel === "tecnico") {
       const currentName = authUser.nome.trim().toLocaleLowerCase("pt-BR");
       return chamados.filter((item) => (item.responsavel ?? "").trim().toLocaleLowerCase("pt-BR") === currentName);
+    }
+
+    if (authUser.nivel === "usuario") {
+      const currentName = authUser.nome.trim().toLocaleLowerCase("pt-BR");
+      return chamados.filter((item) => item.solicitante.trim().toLocaleLowerCase("pt-BR") === currentName);
     }
 
     if (authUser.nivel === "analista") {
@@ -203,7 +273,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
   const dashboardMetrics = [
     {
       ...metrics[0],
-      value: `${users.filter((user) => user.ativo).length}`,
+      value: `${usuarios.filter((user) => user.ativo).length}`,
     },
     {
       ...metrics[1],
@@ -238,6 +308,10 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
     });
   }, [chamadosByRole, searchChamado, categoryFilter, statusFilter, priorityFilter]);
 
+  const usuariosOrdenados = useMemo(() => {
+    return [...usuarios].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+  }, [usuarios]);
+
   async function handleAssignTechnician(ticketId: number, technicianId: number) {
     setIsAssigningTicketId(ticketId);
     setAssignmentFeedback(null);
@@ -250,11 +324,21 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
       });
 
       setAssignmentFeedback("Técnico atribuído com sucesso.");
+
+      setTimeout(() => {
+        setAssignmentFeedback(null);
+      }, 3500);
+
       reloadChamados();
       reloadTecnicos();
     } catch (error) {
       const message = error instanceof Error ? error.message : "Erro ao atribuir técnico";
       setAssignmentError(message);
+
+      setTimeout(() => {
+        setAssignmentFeedback(null);
+      }, 3000);
+
     } finally {
       setIsAssigningTicketId(null);
     }
@@ -277,10 +361,16 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
 
       setTicketForm(createInitialTicketForm(authUser.id));
       setTicketSubmitSuccess("Chamado enviado com sucesso.");
+      setTimeout(() => {
+        setTicketSubmitSuccess(null);
+      }, 3000);
       reloadChamados();
     } catch (error) {
       const message = error instanceof Error ? error.message : "Erro ao criar chamado";
       setTicketSubmitError(message);
+      setTimeout(() => {
+        setTicketSubmitSuccess(null);
+      }, 3500);
     } finally {
       setIsSubmittingTicket(false);
     }
@@ -358,6 +448,49 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
     }
   }
 
+  async function handleAlterarNivel(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!viewingUser) return;
+
+    setIsSubmittingNivel(true);
+    setNivelError(null);
+
+    try {
+      await alterarNivelUsuario(viewingUser.id, selectedNivel);
+      reloadUsuarios();
+      setNivelSuccess("Nível atualizado com sucesso.");
+      setTimeout(() => {
+        setAssignmentFeedback(null);
+      }, 3500);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Erro ao atualizar nível";
+      setNivelError(message);
+    } finally {
+      setIsSubmittingNivel(false);
+    }
+  }
+
+  async function handleResetarSenha() {
+    if (!viewingUser) return;
+
+    setIsResettingSenha(true);
+    setResetSenhaError(null);
+    setResetSenhaSuccess(null);
+
+    try {
+      await resetarSenhaUsuario(viewingUser.id);
+      setResetSenhaSuccess("Senha redefinida para a senha padrão.");
+      setTimeout(() => {
+        setAssignmentFeedback(null);
+      }, 3500);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Erro ao redefinir senha";
+      setResetSenhaError(message);
+    } finally {
+      setIsResettingSenha(false);
+    }
+  }
+
   return (
     <main className="min-h-screen p-4 md:p-6">
       <div className="mx-auto flex max-w-7xl gap-4 xl:gap-6">
@@ -414,29 +547,162 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                           techniciansLoading={isTecnicosLoading}
                           onAssignTechnician={handleAssignTechnician}
                           userRole={authUser.nivel}
+                          isUpdatingStatusId={isUpdatingStatusId}
+                          onUpdateStatus={handleUpdateStatus}
                         />
                       )}
                     </>
                   )}
                 </div>
               ) : null}
-              {canAccessCurrentSection && section === "usuarios" ? (
-                <Card>
-                  <CardContent className="space-y-3">
-                    {users.map((user) => (
-                      <div
-                        key={user.id}
-                        className="flex items-center justify-between gap-3 rounded-xl border border-stone-700/70 bg-stone-800/45 p-3"
-                      >
-                        <div>
-                          <p className="font-medium text-white">{user.nome}</p>
-                          <p className="text-sm text-stone-300">{user.email}</p>
+              {canAccessCurrentSection && section === "usuarios" && selectedUserId === null ? (
+                isUsuariosLoading ? (
+                  <SkeletonGrid />
+                ) : usuariosError ? (
+                  <EmptyState
+                    title="Erro ao carregar usuários"
+                    description="Não foi possível conectar com o servidor. Verifique se o backend está rodando."
+                  />
+                ) : usuarios.length === 0 ? (
+                  <EmptyState
+                    title="Nenhum usuário encontrado"
+                    description="Ainda não há usuários cadastrados no sistema."
+                  />
+                ) : (
+                  <Card>
+                    <CardContent className="space-y-3">
+                      {usuariosOrdenados.map((usuario) => (
+                        <div
+                          key={usuario.id}
+                          onClick={() => setSelectedUserId(usuario.id)}
+                          className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-stone-700/70 bg-stone-800/45 p-3 transition-colors hover:border-amber-500/40"
+                        >
+                          <div>
+                            <p className="font-medium text-white">{usuario.nome}</p>
+                            <p className="text-sm text-stone-300">{usuario.email}</p>
+                          </div>
+                          <Badge variant={usuario.ativo ? "success" : "warning"}>
+                            {usuario.nivel}
+                          </Badge>
                         </div>
-                        <Badge variant={user.ativo ? "success" : "warning"}>
-                          {user.nivel}
-                        </Badge>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )
+              ) : null}
+              {canAccessCurrentSection && section === "usuarios" && selectedUserId !== null ? (
+                <Card>
+                  <CardContent className="space-y-4 py-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-4">
+                        <div className="flex size-14 items-center justify-center rounded-2xl border border-amber-500/30 bg-amber-600/15 text-lg font-semibold text-amber-200">
+                          {viewingUser?.nome
+                            .split(" ")
+                            .map((n) => n[0])
+                            .slice(0, 2)
+                            .join("") ?? "?"}
+                        </div>
+                        <div>
+                          <p className="text-xl font-semibold text-stone-100">{viewingUser?.nome ?? "Carregando..."}</p>
+                        </div>
                       </div>
-                    ))}
+                      <Button variant="ghost" onClick={() => setSelectedUserId(null)}>
+                        ⮌  Voltar
+                      </Button>
+                    </div>
+
+                    {!viewingUser ? (
+                      isUsuariosLoading ? (
+                        <SkeletonGrid />
+                      ) : (
+                        <EmptyState
+                          title="Usuário não encontrado"
+                          description="Não foi possível localizar esse usuário na lista."
+                        />
+                      )
+                    ) : (
+                      <>
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div className="space-y-2">
+                            <span className="text-sm text-stone-200">Email</span>
+                            <div className="w-full rounded-xl border border-stone-700 bg-stone-900/60 px-3 py-2 text-stone-300">
+                              {viewingUser.email}
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <span className="text-sm text-stone-200">Telefone</span>
+                            <div className="w-full rounded-xl border border-stone-700 bg-stone-900/60 px-3 py-2 text-stone-300">
+                              {viewingUser.telefone || "Não informado"}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2 border-t border-stone-700/60 pt-4">
+                          <span className="text-sm text-stone-200">Alterar cargo</span>
+
+                          {nivelError ? (
+                            <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+                              {nivelError}
+                            </div>
+                          ) : null}
+
+                          {nivelSuccess ? (
+                            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
+                              {nivelSuccess}
+                            </div>
+                          ) : null}
+
+                          <form className="flex flex-wrap items-center gap-2" onSubmit={handleAlterarNivel}>
+                            <select
+                              value={selectedNivel}
+                              onChange={(event) => setSelectedNivel(event.target.value as UserRole)}
+                              className="rounded-xl border border-stone-700 bg-stone-950 px-3 py-2 text-stone-100"
+                            >
+                              <option value="usuario">Usuário</option>
+                              <option value="tecnico">Técnico</option>
+                              <option value="analista">Analista</option>
+                              <option value="adm">Administrador</option>
+                            </select>
+
+                            <Button type="submit" disabled={isSubmittingNivel || selectedNivel === viewingUser.nivel}>
+                              {isSubmittingNivel ? "Salvando..." : "Salvar cargo"}
+                            </Button>
+                          </form>
+                        </div>
+
+                        <div className="space-y-2 border-t border-stone-700/60 pt-4">
+                          <span className="text-sm text-stone-200">Senha</span>
+                            <p className="text-xs text-stone-400">
+                              Atenção: esta ação é não é reversível e redefine a senha do usuário para o valor padrão do sistema.
+                            </p>
+                          {resetSenhaError ? (
+                            <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+                              {resetSenhaError}
+                            </div>
+                          ) : null}
+
+                          {resetSenhaSuccess ? (
+                            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
+                              {resetSenhaSuccess}
+                            </div>
+                          ) : null}
+
+                          <div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              disabled={isResettingSenha}
+                              onClick={handleResetarSenha}
+                              className="border border-stone-500/50 hover:border-amber-500/60"
+                            >
+                              <KeyRound className="size-4" />
+                              {isResettingSenha ? "Redefinindo..." : "Redefinir para senha padrão"}
+                            </Button>
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </CardContent>
                 </Card>
               ) : null}
@@ -482,6 +748,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                           <option value="pendente">Pendente</option>
                           <option value="concluido">Concluído</option>
                           <option value="cancelado">Cancelado</option>
+                          <option value="não resolvido">Não Resolvido</option>
                         </select>
 
                         <select
@@ -526,31 +793,6 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                     )}
                   </div>
                 )
-              ) : null}
-              {/* {canAccessCurrentSection && section === "status" ? (
-                <Card>
-                  <CardContent className="space-y-3 py-4">
-                    {statuses.map((status) => (
-                      <div
-                        key={status.id}
-                        className="flex items-center justify-between rounded-xl bg-stone-800/45 p-3"
-                      >
-                        <p className="capitalize text-stone-100">
-                          {status.nome}
-                        </p>
-                        <Badge variant={status.ativo ? "success" : "warning"}>
-                          {status.ativo ? "Ativo" : "Inativo"}
-                        </Badge>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              ) : null} */}
-              {canAccessCurrentSection && section === "historico" ? (
-                <EmptyState
-                  title="Histórico em preparação"
-                  description="O polvo está organizando o timeline de interações para este módulo."
-                />
               ) : null}
               {canAccessCurrentSection && section === "criarChamado" ? (
                 <Card>
@@ -632,13 +874,20 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                               id_categoria: Number(event.target.value),
                             }))
                           }
+                          disabled={isCategoriasLoading || categorias.length === 0}
                           className="w-full rounded-xl border border-stone-700 bg-stone-950 px-3 py-2 text-stone-100"
                         >
-                          {categories.map((category) => (
-                            <option key={category.id} value={category.id}>
-                              {category.nome}
-                            </option>
-                          ))}
+                          {isCategoriasLoading ? (
+                            <option value={0}>Carregando categorias...</option>
+                          ) : categorias.length === 0 ? (
+                            <option value={0}>Nenhuma categoria disponível</option>
+                          ) : (
+                            categorias.map((category) => (
+                              <option key={category.id} value={category.id}>
+                                {category.nome}
+                              </option>
+                            ))
+                          )}
                         </select>
                       </label>
 
@@ -719,6 +968,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                           <input
                             type="password"
                             value={userForm.senha}
+                            defaultValue="Help123@"
                             onChange={(event) =>
                               setUserForm((current) => ({ ...current, senha: event.target.value }))
                             }
@@ -872,9 +1122,13 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                 </Card>
               ) : null}          
             </motion.div>
+            {canAccessCurrentSection && section === "relatorios" ? (
+        <RelatoriosPage />
+    ) : null}
           </AnimatePresence>
         </section>
       </div>
+      
       {/* <FloatingAssistant /> */}
       <nav className="glass-panel fixed bottom-3 left-1/2 z-40 flex -translate-x-1/2 gap-2 rounded-2xl p-2 lg:hidden">
         {[

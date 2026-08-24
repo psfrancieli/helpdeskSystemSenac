@@ -149,16 +149,21 @@ class TicketServices {
         return $ticket;
     }
 
-    public function atualizarStatus(int $id, string $novoStatus): Ticket {
+    public function atualizarStatus(int $id, array $statusArray): Ticket {
         $ticket = $this->repository->encontrarTicketPorId($id);
 
         if (!$ticket) {
             throw new \Exception("Ticket não encontrado!");
         }
 
-        $statusValidos = ['pendente', 'concluido', 'cancelado'];
+        $statusValidos = ['pendente', 'concluido', 'cancelado', 'nao-resolvido'];
+        $novoStatus = $statusArray['status'] ?? '';
         if (!in_array(strtolower($novoStatus), $statusValidos)) {
             throw new \Exception("Status inválido!");
+        }
+
+        if ($ticket->getStatus() === strtolower($novoStatus)) {
+            throw new \Exception("O status do ticket já está definido como '{$novoStatus}'.");
         }
 
         if ($ticket->getStatus() !== strtolower($novoStatus)) {
@@ -208,6 +213,168 @@ class TicketServices {
         }
         return $dadosLimpos;
     }
+
+    public function buscarTicketsPorCategoria(int $idCategoria): array {
+        $tickets = $this->repository->buscarTicketsPorCategoria($idCategoria);
+        if(!$tickets) {
+            return []; 
+        }
+        $dadosLimpos = [];
+
+        foreach ($tickets as $ticket) {
+            $dadosLimpos[] = $ticket->getAll(); 
+        }
+        return $dadosLimpos;
+    }
+
+    public function contarChamadosPorPeriodo(\DateTime $dataInicio, \DateTime $dataFim): int {
+        return $this->repository->contarChamadosPorPeriodo($dataInicio, $dataFim);
+    }
+
+    public function contarChamados(): int {
+        return $this->repository->contarChamados();
+    }
+
+    public function contarChamadosResolvidos(): int {
+        return $this->repository->contarChamadosResolvidos();
+    }
+
+    public function contarChamadosPendentes(): int {
+        return $this->repository->contarChamadosPendentes();
+    }
+
+    public function contarChamadosCancelados(\DateTime $dataInicio, \DateTime $dataFim): int {
+        return $this->repository->contarChamadosCancelados($dataInicio, $dataFim);
+    }
+
+    public function contarChamadosCanceladosPorPeriodo(\DateTime $dataInicio, \DateTime $dataFim): int {
+        return $this->repository->contarChamadosCanceladosPorPeriodo($dataInicio, $dataFim);
+    }
+
+    public function buscarTicketsPorUsuario(int $idUsuario): array {
+        $tickets = $this->repository->buscarTicketPorUserId($idUsuario);
+        if(!$tickets) {
+            return []; 
+        }
+        $dadosLimpos = [];
+
+        foreach ($tickets as $ticket) {
+            $dadosLimpos[] = $ticket->getAll(); 
+        }
+        return $dadosLimpos;
+    }
+
+    public function buscarTicketsPorResponsavel(int $idResponsavel): array {
+        $tickets = $this->repository->buscarTicketPorResponsavelId($idResponsavel);
+        if(!$tickets) {
+            return []; 
+        }
+        $dadosLimpos = [];
+
+        foreach ($tickets as $ticket) {
+            $dadosLimpos[] = $ticket->getAll(); 
+        }
+        return $dadosLimpos;
+    }
+
+    public function buscarTicketsPornome(string $nome): array {
+        $tickets = $this->repository->buscarChamadosNomeUser($nome);
+        if(!$tickets) {
+            return []; 
+        }
+        $dadosLimpos = [];
+
+        foreach ($tickets as $ticket) {
+            $dadosLimpos[] = $ticket->getAll(); 
+        }
+        return $dadosLimpos;
+    }
+
+    public function buscarTicketsPornomeChamado(string $nomeChamado): array {
+        $tickets = $this->repository->buscarChamadosNomeChamado($nomeChamado);
+        if(!$tickets) {
+            return []; 
+        }
+        $dadosLimpos = [];
+
+        foreach ($tickets as $ticket) {
+            $dadosLimpos[] = $ticket->getAll(); 
+        }
+        return $dadosLimpos;
+    }
+
+    public function buscarTicketNaoResolvido(): array {
+        $tickets = $this->repository->buscarTicketNaoResolvido();
+        if(!$tickets) {
+            return []; 
+        }
+        $dadosLimpos = [];
+
+        foreach ($tickets as $ticket) {
+            $dadosLimpos[] = $ticket->getAll(); 
+        }
+        return $dadosLimpos;
+    }
+
+    public function buscarTicketNomeUser(string $nomeUsuario): array {
+        $tickets = $this->repository->buscarChamadosNomeUser($nomeUsuario);
+        if(!$tickets) {
+            return []; 
+        }
+        $dadosLimpos = [];
+
+        foreach ($tickets as $ticket) {
+            $dadosLimpos[] = $ticket->getAll(); 
+        }
+        return $dadosLimpos;
+    }
+
+    public function calcularTaxaResolucao(int $totalChamados, int $chamadosResolvidos): float {
+        return $this->repository->calcularTaxaResolucao($totalChamados, $chamadosResolvidos);
+    }
+
+    public function relatorioPorCategoria(): array {
+        $relatorio = $this->repository->relatorioPorCategoria();
+        return $relatorio ?: [];
+    }
+
+    public function contarChamadosResolvidosPorPeriodo(\DateTime $dataInicial, \DateTime $dataFinal): int {
+        return $this->repository->contarChamadosResolvidosPorPeriodo($dataInicial, $dataFinal);
+    }
+
+    public function contarChamadosPendentesPorPeriodo(\DateTime $dataInicial, \DateTime $dataFinal): int {
+        return $this->repository->contarChamadosPendentesPorPeriodo($dataInicial, $dataFinal);
+    }
+
+    public function relatorioPorCategoriaPorPeriodo(\DateTime $dataInicial, \DateTime $dataFinal): array {
+        $relatorio = $this->repository->relatorioPorCategoriaPorPeriodo($dataInicial, $dataFinal);
+        return $relatorio ?: [];
+    }
+
+   public function chamadosAbertosPorPeriodo(\DateTime $dataInicio, \DateTime $dataFim): int {
+        return $this->repository->contarChamadosPorPeriodo($dataInicio, $dataFim);
+    }
+
+    public function calcularTaxaResolucaoPeriodo(\DateTime $dataInicial, \DateTime $dataFim): float {
+        return $this->repository->calcularTaxaResolucaoPeriodo($dataInicial, $dataFim);
+    }
+
+    // Função para juntar as funções para o relatorio
+    public function relatorioDashboardPorPeriodo(\DateTime $dataInicial, \DateTime $dataFinal): array {
+        $abertos = $this->repository->contarChamadosPorPeriodo($dataInicial, $dataFinal);
+        $resolvidos = $this->repository->contarChamadosResolvidosPorPeriodo($dataInicial, $dataFinal);
+        $pendentes = $this->repository->contarChamadosPendentesPorPeriodo($dataInicial, $dataFinal);
+        $taxaResolucao = $this->repository->calcularTaxaResolucaoPeriodo($dataInicial, $dataFinal);
+        $tempoResolucao = $this->repository->calcularTempoMedioResolucaoPorPeriodo($dataInicial, $dataFinal);
+        
+        return [
+            "chamados_abertos" => $abertos,
+            "chamados_resolvidos" => $resolvidos,
+            "chamados_pendentes" => $pendentes,
+            "taxa_resolucao" => $taxaResolucao . "%",
+            "tempo_medio_resolucao" => $tempoResolucao
+        ];
+    }
 }
 
 // =========================================================================
@@ -217,7 +384,7 @@ class TicketServices {
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-echo "<h1>Testes do TicketServices</h1>";
+// echo "<h1>Testes do TicketServices</h1>";
 
 $service = new TicketServices();
 
@@ -389,4 +556,242 @@ $idTeste = 82;
 //     echo "<b>Erro na busca por status:</b> " . $e->getMessage() . "<br>";
 // }
 
+// // =========================================================================
+// // 11. TESTE: BUSCA POR CATEGORIA
+// // =========================================================================
+// echo "<h3>11. Busca por Categoria</h3>";
+// try {
+//     $idCategoria = 1; 
+//     $ticketsPorCategoria = $service->buscarTicketsPorCategoria($idCategoria);
+//     echo "Sucesso! Foram encontrados " . count($ticketsPorCategoria) . " chamados na categoria ID {$idCategoria}.<br>";
+//     echo "<pre>";
+//     print_r($ticketsPorCategoria);
+//     echo "</pre>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro na busca por categoria:</b> " . $e->getMessage() . "<br>";
+// }
+
+// =========================================================================
+// 12. TESTE: CONTAR CHAMADOS POR PERÍODO
+// =========================================================================
+// echo "<h3>12. Contar Chamados por Período</h3>";
+// try {
+//     $dataInicio = new \DateTime('2026-08-01');
+//     $dataFim = new \DateTime('2026-08-31');
+//     $totalChamados = $service->contarChamadosPorPeriodo($dataInicio, $dataFim);
+//     echo "Sucesso! Foram encontrados {$totalChamados} chamados entre " . $dataInicio->format('Y-m-d') . " e " . $dataFim->format('Y-m-d') . ".<br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao contar chamados por período:</b> " . $e->getMessage() . "<br>";
+// }
+
+// =========================================================================
+// 13. TESTE: CONTAR CHAMADOS TOTAIS
+// =========================================================================
+// echo "<h3>13. Contar Chamados Totais</h3>";
+// try {
+//     $totalChamados = $service->contarChamados();
+//     echo "Sucesso! Total de chamados: {$totalChamados}.<br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao contar chamados totais:</b> " . $e->getMessage() . "<br>";
+// }
+
+// =========================================================================
+// 14. TESTE: CONTAR CHAMADOS RESOLVIDOS
+// =========================================================================
+// echo "<h3>14. Contar Chamados Resolvidos</h3>";
+// try {
+//     $totalResolvidos = $service->contarChamadosResolvidos();
+//     echo "Sucesso! Total de chamados resolvidos: {$totalResolvidos}.<br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao contar chamados resolvidos:</b> " . $e->getMessage() . "<br>";
+// }
+
+// =========================================================================
+// 15. TESTE: CONTAR CHAMADOS PENDENTES
+// =========================================================================
+// echo "<h3>15. Contar Chamados Pendentes</h3>";
+// try {
+//     $totalPendentes = $service->contarChamadosPendentes();
+//     echo "Sucesso! Total de chamados pendentes: {$totalPendentes}.<br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao contar chamados pendentes:</b> " . $e->getMessage() . "<br>";
+// }
+
+// =========================================================================
+// 16. TESTE: CONTAR CHAMADOS CANCELADOS POR PERÍODO
+// =========================================================================
+// echo "<h3>16. Contar Chamados Cancelados por Período</h3>";
+// try {
+//     $dataInicio = new \DateTime('2026-08-01');
+//     $dataFim = new \DateTime('2026-08-31');
+//     $totalCancelados = $service->contarChamadosCanceladosPorPeriodo($dataInicio, $dataFim);
+//     echo "Sucesso! Foram encontrados {$totalCancelados} chamados cancelados entre " . $dataInicio->format('Y-m-d') . " e " . $dataFim->format('Y-m-d') . ".<br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao contar chamados cancelados por período:</b> " . $e->getMessage() . "<br>";
+// }
+
+// =========================================================================
+// 17. TESTE: BUSCAR TICKETS POR USUÁRIO ID
+// =========================================================================
+// echo "<h3>17. Buscar Tickets por Usuário ID</h3>";
+// try {
+//     $idUsuario = 17;
+//     $ticketsPorUsuario = $service->buscarTicketsPorUsuario($idUsuario);
+//     echo "Sucesso! Foram encontrados " . count($ticketsPorUsuario) . " chamados para o usuário ID {$idUsuario}.<br>";
+//     echo "<pre>";
+//     print_r($ticketsPorUsuario);
+//     echo "</pre>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao buscar tickets por usuário:</b> " . $e->getMessage() . "<br>";
+// }
+
+// =========================================================================
+// 18. TESTE: BUSCAR TICKETS POR RESPONSÁVEL ID
+// =========================================================================
+// echo "<h3>18. Buscar Tickets por Responsável ID</h3>";
+// try {
+//     $idResponsavel = 14;
+//     $ticketsPorResponsavel = $service->buscarTicketsPorResponsavel($idResponsavel);
+//     echo "Sucesso! Foram encontrados " . count($ticketsPorResponsavel) . " chamados para o responsável ID {$idResponsavel}.<br>";
+//     echo "<pre>";
+//     print_r($ticketsPorResponsavel);
+//     echo "</pre>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao buscar tickets por responsável:</b> " . $e->getMessage() . "<br>";
+// }
+
+// =========================================================================
+// 19. TESTE: BUSCAR TICKETS POR NOME DE USUÁRIO
+// =========================================================================
+// echo "<h3>19. Buscar Tickets por Nome de Usuário</h3>";
+// try {
+//     $nomeUsuario = 'Fran';
+//     $ticketsPorNome = $service->buscarTicketsPornome($nomeUsuario);
+//     echo "Sucesso! Foram encontrados " . count($ticketsPorNome) . " chamados para o usuário com nome '{$nomeUsuario}'.<br>";
+//     echo "<pre>";
+//     print_r($ticketsPorNome);
+//     echo "</pre>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao buscar tickets por nome de usuário:</b> " . $e->getMessage() . "<br>";
+// }
+
+// =========================================================================
+// 20. TESTE: BUSCAR TICKETS POR NOME DE CHAMADO
+// =========================================================================
+// echo "<h3>20. Buscar Tickets por Nome de Chamado</h3>";
+// try {
+//     $nomeChamado = 'xbox';
+//     $ticketsPorNomeChamado = $service->buscarTicketsPornomeChamado($nomeChamado);
+//     echo "Foram encontrados " . count($ticketsPorNomeChamado) . " chamados com nome '{$nomeChamado}'.<br>";
+//     echo "<pre>";
+//     print_r($ticketsPorNomeChamado);
+//     echo "</pre>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao buscar tickets por nome de chamado:</b> " . $e->getMessage() . "<br>";
+// }
+
+// =========================================================================
+// 21. TESTE: BUSCAR TICKETS NÃO RESOLVIDOS
+// =========================================================================
+// echo "<h3>21. Buscar Tickets Não Resolvidos</h3>";
+// try {
+//     $ticketsNaoResolvidos = $service->buscarTicketNaoResolvido();
+//     echo "Foram encontrados " . count($ticketsNaoResolvidos) . " chamados não resolvidos.<br>";
+//     echo "<pre>";
+//     print_r($ticketsNaoResolvidos);
+//     echo "</pre>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao buscar tickets não resolvidos:</b> " . $e->getMessage() . "<br>";
+// }
+
+// =========================================================================
+// 22. TESTE: BUSCAR TICKETS POR NOME DE USUÁRIO
+// =========================================================================
+// echo "<h3>22. Buscar Tickets por Nome de Usuário</h3>";
+// try {
+//     $nomeUsuario = 'Fran';
+//     $ticketsPorNomeUsuario = $service->buscarTicketNomeUser($nomeUsuario);
+//     echo "Foram encontrados " . count($ticketsPorNomeUsuario) . " chamados para o usuário com nome '{$nomeUsuario}'.<br>";
+//     echo "<pre>";
+//     print_r($ticketsPorNomeUsuario);
+//     echo "</pre>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao buscar tickets por nome de usuário:</b> " . $e->getMessage() . "<br>";
+// }
+
+// =========================================================================
+// 23. TESTE: CALCULAR TAXA DE RESOLUÇÃO
+// =========================================================================
+// echo "<h3>23. Calcular Taxa de Resolução</h3>";
+// try {
+//     $totalGeral = $service->contarChamados();
+//     $totalResolvidos = $service->contarChamadosResolvidos();
+//     $taxa = $service->calcularTaxaResolucao($totalGeral, $totalResolvidos);
+//     echo "Sucesso! Análise de resolução da Service:<br>";
+//     echo "Total de chamados: <b>{$totalGeral}</b><br>";
+//     echo "Chamados resolvidos: <b>{$totalResolvidos}</b><br>";
+//     echo "Taxa de resolução: <b>{$taxa}%</b><br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao calcular taxa de resolução:</b> " . $e->getMessage() . "<br>";
+// }
+
+// =========================================================================
+// 24. TESTE: RELATÓRIO POR CATEGORIA (GERAL)
+// =========================================================================
+// echo "<h3>24. Relatório de Chamados por Categoria</h3>";
+// try {
+//     $indicadores = $service->relatorioPorCategoria();
+//     echo "Sucesso! Indicadores gerais por categoria:<br><br>";
+//     foreach ($indicadores as $linha) {
+//         echo "Categoria: <b>" . $linha['categoria'] . "</b> | ";
+//         echo "Quantidade: " . $linha['quantidade'] . " | ";
+//         echo "Porcentagem: " . $linha['porcentagem'] . "%<br>";
+//     }
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao gerar relatório por categoria:</b> " . $e->getMessage() . "<br>";
+// }
+
+// =========================================================================
+// 25. TESTE: CONTAR CHAMADOS RESOLVIDOS POR PERÍODO
+// =========================================================================
+// echo "<h3>25. Contar Chamados Resolvidos por Período</h3>";
+// try {
+//     $dataInicial = new \DateTime('2026-07-01');
+//     $dataFinal = new \DateTime('2026-09-30');
+//     $quantidadeResolvidos = $service->contarChamadosResolvidosPorPeriodo($dataInicial, $dataFinal);
+//     echo "Sucesso! Quantidade de chamados resolvidos entre " . $dataInicial->format('Y-m-d') . " e " . $dataFinal->format('Y-m-d') . ": <b>{$quantidadeResolvidos}</b><br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao contar resolvidos por período:</b> " . $e->getMessage() . "<br>";
+// }
+
+// =========================================================================
+// 26. TESTE: CONTAR CHAMADOS PENDENTES POR PERÍODO
+// =========================================================================
+// echo "<h3>26. Contar Chamados Pendentes por Período</h3>";
+// try {
+//     $dataInicial = new \DateTime('2026-07-01');
+//     $dataFinal = new \DateTime('2026-09-30');
+//     $quantidadePendentes = $service->contarChamadosPendentesPorPeriodo($dataInicial, $dataFinal);
+//     echo "Sucesso! Quantidade de chamados pendentes entre " . $dataInicial->format('Y-m-d') . " e " . $dataFinal->format('Y-m-d') . ": <b>{$quantidadePendentes}</b><br>";
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao contar pendentes por período:</b> " . $e->getMessage() . "<br>";
+// }
+
+// =========================================================================
+// 27. TESTE: RELATÓRIO DE CATEGORIA POR PERÍODO
+// =========================================================================
+// echo "<h3>27. Relatório de Categoria por Período</h3>";
+// try {
+//     $dataInicial = new \DateTime('2026-07-01');
+//     $dataFinal = new \DateTime('2026-09-30');
+//     $indicadores = $service->relatorioPorCategoriaPorPeriodo($dataInicial, $dataFinal);
+//     echo "Sucesso! Indicadores gerados entre " . $dataInicial->format('Y-m-d') . " e " . $dataFinal->format('Y-m-d') . ":<br><br>";
+//     foreach ($indicadores as $linha) {
+//         echo "Categoria: <b>" . $linha['categoria'] . "</b> | ";
+//         echo "Quantidade: " . $linha['quantidade'] . " | ";
+//         echo "Porcentagem: " . $linha['porcentagem'] . "%<br>";
+//     }
+// } catch (\Exception $e) {
+//     echo "<b>Erro ao gerar relatório de categoria por período:</b> " . $e->getMessage() . "<br>";
+// }
 ?>

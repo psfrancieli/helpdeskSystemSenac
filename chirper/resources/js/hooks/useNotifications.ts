@@ -73,25 +73,10 @@ interface UseNotificationsResult {
     error: string | null;
     markAsRead: (id: string) => void;
     markAllAsRead: () => void;
+    deleteNotifications: (ids: string[]) => void;
+    deleteAllNotifications: () => void;
     refresh: () => void;
 }
-
-/**
- * Deriva uma central de notificações 100% funcional a partir do endpoint
- * já existente `/api/chamados` (que por sua vez lê direto da tabela CHAMADO).
- *
- * Não existe tabela/rota de notificações no backend, então este hook faz o
- * trabalho no front: a cada poll ele compara o estado atual dos chamados com
- * o snapshot anterior (guardado por usuário) e gera eventos reais quando
- * detecta:
- *  - um chamado novo (visível para analista/adm)
- *  - atribuição de um técnico a um chamado (visível só para o técnico designado)
- *  - resolução ou cancelamento de um chamado (visível para quem abriu, o
- *    responsável e a equipe de analista/adm)
- *  - mudança de prioridade (visível para analista/adm)
- *
- * O feed é persistido em localStorage por usuário para sobreviver a reloads.
- */
 export function useNotifications(user: HelpdeskUser | null): UseNotificationsResult {
     const [notifications, setNotifications] = useState<HelpdeskNotification[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -281,7 +266,39 @@ export function useNotifications(user: HelpdeskUser | null): UseNotificationsRes
         });
     }, []);
 
+    const deleteNotifications = useCallback((ids: string[]) => {
+        const currentUser = userRef.current;
+        if (!currentUser || ids.length === 0) return;
+
+        const idsToRemove = new Set(ids);
+        setNotifications((current) => {
+            const updated = current.filter((item) => !idsToRemove.has(item.id));
+            saveFeed(currentUser.id, updated);
+            return updated;
+        });
+    }, []);
+
+    const deleteAllNotifications = useCallback(() => {
+        const currentUser = userRef.current;
+        if (!currentUser) return;
+
+        setNotifications(() => {
+            saveFeed(currentUser.id, []);
+            return [];
+        });
+    }, []);
+
     const unreadCount = notifications.filter((item) => !item.read).length;
 
-    return { notifications, unreadCount, isLoading, error, markAsRead, markAllAsRead, refresh: poll };
+    return {
+        notifications,
+        unreadCount,
+        isLoading,
+        error,
+        markAsRead,
+        markAllAsRead,
+        deleteNotifications,
+        deleteAllNotifications,
+        refresh: poll,
+    };
 }

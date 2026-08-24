@@ -12,13 +12,14 @@ export const currentUser: HelpdeskUser = {
     email: 'marina@octopus.system',
     nivel: 'adm',
     ativo: true,
+    telefone: '(15) 99854-2782',
 };
 
 export const users: HelpdeskUser[] = [
     currentUser,
-    { id: 2, nome: 'Leonardo Costa', email: 'leo@octopus.system', nivel: 'analista', ativo: true },
-    { id: 3, nome: 'Bruna Matos', email: 'bruna@octopus.system', nivel: 'tecnico', ativo: true },
-    { id: 4, nome: 'Daniel Lima', email: 'daniel@octopus.system', nivel: 'usuario', ativo: true },
+    { id: 2, nome: 'Leonardo Costa', email: 'leo@octopus.system', nivel: 'analista', ativo: true, telefone: '(15) 99854-2782' },
+    { id: 3, nome: 'Bruna Matos', email: 'bruna@octopus.system', nivel: 'tecnico', ativo: true, telefone: '(15) 99854-2781' },
+    { id: 4, nome: 'Daniel Lima', email: 'daniel@octopus.system', nivel: 'usuario', ativo: true, telefone: '(15) 99854-2780' },
 ];
 
 export const categories: HelpdeskCategory[] = [

@@ -4,6 +4,7 @@ import type { CreateChamadoInput, HelpdeskTicket, TicketPriority, TicketStatus }
 interface RawChamado {
     id: number;
     titulo: string;
+    descricao?: string | null;
     patrimonio: string;
     prioridade: string | null;
     categoria: string | null;
@@ -33,6 +34,7 @@ export async function fetchChamados(): Promise<HelpdeskTicket[]> {
         .map((item) => ({
             id: item.id,
             titulo: item.titulo,
+            descricao: item.descricao ?? undefined,
             patrimonio: item.patrimonio,
             prioridade: (item.prioridade ?? 'media') as TicketPriority,
             categoria: item.categoria ?? 'Sem categoria',
