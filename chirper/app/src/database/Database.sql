@@ -17,23 +17,23 @@ CREATE TYPE  prioridade_chamado AS ENUM(
   'muito alta'
 );
 CREATE TABLE IF NOT EXISTS "USUARIO" (
-	"id" SERIAL NOT NULL,
-	"uuid" UUID NOT NULL UNIQUE,
-	"nome" VARCHAR(100) NOT NULL,
-	"CPF" VARCHAR(14) NOT NULL UNIQUE,
-	"telefone" VARCHAR(15) NOT NULL UNIQUE,
-	"email" VARCHAR(80) NOT NULL UNIQUE,
-	"senha" VARCHAR(300) NOT NULL,
-	"nivel" nivel_usuario NOT NULL DEFAULT 'usuario',
-	"ativo" BOOLEAN NOT NULL,
-	PRIMARY KEY("id")
+    "id" SERIAL NOT NULL,
+    "uuid" UUID NOT NULL UNIQUE,
+    "nome" VARCHAR(100) NOT NULL,
+    "CPF" VARCHAR(14) NOT NULL UNIQUE,
+    "telefone" VARCHAR(15) NOT NULL UNIQUE,
+    "email" VARCHAR(80) NOT NULL UNIQUE,
+    "senha" VARCHAR(300) NOT NULL,
+    "nivel" nivel_usuario NOT NULL DEFAULT 'usuario',
+    "ativo" BOOLEAN NOT NULL,
+    PRIMARY KEY("id")
 );
-
+ 
 CREATE INDEX "USUARIO_index_0"
 ON "USUARIO" ("CPF");
 CREATE INDEX "USUARIO_index_1"
 ON "USUARIO" ("email");
-
+ 
 CREATE TABLE IF NOT EXISTS "CHAMADO" (
 	"id" SERIAL NOT NULL,
 	"uuid" UUID NOT NULL UNIQUE,
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS "CHAMADO" (
 	"status" status_pedido DEFAULT 'pendente' NOT NULL,
 	PRIMARY KEY("id")
 );
-
+ 
 CREATE INDEX "CHAMADO_index_0"
 ON "CHAMADO" ("data_abertura");
 CREATE INDEX "CHAMADO_index_1"
@@ -59,26 +59,25 @@ ON "CHAMADO" ("id_categoria");
 CREATE INDEX "CHAMADO_index_3"
 ON "CHAMADO" ("patrimonio");
 CREATE TABLE IF NOT EXISTS "CATEGORIA" (
-	"id" SERIAL NOT NULL,
-	"nome" VARCHAR(80) NOT NULL,
-	PRIMARY KEY("id")
+    "id" SERIAL NOT NULL,
+    "nome" VARCHAR(80) NOT NULL,
+    PRIMARY KEY("id")
 );
-
+ 
 CREATE TABLE IF NOT EXISTS "HISTORICO" (
-	"id" SERIAL NOT NULL,
-	"uuid" UUID NOT NULL UNIQUE,
-	"descricao" TEXT NOT NULL,
-	"data" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	"id_usuario_tecnico" INTEGER NOT NULL,
-	"id_chamado" INTEGER NOT NULL,
-	PRIMARY KEY("id")
+    "id" SERIAL NOT NULL,
+    "uuid" UUID NOT NULL UNIQUE,
+    "descricao" TEXT NOT NULL,
+    "data" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "id_usuario_tecnico" INTEGER NOT NULL,
+    "id_chamado" INTEGER NOT NULL,
+    PRIMARY KEY("id")
 );
-
+ 
 CREATE INDEX "HISTORICO_index_0"
 ON "HISTORICO" ("id_usuario_tecnico");
 CREATE INDEX "HISTORICO_index_1"
 ON "HISTORICO" ("data");
-
  
  
 ALTER TABLE "CHAMADO"
