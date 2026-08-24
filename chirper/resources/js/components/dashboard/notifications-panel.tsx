@@ -149,7 +149,7 @@ export function NotificationsPanel({
                                 onClick={onDeleteAll}
                                 className="text-xs font-medium text-stone-400 hover:text-rose-300"
                             >
-                                Apagar tudo
+                                Limpar tudo
                             </button>
                         ) : null}
                         <button
@@ -159,7 +159,7 @@ export function NotificationsPanel({
                             className="notifications-delete-button flex items-center gap-1.5 rounded-lg bg-rose-600 px-2.5 py-1.5 text-xs font-medium text-white transition-colors hover:bg-rose-500 disabled:cursor-not-allowed disabled:bg-rose-600 disabled:text-white"
                         >
                             <Trash2 className="size-3.5" />
-                            Apagar {selectedIds.length > 0 ? `(${selectedIds.length})` : ''}
+                            Limpar {selectedIds.length > 0 ? `(${selectedIds.length})` : ''}
                         </button>
                     </div>
                 </div>
