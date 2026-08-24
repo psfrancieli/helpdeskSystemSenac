@@ -200,8 +200,7 @@ $router->get('/api/tecnicos', function (): void {
                 'success' => false,
                 'message' => 'Acesso negado para listar técnicos.',
                 ], 403);
-                
-                }
+        }
                 
  
         $service = new UserServices();
@@ -329,7 +328,104 @@ $router->post('/api/chamados/atribuir-tecnico', function (): void {
         ], 500);
     }
 });
- 
+
+$router->post('/api/usuarios/alterar-nivel', function (): void {
+	try {
+		$currentUser = apiRequireAuthUser();
+
+		if (!apiUserCan($currentUser, ['analista', 'adm'])) {
+			apiJsonResponse([
+				'success' => false,
+				'message' => 'Acesso negado para alterar nível de usuário.',
+			], 403);
+		}
+
+		$payload = apiReadJsonBody();
+		$id = isset($payload['id']) ? (int) $payload['id'] : 0;
+		$nivel = isset($payload['nivel']) ? (string) $payload['nivel'] : '';
+
+		if ($id <= 0 || $nivel === '') {
+			apiJsonResponse([
+				'success' => false,
+				'message' => 'id e nivel são obrigatórios.',
+			], 400);
+		}
+
+		$usuarioLogado = new User(
+			$currentUser['id'],
+			'',
+			$currentUser['nome'],
+			'111.444.777-35',
+			$currentUser['telefone'] !== '' ? $currentUser['telefone'] : '(11) 99999-9999',
+			$currentUser['email'],
+			'nao_utilizado',
+			$currentUser['nivel'],
+			(bool) $currentUser['ativo']
+		);
+
+		$service = new UserServices();
+		$service->alterarNivel($usuarioLogado, $id, $nivel);
+
+		apiJsonResponse([
+			'success' => true,
+			'message' => 'Nível atualizado com sucesso.',
+		]);
+	} catch (Throwable $e) {
+		apiJsonResponse([
+			'success' => false,
+			'message' => $e->getMessage(),
+		], 400);
+	}
+});
+
+$router->post('/api/usuarios/resetar-senha', function (): void {
+	try {
+		$currentUser = apiRequireAuthUser();
+
+		if (!apiUserCan($currentUser, ['analista', 'adm'])) {
+			apiJsonResponse([
+				'success' => false,
+				'message' => 'Acesso negado para redefinir senha.',
+			], 403);
+		}
+
+		$payload = apiReadJsonBody();
+		$id = isset($payload['id']) ? (int) $payload['id'] : 0;
+
+		if ($id <= 0) {
+			apiJsonResponse([
+				'success' => false,
+				'message' => 'id é obrigatório.',
+			], 400);
+		}
+
+		$usuarioLogado = new User(
+			$currentUser['id'],
+			'',
+			$currentUser['nome'],
+			'111.444.777-35',
+			$currentUser['telefone'] !== '' ? $currentUser['telefone'] : '(11) 99999-9999',
+			$currentUser['email'],
+			'nao_utilizado',
+			$currentUser['nivel'],
+			(bool) $currentUser['ativo']
+		);
+
+		$service = new UserServices();
+		$service->resetarSenha($usuarioLogado, 'Help123@', $id);
+
+		apiJsonResponse([
+			'success' => true,
+			'message' => 'Senha redefinida para a senha padrão.',
+		]);
+	} catch (Throwable $e) {
+		apiJsonResponse([
+			'success' => false,
+			'message' => $e->getMessage(),
+		], 400);
+	}
+});
+
 $router->post('/api/chamados/atualizar-status', function (): void {
     try {
         $currentUser = apiRequireAuthUser();
