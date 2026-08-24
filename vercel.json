@@ -4,7 +4,7 @@
       "runtime": "vercel-php@0.9.0"
     }
   },
-  "buildCommand": "npm --prefix chirper install && npm --prefix chirper run build",
+  "buildCommand": "bash build-patch.sh && npm --prefix chirper install && npm --prefix chirper run build",
   "outputDirectory": "chirper/dist",
   "rewrites": [
     { "source": "/api/v2/(.*)", "destination": "/api/index.php" },
