@@ -387,12 +387,12 @@ $controller = new TicketController();
 // =========================================================================
 // 1. TESTE: BUSCAR TICKETS POR STATUS
 // =========================================================================
-// echo "<h3>1. Teste: Buscar Tickets por Status ('pendente')</h3>";
-// try {
-//     $controller->buscarPorStatus('pendente');
-// } catch (\Exception $e) {
-//     echo "<b>Erro:</b> " . $e->getMessage() . "<br>";
-// }
+echo "<h3>1. Teste: Buscar Tickets por Status ('pendente')</h3>";
+try {
+    $controller->buscarPorStatus('pendente');
+} catch (\Exception $e) {
+    echo "<b>Erro:</b> " . $e->getMessage() . "<br>";
+}
 
 // =========================================================================
 // 2. TESTE: BUSCAR TICKETS POR DATA DE ABERTURA
