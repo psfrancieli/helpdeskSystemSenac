@@ -3,6 +3,7 @@ import '../css/app.css';
 import { AnimatePresence, motion } from 'framer-motion';
 import { createRoot } from 'react-dom/client';
 import { HashRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { HistoryTest } from '../js/components/dashboard/historyList';
 
 import { AuthProvider, useAuth } from './context/auth-context';
 import { DashboardPage } from '@/pages/dashboard-page';
@@ -62,5 +63,5 @@ function App() {
 const container = document.getElementById('app');
 
 if (container) {
-    createRoot(container).render(<App />);
+    createRoot(container).render(<HistoryTest />);
 }

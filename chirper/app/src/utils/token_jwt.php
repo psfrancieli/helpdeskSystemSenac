@@ -2,13 +2,13 @@
 
 require_once __DIR__ . "/jwt/JWTExceptionWithPayloadInterface.php";
 
-require_once __DIR__ . "/jwt/BeforeValidException.php";
+// require_once __DIR__ . "/jwt/BeforeValidException.php";
 
-require_once __DIR__ . "/jwt/CachedKeySet.php";
+// require_once __DIR__ . "/jwt/CachedKeySet.php";
 
 require_once __DIR__ . "/jwt/ExpiredException.php";
 
-require_once __DIR__ . "/jwt/JWK.php";
+// require_once __DIR__ . "/jwt/JWK.php";
 
 require_once __DIR__ . "/jwt/JWT.php";
 
