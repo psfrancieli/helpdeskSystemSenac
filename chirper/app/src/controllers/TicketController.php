@@ -247,10 +247,11 @@ class TicketController extends Controller {
         }
     }
 
-    public function metricasPorPeriodo(string $dataInicio, string $dataFim): void {
+    public function metricasPorPeriodo(): void {
         try {
-            $inicio = new \DateTime($dataInicio);
-            $fim = new \DateTime($dataFim);
+            $dados = $this->getBody();
+            $inicio = new \DateTime($dados['data_inicio']);
+            $fim = new \DateTime($dados['data_fim']);
 
             $resolvidos = $this->services->contarChamadosResolvidosPorPeriodo($inicio, $fim);
             $pendentes = $this->services->contarChamadosPendentesPorPeriodo($inicio, $fim);
@@ -278,12 +279,13 @@ class TicketController extends Controller {
         }
     }
 
-    public function relatorioCategoriaPorPeriodo(string $dataInicio, string $dataFim): void {
+    public function relatorioCategoriaPorPeriodo(): void {
         try {
-            $inicio = new \DateTime($dataInicio);
-            $fim = new \DateTime($dataFim);
-            $dados = $this->services->relatorioPorCategoriaPorPeriodo($inicio, $fim);
-            $this->response(["success" => true, "data" => $dados]);
+            $dados = $this->getBody();
+            $inicio = new \DateTime($dados['data_inicio']);
+            $fim = new \DateTime($dados['data_fim']);
+            $data = $this->services->relatorioPorCategoriaPorPeriodo($inicio, $fim);
+            $this->response(["success" => true, "data" => $data]);
         } catch (\Throwable $e) {
             $this->response(["success" => false, "message" => "Formato de data inválido."], 400);
         }
@@ -328,14 +330,15 @@ class TicketController extends Controller {
         }
     }
 
-    public function dashboardPorPeriodo(string $dataInicio, string $dataFim): void {
+    public function dashboardPorPeriodo(): void {
         try {
-            $inicio = new \DateTime($dataInicio);
-            $fim = new \DateTime($dataFim);
-            $dados = $this->services->relatorioDashboardPorPeriodo($inicio, $fim);
+            $dados = $this->getBody();
+            $inicio = new \DateTime($dados['data_inicio']);
+            $fim = new \DateTime($dados['data_fim']);
+            $data = $this->services->relatorioDashboardPorPeriodo($inicio, $fim);
             $this->response([
                 "success" => true, 
-                "data" => $dados
+                "data" => $data
             ]);
         } catch (\Throwable $e) {
             $this->response([
