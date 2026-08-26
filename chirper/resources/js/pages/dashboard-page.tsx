@@ -99,29 +99,6 @@ interface ChamadoDetalhesProps {
 }
 
 function ChamadoDetalhes({ chamado, onVoltar }: ChamadoDetalhesProps) {
-    const dadosMokados = {
-      "success": true,
-      "data": [
-        {
-          "data": "2026-08-11 10:30:00",
-          "descricao": "Chamado criado",
-          "id_chamado": 1,
-          "id_usuario_tecnico": 3
-        },
-        {
-          "data": "2026-08-11 10:35:00",
-          "descricao": "Chamado atribuído ao técnico",
-          "id_chamado": 1,
-          "id_usuario_tecnico": 3
-        },
-        {
-          "data": "2026-08-11 10:40:00",
-          "descricao": "Status alterado para em andamento",
-          "id_chamado": 1,
-          "id_usuario_tecnico": 3
-        }
-      ]
-    };
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -136,22 +113,16 @@ function ChamadoDetalhes({ chamado, onVoltar }: ChamadoDetalhesProps) {
         <Card className="lg:col-span-2">
           <CardContent className="space-y-5 py-5">
             <div><p className="text-sm text-stone-400">ID do chamado</p><p className="mt-1 text-stone-200">#{chamado.id}</p></div>
-            <div><p className="text-sm text-stone-400">Descrição</p><p className="mt-1 text-stone-200">{chamado.descricao}</p></div>
-            
+            <div><p className="text-sm text-stone-400">Título</p><p className="mt-1 text-stone-200">{chamado.titulo}</p></div>
             <div>
               <p className="text-sm text-stone-400">Histórico</p>
-              
-              <div className="mt-2 space-y-4 rounded-xl border border-stone-700 bg-stone-900/60 p-4">
-                {dadosMokados.data.map((item, index) => (
-                  <div key={index} className="border-l-2 border-amber-500 pl-4">
-                    <p className="text-sm font-medium text-white">{item.descricao}</p>
-                    <p className="mt-1 text-sm text-stone-400">{item.data}</p>
-                  </div>
-                ))}
+              <div className="mt-2 rounded-xl border border-stone-700 bg-stone-900/60 p-4">
+                <div className="border-l-2 border-amber-500 pl-4">
+                  <p className="text-sm font-medium text-white">Chamado registrado</p>
+                  <p className="mt-1 text-sm text-stone-400">Histórico mockado.</p>
+                </div>
               </div>
-            
-            </div> 
-
+            </div>
           </CardContent>
         </Card>
 
