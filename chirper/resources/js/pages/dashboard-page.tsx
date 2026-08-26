@@ -28,10 +28,10 @@ interface DashboardPageProps {
 }
 
 const sectionVisibilityByRole: Record<UserRole, DashboardSection[]> = {
-  usuario: ["overview", "chamados", "historico", "criarChamado", "perfil"],
-  tecnico: ["overview", "chamados", "historico", "criarChamado", "perfil"],
-  analista: ["overview", "usuarios", "chamados", "historico", "criarChamado", "criarUsuario", "perfil"],
-  adm: ["overview", "usuarios", "chamados", "historico", "criarChamado", "criarUsuario", "perfil", "relatorios"],
+  usuario: ["overview", "chamados", "criarChamado", "perfil"],
+  tecnico: ["overview", "chamados", "criarChamado", "perfil"],
+  analista: ["overview", "usuarios", "chamados", "criarChamado", "criarUsuario", "perfil"],
+  adm: ["overview", "usuarios", "chamados", "criarChamado", "criarUsuario", "perfil", "relatorios"],
 };
 
 function normalizeSection(sectionParam?: string): DashboardSection {
@@ -154,8 +154,8 @@ function ChamadoDetalhes({ chamado, onVoltar }: ChamadoDetalhesProps) {
               <p className="mt-1 text-stone-200">#{chamado.id}</p>
             </div>
             <div>
-              <p className="text-sm text-stone-400">Título</p>
-              <p className="mt-1 text-stone-200">{chamado.titulo}</p>
+              <p className="text-sm text-stone-400">Descrição</p>
+              <p className="mt-1 text-stone-200">{chamado.descricao}</p>
             </div>
             <div>
               <p className="text-sm text-stone-400">Histórico</p>
@@ -376,7 +376,10 @@ const handleUpdateStatus = async (ticketId: number, novoStatus: string) => {
       ...metrics[2],
       value: `${chamadosByRole.filter((ticket) => ticket.status === "concluido").length}`,
     },
-    metrics[3],
+    {
+      ...metrics[3],
+      value: `${chamadosByRole.filter((ticket) => ticket.status === "não resolvido").length}`,
+    }
   ];
 
   const chamadoCategories = useMemo(() => {
@@ -412,7 +415,7 @@ const handleUpdateStatus = async (ticketId: number, novoStatus: string) => {
   }
 
   function handleVoltarChamado() {
-    navigate(window.location.pathname);
+      navigate(-1);
   }
 
   async function handleAssignTechnician(ticketId: number, technicianId: number) {
@@ -652,18 +655,7 @@ const handleUpdateStatus = async (ticketId: number, novoStatus: string) => {
                       ) : (
                         <AnimatedTable
                           rows={chamadosByRole}
-                          canAssignTechnicians={authUser.nivel === "analista"}
-                          technicians={tecnicos}
-                          isAssigningTicketId={isAssigningTicketId}
-                          assignmentFeedback={assignmentFeedback}
-                          assignmentError={assignmentError}
-                          technicianLoadError={tecnicosError}
-                          techniciansLoading={isTecnicosLoading}
-                          onAssignTechnician={handleAssignTechnician}
-                          userRole={authUser.nivel}
-                          isUpdatingStatusId={isUpdatingStatusId}
-                          onUpdateStatus={handleUpdateStatus}
-                        />
+                      />
                       )}
                     </>
                   )}
@@ -903,7 +895,21 @@ const handleUpdateStatus = async (ticketId: number, novoStatus: string) => {
                         description="Ajuste os filtros para visualizar mais resultados."
                       />
                     ) : (
-                      <AnimatedTable rows={filteredChamados} onTicketClick={handleTicketClick} />
+                      <AnimatedTable
+                        rows={filteredChamados}
+                        onTicketClick={handleTicketClick}
+                        canAssignTechnicians={authUser.nivel === "analista"}
+                        technicians={tecnicos}
+                        isAssigningTicketId={isAssigningTicketId}
+                        assignmentFeedback={assignmentFeedback}
+                        assignmentError={assignmentError}
+                        technicianLoadError={tecnicosError}
+                        techniciansLoading={isTecnicosLoading}
+                        onAssignTechnician={handleAssignTechnician}
+                        userRole={authUser.nivel}
+                        isUpdatingStatusId={isUpdatingStatusId}
+                        onUpdateStatus={handleUpdateStatus}
+                    />
                     )}
                   </div>
                 )

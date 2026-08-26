@@ -70,6 +70,13 @@ export function AnimatedTable({
         }
 
         onAssignTechnician(ticketId, technicianId);
+
+        setStatusLocal((prev) => ({
+        ...prev,
+        [ticketId]: 'pendente',
+    }));
+
+    onUpdateStatus?.(ticketId, 'pendente');
     }
 
     function handleStatusChange(
@@ -103,6 +110,13 @@ export function AnimatedTable({
         if (newStatus === 'cancelado') {
             setTimeout(
                 () => alert(`Chamado #${ticketId} marcado como Cancelado!`),
+                0
+            );
+        }
+
+         if (newStatus === 'não resolvido') {
+            setTimeout(
+                () => alert(`Chamado #${ticketId} marcado como Não Resolvido!`),
                 0
             );
         }
@@ -168,148 +182,111 @@ export function AnimatedTable({
                         </thead>
 
                         <tbody className="divide-y divide-stone-700/60">
-                            {rows.map((row, index) => (
-                                <motion.tr
-                                    key={row.id}
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{
-                                        delay: 0.2 + index * 0.07,
-                                    }}
-                                    onClick={() => onTicketClick?.(row)}
-                                    className="cursor-pointer hover:bg-stone-800/45"
-                                >
-                                    <td className="px-3 py-3 text-stone-100">
-                                        {row.titulo}
-                                    </td>
+                            {rows.map((row, index) => {
+                                const statusAtual = String(statusLocal[row.id] || row.status).toLowerCase().trim();
 
-                                    <td className="px-3 py-3 text-stone-300">
-                                        {row.categoria}
-                                    </td>
+                                const jaPossuiTecnico = Boolean(row.responsavel) && row.responsavel.trim() !== '' && row.responsavel !== 'A definir';
 
-                                    <td className="px-3 py-3">
-                                        <Badge
-                                            variant={priorityVariant(
-                                                row.prioridade
-                                            )}
-                                        >
-                                            {row.prioridade}
-                                        </Badge>
-                                    </td>
+                                const bloquearAtribuicao = jaPossuiTecnico && statusAtual !== 'não resolvido';
 
-                                    <td
-                                        className="px-3 py-3"
-                                        onClick={(event) =>
-                                            event.stopPropagation()
-                                        }
+                                return (
+                                    <motion.tr
+                                        key={row.id}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{
+                                            delay: 0.2 + index * 0.07,
+                                        }}
+                                        onClick={() => onTicketClick?.(row)}
+                                        className="cursor-pointer hover:bg-stone-800/45"
                                     >
-                                        <select
-                                            value={
-                                                statusLocal[row.id] ||
-                                                row.status
-                                            }
-                                            disabled={
-                                                isUpdatingStatusId ===
-                                                    row.id ||
-                                                (userRole !== 'tecnico' &&
-                                                    userRole !== 'analista')
-                                            }
-                                            onChange={(event) =>
-                                                handleStatusChange(
-                                                    row.id,
-                                                    event
-                                                )
-                                            }
-                                            className="w-full min-w-36 rounded-xl border border-stone-700 bg-stone-950 px-3 py-2 text-stone-100 capitalize disabled:cursor-not-allowed disabled:opacity-60"
-                                        >
-                                            <option value="pendente">
-                                                Pendente
-                                            </option>
+                                        <td className="px-3 py-3 text-stone-100">{row.titulo}</td>
+                                        <td className="px-3 py-3 text-stone-300">{row.categoria}</td>
+                                        <td className="px-3 py-3">
+                                            <Badge variant={priorityVariant(row.prioridade)}>
+                                                {row.prioridade}
+                                            </Badge>
+                                        </td>
 
-                                            {(userRole === 'tecnico' ||
-                                                userRole === 'analista') && (
+                                        <td className="px-3 py-3" onClick={(event) => event.stopPropagation()}>
+                                            {onUpdateStatus ? (
                                                 <>
-                                                    <option value="concluido">
-                                                        Concluído
-                                                    </option>
+                                                    <select
+                                                        value={statusLocal[row.id] || row.status}
+                                                        disabled={
+                                                            isUpdatingStatusId === row.id ||
+                                                            (userRole !== 'tecnico')
+                                                        }
+                                                        onChange={(event) => handleStatusChange(row.id, event)}
+                                                        className="w-full min-w-36 rounded-xl border border-stone-700 bg-stone-950 px-3 py-2 text-stone-100 capitalize disabled:cursor-not-allowed disabled:opacity-60"
+                                                    >
+                                                        <option value="pendente">Pendente</option>
 
-                                                    <option value="cancelado">
-                                                        Cancelado
-                                                    </option>
+                                                        {(userRole === 'tecnico' || userRole === 'analista') && (
+                                                            <>
+                                                                <option value="concluido">Concluído</option>
+                                                                <option value="cancelado">Cancelado</option>
+                                                                <option value="não resolvido">Não Resolvido</option>
+                                                            </>
+                                                        )}
+                                                    </select>
+                                                    {isUpdatingStatusId === row.id ? (
+                                                        <p className="mt-1 text-xs text-amber-200">Atualizando...</p>
+                                                    ) : null}
                                                 </>
+                                            ) : (
+                                                <span className="text-stone-300 capitalize">{row.status}</span>
                                             )}
-                                        </select>
+                                        </td>
 
-                                        {isUpdatingStatusId === row.id ? (
-                                            <p className="mt-1 text-xs text-amber-200">
-                                                Atualizando...
-                                            </p>
-                                        ) : null}
-                                    </td>
+                                        <td className="px-3 py-3 text-stone-300">
+                                            {row.responsavel ?? 'A definir'}
+                                        </td>
 
-                                    <td className="px-3 py-3 text-stone-300">
-                                        {row.responsavel ?? 'A definir'}
-                                    </td>
+                                        {showAssignmentColumn ? (
+                                            <td className="px-3 py-3" onClick={(event) => event.stopPropagation()}>
+                                                <select
+                                                    value={row.tecnicoId ?? ''}
+                                                    disabled={
+                                                        isAssigningTicketId === row.id ||
+                                                        techniciansLoading ||
+                                                        technicians.length === 0 ||
+                                                        bloquearAtribuicao 
+                                                    }
+                                                    onChange={(event) => handleTechnicianChange(row.id, event)}
+                                                    className="w-full min-w-44 rounded-xl border border-stone-700 bg-stone-950 px-3 py-2 text-stone-100 disabled:cursor-not-allowed disabled:opacity-60"
+                                                >
+                                                    <option value="">
+                                                        {techniciansLoading
+                                                            ? 'Carregando técnicos...'
+                                                            : 'Selecionar técnico'}
+                                                    </option>
 
-                                    {showAssignmentColumn ? (
-                                        <td
-                                            className="px-3 py-3"
-                                            onClick={(event) =>
-                                                event.stopPropagation()
-                                            }
-                                        >
-                                            <select
-                                                value={row.tecnicoId ?? ''}
-                                                disabled={
-                                                    isAssigningTicketId ===
-                                                        row.id ||
-                                                    techniciansLoading ||
-                                                    technicians.length === 0
-                                                }
-                                                onChange={(event) =>
-                                                    handleTechnicianChange(
-                                                        row.id,
-                                                        event
-                                                    )
-                                                }
-                                                className="w-full min-w-44 rounded-xl border border-stone-700 bg-stone-950 px-3 py-2 text-stone-100 disabled:cursor-not-allowed disabled:opacity-60"
-                                            >
-                                                <option value="">
-                                                    {techniciansLoading
-                                                        ? 'Carregando técnicos...'
-                                                        : 'Selecionar técnico'}
-                                                </option>
-
-                                                {technicians.map(
-                                                    (technician) => (
-                                                        <option
-                                                            key={technician.id}
-                                                            value={
-                                                                technician.id
-                                                            }
-                                                        >
+                                                    {technicians.map((technician) => (
+                                                        <option key={technician.id} value={technician.id}>
                                                             {technician.nome}
                                                         </option>
-                                                    )
-                                                )}
-                                            </select>
+                                                    ))}
+                                                </select>
 
-                                            {isAssigningTicketId === row.id ? (
-                                                <p className="mt-1 text-xs text-amber-200">
-                                                    Atribuindo...
-                                                </p>
-                                            ) : null}
+                                                {bloquearAtribuicao ? (
+                                                    <p className="mt-1 text-[11px] leading-tight text-amber-500/90 font-medium">
+                                                        Status não permite reatribuição.
+                                                    </p>
+                                                ) : null}
 
-                                            {!techniciansLoading &&
-                                            technicians.length === 0 ? (
-                                                <p className="mt-1 text-xs text-stone-500">
-                                                    Nenhum técnico disponível
-                                                </p>
-                                            ) : null}
-                                        </td>
-                                    ) : null}
-                                </motion.tr>
-                            ))}
+                                                {isAssigningTicketId === row.id ? (
+                                                    <p className="mt-1 text-xs text-amber-200">Atribuindo...</p>
+                                                ) : null}
+
+                                                {!techniciansLoading && technicians.length === 0 ? (
+                                                    <p className="mt-1 text-xs text-stone-500">Nenhum técnico disponível</p>
+                                                ) : null}
+                                            </td>
+                                        ) : null}
+                                    </motion.tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>

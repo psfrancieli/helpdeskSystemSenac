@@ -70,7 +70,7 @@ class TicketServices {
             throw new \Exception("A prioridade informada é inválida.");
         }
 
-        $statusValidos = ['pendente', 'concluido', 'cancelado'];
+        $statusValidos = ['pendente', 'concluido', 'cancelado', 'não resolvido'];
             $status = strtolower(trim((string) ($ticket->getStatus() ?: 'pendente')));
             if (!in_array($status, $statusValidos, true)) {
                 throw new \InvalidArgumentException("O status informado é inválido.");
@@ -156,7 +156,7 @@ class TicketServices {
             throw new \Exception("Ticket não encontrado!");
         }
 
-        $statusValidos = ['pendente', 'concluido', 'cancelado', 'nao-resolvido'];
+        $statusValidos = ['pendente', 'concluido', 'cancelado', 'não resolvido'];
         $novoStatus = $statusArray['status'] ?? '';
         if (!in_array(strtolower($novoStatus), $statusValidos)) {
             throw new \Exception("Status inválido!");

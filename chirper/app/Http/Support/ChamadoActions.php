@@ -47,10 +47,10 @@ class ChamadoActions
     public function atualizarStatus(int $chamadoId, string $status): array
     {
         $statusNormalizado = trim(strtolower($status));
-        $statusPermitidos = ['pendente', 'concluido', 'cancelado'];
+        $statusPermitidos = ['pendente', 'concluido', 'cancelado', 'não resolvido'];
 
         if (!in_array($statusNormalizado, $statusPermitidos, true)) {
-            throw new InvalidArgumentException('Status inválido. Use pendente, concluido ou cancelado.');
+            throw new InvalidArgumentException('Status inválido. Use pendente, concluido, cancelado, não resolvido.');
         }
 
         $this->garantirChamadoExiste($chamadoId);
