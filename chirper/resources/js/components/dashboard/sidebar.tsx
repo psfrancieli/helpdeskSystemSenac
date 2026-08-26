@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Activity, LayoutGrid, ListChecks, Ticket, Users, ClipboardPlus, UserRoundPlus } from 'lucide-react';
+import { Activity, LayoutGrid, ListChecks, Ticket, Users, ClipboardPlus, UserRoundPlus, FileBarChart } from 'lucide-react';
 import type React from 'react';
 import { NavLink } from 'react-router-dom';
 
@@ -12,7 +12,8 @@ const items: { key: DashboardSection; label: string; icon: React.ComponentType<{
     { key: 'historico', label: 'Histórico', icon: ListChecks },
     { key: 'status', label: 'Status', icon: Activity },
     { key: 'criarChamado', label: 'Criar Chamado', icon: ClipboardPlus },
-    { key: 'criarUsuario', label: 'Criar Usuário', icon: UserRoundPlus }
+    { key: 'criarUsuario', label: 'Criar Usuário', icon: UserRoundPlus },
+    { key: 'relatorios', label: 'Relatórios', icon: FileBarChart }
 ];
 
 interface SidebarProps {

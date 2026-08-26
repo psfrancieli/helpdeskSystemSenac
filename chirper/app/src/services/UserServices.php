@@ -57,6 +57,11 @@ class UserServices{
             throw new InvalidArgumentException("Cargo inválido");
         }
 
+        // Verifica se o usuário logado é um analista e está tentando criar um administrador
+        if ($usuarioLogado->getNivel() === 'analista' && $dados['nivel'] === 'adm') {
+            throw new DomainException("Analistas não podem criar administradores.");
+        }
+
         if($userRepository->encontrarPorEmail($dados['email'])){
             throw new Exception("Esse email ja existe!");
         }
@@ -195,6 +200,21 @@ public function encontrarPorEmail(string $email): ?User{
 
 
 }
+public function login(string $email, string $senha): ?User{
+        $userRepository = new UserRepository();
+        $emailNormalizado = EmailUtils::normalizar($email);
+        if(!EmailUtils::validar($emailNormalizado)){
+            throw new InvalidArgumentException("Email inválido.");
+        }
+        $usuario = $userRepository->encontrarPorEmail($emailNormalizado);
+        if (!$usuario){ throw new InvalidArgumentException("Login invalido");}
+        if (!PasswordUtils::verificar($senha, $usuario->getSenha())){
+            throw new InvalidArgumentException("Usuario ou senha invalido!");
+        }
+        $usuario->alterarSenha("");
+        return $usuario;
+    }
+ 
 
 public function setDefaultPassword(int $id)
 {

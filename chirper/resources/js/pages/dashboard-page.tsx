@@ -40,7 +40,6 @@ function normalizeSection(sectionParam?: string): DashboardSection {
     "overview",
     "usuarios",
     "chamados",
-    "historico",
     "criarChamado",
     "criarUsuario",
     "perfil",
