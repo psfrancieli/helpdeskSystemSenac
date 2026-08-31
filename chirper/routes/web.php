@@ -21,18 +21,18 @@ if (!function_exists('apiJsonResponse')) {
         exit;
     }
 }
- 
+
 if (!function_exists('apiReadJsonBody')) {
-    function apiReadJsonBody(): array
-    {
-        $raw = file_get_contents('php://input');
-        if ($raw === false || $raw === '') {
-            return [];
-        }
- 
-        $decoded = json_decode($raw, true);
-        return is_array($decoded) ? $decoded : [];
-    }
+	function apiReadJsonBody(): array
+	{
+		$raw = $GLOBALS['__cachedRequestBody'] ?? file_get_contents('php://input');
+		if ($raw === false || $raw === '') {
+			return [];
+		}
+
+		$decoded = json_decode($raw, true);
+		return is_array($decoded) ? $decoded : [];
+	}
 }
  
 if (!function_exists('apiCurrentAuthUser')) {
@@ -136,9 +136,18 @@ if (!function_exists('apiSerializeUsuario')) {
  
 $router->get('/api/chamados', function (): void {
     try {
+        $currentUser = apiRequireAuthUser();
+
         $actions = new ChamadoActions();
         $chamados = $actions->listarComTecnicoId();
- 
+
+        if (($currentUser['nivel'] ?? '') === 'usuario') {
+            $chamados = array_values(array_filter(
+                $chamados,
+                static fn (array $chamado) => (int) ($chamado['id_usuario'] ?? 0) === (int) $currentUser['id']
+            ));
+        }
+
         apiJsonResponse([
             'success' => true,
             'data' => $chamados,
@@ -182,6 +191,10 @@ $router->get('/api/usuarios', function (): void {
         if ($somenteTecnicos || $nivelFiltro !== '') {
             $filtroNormalizado = $somenteTecnicos ? 'tecnico' : strtolower($nivelFiltro);
             $lista = array_values(array_filter($lista, static fn (array $usuario) => ($usuario['nivel'] ?? '') === $filtroNormalizado));
+        }
+
+        if (($currentUser['nivel'] ?? '') === 'analista') {
+            $lista = array_values(array_filter($lista, static fn (array $usuario) => ($usuario['nivel'] ?? '') !== 'adm'));
         }
  
         apiJsonResponse([

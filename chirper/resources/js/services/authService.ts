@@ -4,6 +4,7 @@ import type { HelpdeskUser } from '../types/helpdesk';
 interface LoginPayload {
     email: string;
     senha: string;
+    remember: boolean;
 }
 
 export async function loginRequest(credentials: LoginPayload): Promise<HelpdeskUser> {
