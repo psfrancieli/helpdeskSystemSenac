@@ -29,7 +29,7 @@ class TicketController extends Controller {
         if (isset($dados['prioridade']) && !in_array($dados['prioridade'], ['baixa', 'media', 'alta', 'muito alta'], true)) {
             throw new InvalidArgumentException("Prioridade inválida. Use: baixa, media, alta ou muito alta.");
         }
-        if (isset($dados['status']) && !in_array($dados['status'], ['pendente', 'concluido', 'cancelado'], true)) {
+        if (isset($dados['status']) && !in_array($dados['status'], ['pendente', 'concluido', 'cancelado', 'não resolvido'], true)) {
             throw new InvalidArgumentException("Status invalido.");
         }
     }
