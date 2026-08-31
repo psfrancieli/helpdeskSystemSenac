@@ -133,22 +133,21 @@ if (!function_exists('apiSerializeUsuario')) {
 
 $router->get('/api/historico', function (): void {
     try {
-        // apiRequireAuthUser();
+        $idChamado = isset($_GET['id_chamado'])
+            ? (int) $_GET['id_chamado']
+            : 0;
 
-        // $idChamado = isset($_GET['id_chamado'])
-        //     ? (int) $_GET['id_chamado']
-        //     : 0;
-
-        // if ($idChamado <= 0) {
-        //     apiJsonResponse([
-        //         'success' => false,
-        //         'message' => 'ID do chamado inválido.'
-        //     ], 400);
-        // }
+        if ($idChamado <= 0) {
+            apiJsonResponse([
+                'success' => false,
+                'message' => 'ID do chamado inválido.'
+            ], 400);
+        }
 
         $controller = new HistoryController();
 
-        $controller->getByTicketIdV2();
+        $controller->getByTicketId($idChamado);
+        
 
     } catch (Throwable $e) {
         apiJsonResponse([

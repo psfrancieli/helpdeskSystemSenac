@@ -17,22 +17,47 @@ class Router
     }
 
     public function dispatch(string $method, string $uri): void
-    {
-        $path = parse_url($uri, PHP_URL_PATH) ?: '/';
-        $handler = $this->routes[$method][$path] ?? null;
+{
+    $path = parse_url($uri, PHP_URL_PATH) ?: '/';
 
-        if ($handler === null) {
-            http_response_code(404);
-            echo 'Route not found';
-            return;
-        }
+    echo '<pre>';
+    var_dump([
+        'method' => $method,
+        'uri' => $uri,
+        'path' => $path,
+        'script' => $_SERVER['SCRIPT_NAME'] ?? null,
+        'base' => dirname($_SERVER['SCRIPT_NAME'] ?? ''),
+        'routes' => $this->routes[$method] ?? [],
+    ]);
+    echo '</pre>';
+    exit;
 
-        if (is_array($handler)) {
-            [$class, $action] = $handler;
-            (new $class())->$action();
-            return;
-        }
+    $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
 
-        $handler();
+    if ($scriptName !== '' && str_starts_with($path, $scriptName)) {
+        $path = substr($path, strlen($scriptName));
     }
+
+    if ($path === '') {
+        $path = '/';
+    }
+
+    $handler = $this->routes[$method][$path] ?? null;
+
+    if ($handler === null) {
+        http_response_code(404);
+        echo 'Route not found';
+        return;
+    }
+
+    if (is_array($handler)) {
+        [$class, $action] = $handler;
+
+        (new $class())->$action();
+
+        return;
+    }
+
+    $handler();
+}
 }
