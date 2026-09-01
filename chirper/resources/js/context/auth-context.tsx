@@ -90,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const login = useCallback(
         async ({ email, password, remember }: LoginCredentials) => {
-            const authUser = await loginRequest({ email, senha: password, remember });
+            const authUser = await loginRequest({ email, senha: password });
             persistUser(authUser, remember);
         },
         [persistUser],
