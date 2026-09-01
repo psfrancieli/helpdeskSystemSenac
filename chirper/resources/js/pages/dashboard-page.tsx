@@ -1,6 +1,8 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { KeyRound } from "lucide-react";
+import type { HelpdeskUser } from '@/types/helpdesk';
+import {getHistoryByTicketId,createHistoryComment,type HistoryItem,} from "../services/historicoService";
 import { NavLink, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/auth-context";
 import { AnimatedTable } from "../components/dashboard/animated-table";
@@ -126,9 +128,61 @@ function priorityVariant(priority: HelpdeskTicket["prioridade"]) {
 interface ChamadoDetalhesProps {
   chamado: HelpdeskTicket;
   onVoltar: () => void;
+  currentUser: HelpdeskUser;
 }
 
-function ChamadoDetalhes({ chamado, onVoltar }: ChamadoDetalhesProps) {
+function ChamadoDetalhes({ chamado, onVoltar, currentUser }: ChamadoDetalhesProps) {
+  const [historico, setHistorico] = useState<HistoryItem[]>([]);
+  const [isLoadingHistorico, setIsLoadingHistorico] = useState(true);
+  const [historicoError, setHistoricoError] = useState<string | null>(null);
+
+  const [comentario, setComentario] = useState("");
+  const [isSubmittingComentario, setIsSubmittingComentario] = useState(false);
+  const [comentarioError, setComentarioError] = useState<string | null>(null);
+
+  async function carregarHistorico() {
+    setIsLoadingHistorico(true);
+    setHistoricoError(null);
+    try {
+      const dados = await getHistoryByTicketId(chamado.id);
+      setHistorico(dados);
+    } catch (error) {
+      setHistoricoError(error instanceof Error ? error.message : "Erro ao carregar histórico");
+    } finally {
+      setIsLoadingHistorico(false);
+    }
+  }
+
+  useEffect(() => {
+    carregarHistorico();
+  }, [chamado.id]);
+
+  const nomeNormalizado = currentUser.nome.trim().toLocaleLowerCase("pt-BR");
+  const ehTecnicoDoChamado =
+    currentUser.nivel === "tecnico" &&
+    (chamado.responsavel ?? "").trim().toLocaleLowerCase("pt-BR") === nomeNormalizado;
+  const ehSolicitante =
+    currentUser.nivel === "usuario" &&
+    chamado.solicitante.trim().toLocaleLowerCase("pt-BR") === nomeNormalizado;
+  const podeComentar = ehTecnicoDoChamado || ehSolicitante;
+
+  async function handleComentarioSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (comentario.trim() === "") return;
+
+    setIsSubmittingComentario(true);
+    setComentarioError(null);
+    try {
+      await createHistoryComment(chamado.id, comentario.trim());
+      setComentario("");
+      await carregarHistorico();
+    } catch (error) {
+      setComentarioError(error instanceof Error ? error.message : "Erro ao enviar comentário");
+    } finally {
+      setIsSubmittingComentario(false);
+    }
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -145,7 +199,6 @@ function ChamadoDetalhes({ chamado, onVoltar }: ChamadoDetalhesProps) {
           ← Voltar
         </Button>
       </div>
-
       <div className="grid gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardContent className="space-y-5 py-5">
@@ -157,14 +210,51 @@ function ChamadoDetalhes({ chamado, onVoltar }: ChamadoDetalhesProps) {
               <p className="text-sm text-stone-400">Descrição</p>
               <p className="mt-1 text-stone-200">{chamado.descricao}</p>
             </div>
+
             <div>
               <p className="text-sm text-stone-400">Histórico</p>
-              <div className="mt-2 rounded-xl border border-stone-700 bg-stone-900/60 p-4">
-                <div className="border-l-2 border-amber-500 pl-4">
-                  <p className="text-sm font-medium text-white">Chamado registrado</p>
-                  <p className="mt-1 text-sm text-stone-400">Histórico mockado.</p>
-                </div>
+              <div className="mt-2 space-y-3 rounded-xl border border-stone-700 bg-stone-900/60 p-4">
+                {isLoadingHistorico ? (
+                  <p className="text-sm text-stone-400">Carregando histórico...</p>
+                ) : historicoError ? (
+                  <p className="text-sm text-red-300">{historicoError}</p>
+                ) : historico.length === 0 ? (
+                  <p className="text-sm text-stone-400">Nenhum registro de histórico ainda.</p>
+                ) : (
+                  historico
+                    .slice()
+                    .sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime())
+                    .map((item, index) => (
+                      <div key={`${item.data}-${index}`} className="border-l-2 border-amber-500 pl-4">
+                        <p className="text-sm font-medium text-white">{item.descricao}</p>
+                        <p className="mt-1 text-xs text-stone-400">
+                          {new Date(item.data).toLocaleString("pt-BR")}
+                        </p>
+                      </div>
+                    ))
+                )}
               </div>
+
+              {podeComentar ? (
+                <form className="mt-3 space-y-2" onSubmit={handleComentarioSubmit}>
+                  {comentarioError ? (
+                    <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-100">
+                      {comentarioError}
+                    </div>
+                  ) : null}
+                  <textarea
+                    value={comentario}
+                    onChange={(event) => setComentario(event.target.value)}
+                    rows={3}
+                    className="w-full rounded-xl border border-stone-700 bg-stone-950 px-3 py-2 text-stone-100 placeholder:text-stone-500"
+                    placeholder="Como está indo o chamado?"
+                    required
+                  />
+                  <Button type="submit" disabled={isSubmittingComentario}>
+                    {isSubmittingComentario ? "Enviando..." : "Adicionar comentário"}
+                  </Button>
+                </form>
+              ) : null}
             </div>
           </CardContent>
         </Card>
@@ -178,9 +268,7 @@ function ChamadoDetalhes({ chamado, onVoltar }: ChamadoDetalhesProps) {
             <div>
               <p className="text-sm text-stone-400">Prioridade</p>
               <div className="mt-2">
-                <Badge variant={priorityVariant(chamado.prioridade)}>
-                  {chamado.prioridade}
-                </Badge>
+                <Badge variant={priorityVariant(chamado.prioridade)}>{chamado.prioridade}</Badge>
               </div>
             </div>
             <div>
@@ -354,11 +442,8 @@ const handleUpdateStatus = async (ticketId: number, novoStatus: string) => {
     }
 
     if (authUser.nivel === "analista") {
-      return chamados.filter((item) => {
-        const normalizedStatus = item.status.trim().toLocaleLowerCase("pt-BR");
-        return normalizedStatus !== "concluido" && normalizedStatus !== "finalizado";
-      });
-    }
+  return chamados;
+}
 
     return chamados;
   }, [chamados, authUser.nivel, authUser.nome]);
@@ -618,7 +703,11 @@ const handleUpdateStatus = async (ticketId: number, novoStatus: string) => {
             >
               {chamadoSelecionadoId ? (
                 chamadoSelecionado ? (
-                  <ChamadoDetalhes chamado={chamadoSelecionado} onVoltar={handleVoltarChamado} />
+                  <ChamadoDetalhes
+                      chamado={chamadoSelecionado}
+                      onVoltar={handleVoltarChamado}
+                      currentUser={authUser}
+                  />
                 ) : (
                   <EmptyState
                     title="Chamado não encontrado"

@@ -11,6 +11,7 @@ require_once __DIR__ . '/../app/src/models/User.php';
 require_once __DIR__ . '/../app/src/utils/CpfUtils.php';
 require_once __DIR__ . '/../app/src/utils/PhoneUtils.php';
 require_once __DIR__ . '/../app/Http/Support/ChamadoActions.php';
+require_once __DIR__ . '/../app/src/controllers/HistoryController.php';
  
 if (!function_exists('apiJsonResponse')) {
     function apiJsonResponse(array $payload, int $status = 200): void
@@ -233,6 +234,85 @@ $router->get('/api/tecnicos', function (): void {
         apiJsonResponse([
             'success' => false,
             'message' => 'Erro ao listar técnicos.',
+        ], 500);
+    }
+});
+$router->get('/api/historico', function (): void {
+
+    try {
+
+        apiRequireAuthUser();
+
+        $idChamado = isset($_GET['id_chamado'])
+            ? (int) $_GET['id_chamado']
+            : 0;
+
+        if ($idChamado <= 0) {
+            apiJsonResponse([
+                'success' => false,
+                'message' => 'id_chamado é obrigatório.'
+            ], 400);
+        }
+
+        $controller = new HistoryController();
+
+        $controller->getByTicketId($idChamado);
+
+    } catch (Throwable $e) {
+
+        apiJsonResponse([
+            'success' => false,
+            'message' => $e->getMessage()
+        ], 500);
+    }
+});
+$router->post('/api/historico', function (): void {
+
+    try {
+
+        $currentUser = apiRequireAuthUser();
+
+        $payload = apiReadJsonBody();
+
+        $descricao = isset($payload['descricao'])
+            ? trim((string) $payload['descricao'])
+            : '';
+
+        $idChamado = isset($payload['id_chamado'])
+            ? (int) $payload['id_chamado']
+            : 0;
+
+        if ($descricao === '') {
+
+            apiJsonResponse([
+                'success' => false,
+                'message' => 'O comentário é obrigatório.'
+            ], 400);
+        }
+
+        if ($idChamado <= 0) {
+
+            apiJsonResponse([
+                'success' => false,
+                'message' => 'Chamado inválido.'
+            ], 400);
+        }
+
+        $controller = new HistoryController();
+
+        $controller->create([
+            'descricao' => $descricao,
+
+            'id_chamado' => $idChamado,
+
+            'id_usuario' => (int) $currentUser['id']
+        ]);
+
+    } catch (Throwable $e) {
+
+        apiJsonResponse([
+            'success' => false,
+            'message' => $e->getMessage()
         ], 500);
     }
 });
