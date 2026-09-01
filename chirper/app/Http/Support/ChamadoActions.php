@@ -18,6 +18,7 @@ class ChamadoActions
                 c.data_encerramento,
                 c.status,
                 cat.nome  AS categoria,
+                c.id_usuario AS id_usuario,
                 us.nome   AS solicitante,
                 c.id_responsavel AS tecnico_id,
                 resp.nome AS responsavel

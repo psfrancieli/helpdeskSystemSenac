@@ -59,9 +59,9 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                     initial={{ opacity: 0, x: 22, filter: 'blur(10px)' }}
                     animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
                     transition={{ duration: 0.7, ease: 'easeOut' }}
-                    className="flex items-center"
+                    className="flex items-stretch"
                 >
-                    <Card className="w-full rounded-3xl p-1">
+                    <Card className="w-full rounded-3xl p-6 sm:p-8">
                         <CardHeader>
                             <CardTitle className="text-2xl">Entrar</CardTitle>
                             <CardDescription>Acesse seu painel.</CardDescription>
@@ -108,13 +108,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                                         </button>
                                     </div>
                                 </label>
-                                <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
-                                    <label className="flex items-center gap-2 text-stone-300">
-                                        <Checkbox checked={remember} onCheckedChange={(checked) => setRemember(Boolean(checked))} />
-                                        Lembrar acesso
-                                    </label>
-                                    
-                                </div>
                                 <AnimatePresence mode="wait">
                                     <motion.button
                                         key={isLoading ? 'loading' : 'ready'}
